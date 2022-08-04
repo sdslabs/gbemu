@@ -66,3 +66,28 @@ bool checkHeaderChecksum ( GameHeader *gameHeader )
 	return 1 ;
 
 }
+
+int main()
+{
+
+	bool code_runner = 1 ;
+
+	while ( code_runner )
+	{
+		code_runner = 0;
+
+		GameHeader game_header ;
+
+		bool check = 0 ;
+		
+		check = makeGameHeader ( &game_header ) ;
+		std::cout<<check ;
+
+		check = checkNintendoLogo( &game_header ) ;
+		std::cout<<check ;
+
+		check = checkHeaderChecksum( &game_header ) ;
+		std::cout<<check ;
+	}
+	
+}
