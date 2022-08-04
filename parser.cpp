@@ -47,3 +47,22 @@ bool checkNintendoLogo ( GameHeader *gameHeader )
 	return 1 ;
 
 }
+
+bool checkHeaderChecksum ( GameHeader *gameHeader )
+{
+
+	uint8_t x = 0 ;
+
+	for ( int i = 52 ; i <= 76 ; i++ )
+	{
+		x = x - gameHeader->game_header[i] - 1 ;
+	}
+	
+	if ( x != gameHeader->header_checksum[0] )
+	{
+		return 0 ;
+	}
+
+	return 1 ;
+
+}
