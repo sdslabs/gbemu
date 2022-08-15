@@ -27,3 +27,8 @@
 		return (a >> 8) | (a << 8);
 	}
 #endif
+
+
+// We assume the machine to be Little Endian by default
+#define LITTLE_ENDIAN true
+#define BIG_ENDIAN false

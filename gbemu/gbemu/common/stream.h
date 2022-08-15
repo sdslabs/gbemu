@@ -23,6 +23,16 @@ namespace Common {
 
             // Read interface
             virtual uint32 read(void *dataPtr, uint32 dataSize) = 0;
+
+            byte readByte() {
+                byte b = 0;
+                read(&b, 1);
+                return b;
+            }
+
+            byte readSByte() {
+                return (int8) readByte();
+            }
     };
 
 }
