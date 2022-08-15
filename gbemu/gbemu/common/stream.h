@@ -30,9 +30,72 @@ namespace Common {
                 return b;
             }
 
-            byte readSByte() {
+            uint16 readUint16LE() {
+		        uint16 val;
+		        read(&val, 2);
+		        return FROM_LE_16(val);
+	        }
+
+            uint32 readUint32LE() {
+	        	uint32 val;
+	        	read(&val, 4);
+	        	return FROM_LE_32(val);
+	        }
+
+            uint64 readUint64LE() {
+	        	uint64 val;
+	        	read(&val, 8);
+	        	return FROM_LE_64(val);
+	        }
+
+            uint16 readUint16BE() {
+	        	uint16 val;
+	        	read(&val, 2);
+	        	return FROM_BE_16(val);
+	        }
+
+            uint32 readUint32BE() {
+	        	uint32 val;
+	        	read(&val, 4);
+	        	return FROM_BE_32(val);
+	        }
+
+            uint64 readUint64BE() {
+	        	uint64 val;
+	        	read(&val, 8);
+	        	return FROM_BE_64(val);
+	        }
+
+            inline byte readSByte() {
                 return (int8) readByte();
             }
-    };
 
+            inline int16 readSint16LE() {
+		        return (int16) readUint16LE();
+	        }
+
+            inline int32 readSint32LE() {
+	        	return (int32) readUint32LE();
+	        }
+
+            inline int64 readSint64LE() {
+	        	return (int64) readUint64LE();
+	        }
+
+            inline int16 readSint16BE() {
+	        	return (int16) readUint16BE();
+	        }
+
+            inline int32 readSint32BE() {
+	        	uint32 val;
+	        	read(&val, 4);
+	        	return FROM_BE_32(val);
+	        }
+
+            inline int64 readSint64BE() {
+	        	uint64 val;
+	        	read(&val, 8);
+	        	return FROM_BE_64(val);
+	        }
+    };
 }
