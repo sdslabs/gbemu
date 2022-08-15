@@ -87,15 +87,27 @@ namespace Common {
 	        }
 
             inline int32 readSint32BE() {
-	        	uint32 val;
-	        	read(&val, 4);
-	        	return FROM_BE_32(val);
+	        	return (int32) readUint32BE();
 	        }
 
             inline int64 readSint64BE() {
-	        	uint64 val;
-	        	read(&val, 8);
-	        	return FROM_BE_64(val);
+	        	return (int64) readUint64BE();
 	        }
+    };
+
+    class SeekableReadStream : virtual public ReadStream {
+        public:
+            // Position of cursor
+            virtual int64 pos() const = 0;
+
+            // Size of stream
+            virtual int64 size() const = 0;
+
+            // Set the cursor to a specific place in stream
+            // wrapper identical to fseek()
+            virtual bool seek(int64 offset, int whence = SEEK_SET) = 0;
+
+            // Skip given bytes in stream
+            virtual bool skip(uint32 offset) { return seek(offset, SEEK_CUR); }
     };
 }
