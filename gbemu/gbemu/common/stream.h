@@ -15,8 +15,13 @@ namespace Common {
 	};
 
     class ReadStream : virtual public Stream {
+        private:
+            bool isBigEndian;
+        
         public:
-	        ReadStream() {}
+            ReadStream(bool bigEndian = LITTLE_ENDIAN) : isBigEndian(bigEndian) {}
+
+            bool isBE() { return isBigEndian; }
 
             // End of stream interface
             virtual bool eos() const = 0;
@@ -30,68 +35,38 @@ namespace Common {
                 return b;
             }
 
-            uint16 readUint16LE() {
+            uint16 readUint16() {
 		        uint16 val;
 		        read(&val, 2);
-		        return FROM_LE_16(val);
+		        return (isBigEndian) ? FROM_BE_16(val) : FROM_LE_16(val);
 	        }
 
-            uint32 readUint32LE() {
+            uint32 readUint32() {
 	        	uint32 val;
 	        	read(&val, 4);
-	        	return FROM_LE_32(val);
+	        	return (isBigEndian) ? FROM_BE_32(val) : FROM_LE_32(val);
 	        }
 
-            uint64 readUint64LE() {
+            uint64 readUint64() {
 	        	uint64 val;
 	        	read(&val, 8);
-	        	return FROM_LE_64(val);
-	        }
-
-            uint16 readUint16BE() {
-	        	uint16 val;
-	        	read(&val, 2);
-	        	return FROM_BE_16(val);
-	        }
-
-            uint32 readUint32BE() {
-	        	uint32 val;
-	        	read(&val, 4);
-	        	return FROM_BE_32(val);
-	        }
-
-            uint64 readUint64BE() {
-	        	uint64 val;
-	        	read(&val, 8);
-	        	return FROM_BE_64(val);
+	        	return (isBigEndian) ? FROM_BE_64(val) : FROM_LE_64(val);
 	        }
 
             inline byte readSByte() {
                 return (int8) readByte();
             }
 
-            inline int16 readSint16LE() {
-		        return (int16) readUint16LE();
+            inline int16 readSint16() {
+		        return (int16) readUint16();
 	        }
 
-            inline int32 readSint32LE() {
-	        	return (int32) readUint32LE();
+            inline int32 readSint32() {
+	        	return (int32) readUint32();
 	        }
 
-            inline int64 readSint64LE() {
-	        	return (int64) readUint64LE();
-	        }
-
-            inline int16 readSint16BE() {
-	        	return (int16) readUint16BE();
-	        }
-
-            inline int32 readSint32BE() {
-	        	return (int32) readUint32BE();
-	        }
-
-            inline int64 readSint64BE() {
-	        	return (int64) readUint64BE();
+            inline int64 readSint64() {
+	        	return (int64) readUint64();
 	        }
     };
 

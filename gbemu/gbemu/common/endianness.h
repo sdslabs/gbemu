@@ -95,5 +95,5 @@ inline void WRITE_UINT64(void *ptr, uint64 value) {
 #define TO_BE_64(a) SWAP_BYTES_64(a)
 
 // Might come handy later
-#define LITTLE_ENDIAN true
-#define BIG_ENDIAN false
+#define LITTLE_ENDIAN false
+#define BIG_ENDIAN true
