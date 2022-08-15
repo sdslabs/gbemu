@@ -6,6 +6,9 @@
 #include <assert.h>
 #include <ctype.h>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 typedef unsigned char byte;
 typedef unsigned char uint8;
 typedef signed char int8;

@@ -1,8 +1,11 @@
-#include <iostream>
+#include "common/stream.h"
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    char* k = new char[10];
+    printf_s("Hello World\n");
+    scanf_s(k);
+    return 0;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
