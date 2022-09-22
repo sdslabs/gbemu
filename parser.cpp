@@ -2,6 +2,7 @@
 #include <fstream>
 #include "parser.h"
 
+
 bool makeGameHeader(GameHeader *gameHeader) {
 
   std::ifstream game("game.gb", std::ifstream::binary);
@@ -69,6 +70,7 @@ int main() {
   bool code_runner = 1;
 
   while (code_runner) {
+
     code_runner = 0;
 
     GameHeader game_header;
@@ -76,12 +78,30 @@ int main() {
     bool check = 0;
 
     check = makeGameHeader(&game_header);
-    std::cout << check;
+    std::cout << ((check == 1) ? "Game Header successfully created\n"
+                               : "Game Header creation failed\n");
+
+    if (check == 0) {
+      std::cout << "Terminating Program\n";
+      break;
+    }
 
     check = checkNintendoLogo(&game_header);
-    std::cout << check;
+    std::cout << ((check == 1) ? "Nintendo Logo Matched\n"
+                               : "Nintendo Logo Match Failed\n");
+
+    if (check == 0) {
+      std::cout << "Terminating Program\n";
+      break;
+    }
 
     check = checkHeaderChecksum(&game_header);
-    std::cout << check;
+    std::cout << ((check == 1) ? "Header Checksum Verified\n"
+                               : "Header Checksum Incorrect\n");
+
+    if (check == 0) {
+      std::cout << "Terminating Program\n";
+      break;
+    }
   }
 }
