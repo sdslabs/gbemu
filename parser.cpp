@@ -29,7 +29,7 @@ bool makeGameHeader(GameHeader *gameHeader) // read Game Header values from cart
 
     for (int i = 0; i < 80; i++)
     {
-        gameHeader->game_header[i] = buffer[i];
+        gameHeader->updateGameHeader(i, buffer[i]); // call updateGameHeader function of GameHeader class
     }
 
     game.close();
@@ -48,7 +48,7 @@ bool checkNintendoLogo(GameHeader *gameHeader) // match Nintendo logo in the car
 
     for (int i = 0; i < 48; i++)
     {
-        if (nintendo_logo[i] != (gameHeader->nintendo_logo)[i])
+        if (nintendo_logo[i] != gameHeader->fetchNintendoLogo(i)) // call fetchNintendoLogo function
         {
             return 0;
         }
@@ -64,10 +64,10 @@ bool checkHeaderChecksum(GameHeader *gameHeader) // calculate and verify header 
 
     for (int i = 52; i <= 76; i++)
     {
-        x = x - gameHeader->game_header[i] - 1;
+        x = x - gameHeader->fetchGameHeader(i) - 1; // call fetchGameHeader function
     }
 
-    if (x != gameHeader->header_checksum[0])
+    if (x != gameHeader->fetchHeaderChecksum(0)) // call fetchHeaderChecksum function
     {
         return 0;
     }
