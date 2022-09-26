@@ -39,16 +39,10 @@ bool makeGameHeader(GameHeader *gameHeader) // read Game Header values from cart
 
 bool checkNintendoLogo(GameHeader *gameHeader) // match Nintendo logo in the cartridge to the actual one
 {
-
-    uint8_t nintendo_logo[48] = {206, 237, 102, 102, 204, 13, 0, 11, 3, 115,
-                                 0, 131, 0, 12, 0, 13, 0, 8, 17, 31,
-                                 136, 137, 0, 14, 220, 204, 110, 230, 221, 221,
-                                 217, 153, 187, 187, 103, 99, 110, 14, 236, 204,
-                                 221, 220, 153, 159, 187, 185, 51, 62};
-
+	
     for (int i = 0; i < 48; i++)
     {
-        if (nintendo_logo[i] != gameHeader->fetchNintendoLogo(i)) // call fetchNintendoLogo function
+        if (original_nintendo_logo[i] != gameHeader->fetchNintendoLogo(i)) // call fetchNintendoLogo function
         {
             return 0;
         }
