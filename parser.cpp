@@ -1,5 +1,5 @@
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include "parser.h"
 
 
@@ -19,14 +19,15 @@ bool makeGameHeader(GameHeader *gameHeader) {
     return 0;
   }
 
-  game.seekg(256);
+  game.seekg(256, game.beg);
 
-  char *buffer;
+  int lolo = game.tellg();
 
-  for (int i = 0; i < 80; i++) {
-    game.read(buffer, 1);
-    gameHeader->game_header[i] = *buffer;
-  }
+  char buffer[80];
+  game.read(buffer, 80);
+  
+  for (int i = 0; i < 80; i++)
+    gameHeader->game_header[i] = buffer[i];
 
   game.close();
 
