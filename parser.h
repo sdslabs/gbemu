@@ -1,5 +1,7 @@
-struct GameHeader
+class GameHeader
 {
+
+private: // make all data members private
     union
     {
         uint8_t game_header[80];
@@ -34,4 +36,25 @@ struct GameHeader
             uint8_t global_checksum[2];
         };
     };
+
+public:                                     // make public fetch and update functions
+    void updateGameHeader(int i, uint8_t v) // update ith element of game_header to value v
+    {
+        game_header[i] = v;
+    }
+
+    uint8_t fetchGameHeader(int i) // fetch ith element of game_header
+    {
+        return game_header[i];
+    }
+
+    uint8_t fetchNintendoLogo(int i) // fetch ith element of nintendo_logo
+    {
+        return nintendo_logo[i];
+    }
+
+    uint8_t fetchHeaderChecksum(int i) // fetch ith element of header_checksum
+    {
+        return header_checksum[i];
+    }
 };
