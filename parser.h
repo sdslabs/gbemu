@@ -57,4 +57,9 @@ public:                                     // make public fetch and update func
     {
         return header_checksum[i];
     }
+
+    uint8_t fetchTitle(int i) // fetch ith element of title
+    {
+        return title[i];
+    }
 };

@@ -75,6 +75,26 @@ bool checkHeaderChecksum(GameHeader *gameHeader) // calculate and verify header 
     return 1;
 }
 
+std::string fetchTitle(GameHeader *gameHeader) // fetch game_title from game_header
+{
+
+    std::string game_title = "";
+
+    for (int i = 0; i < 16; i++)
+    {
+        uint8_t a_char = gameHeader->fetchTitle(i);
+
+        if (!a_char)
+        {
+            break;
+        }
+
+        game_title += a_char;
+    }
+
+    return game_title;
+}
+
 int main()
 {
 
@@ -118,5 +138,7 @@ int main()
             std::cout << "Terminating Program\n";
             break;
         }
+
+        std::cout << "Starting Game " << fetchTitle(&game_header) << "\n";
     }
 }
