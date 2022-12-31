@@ -28,3 +28,14 @@ class GBE {
 			
 		Byte screenData[160][144];
 };
+
+// CPU Register
+// Pulled from https://gbdev.io/pandocs/Specifications.html
+
+union Register {
+	Word dat;
+	struct {
+		Byte lo;
+		Byte hi;
+	};
+};
