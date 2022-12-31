@@ -1,0 +1,3 @@
+﻿  main.cpp
+C:\Users\pragy\Documents\gbemu\gbemu\main.cpp(6,7): warning C4101: 'test': unreferenced local variable
+  gbemu.vcxproj -> C:\Users\pragy\Documents\gbemu\gbemu\Debug\gbemu.exe
