@@ -29,7 +29,13 @@ private:
 
 	Byte screenData[160][144];
 
+	// Pointer to CPU
 	CPU* gbe_cpu;
+
+	// Update function of the GBE
+	// Will be called every frame
+	// GB has 59.73 frames per second
+	void update();
 
 public:
 	// Constructor

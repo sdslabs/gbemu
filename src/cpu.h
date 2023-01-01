@@ -54,4 +54,9 @@ private:
     // 16 bit address space
     // Pulled from https://gbdev.io/pandocs/Memory_Map.html
     Byte addressSpace[0x10000];
+
+public:
+    const int clockSpeed = 4194304; // 4.194304 MHz CPU
+    const int clockSpeedPerFrame = 70224; // 4194304 / 59.73fps
+
 };
