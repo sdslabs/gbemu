@@ -66,31 +66,31 @@ public:
 	~MemoryMap();
 
 	// Returns the ROM Bank 0
-	Byte* getRomBank0() { return romBank0; }
+	Byte* getRomBank0() const { return romBank0; }
 
 	// Returns the ROM Bank 1
-	Byte* getRomBank1() { return romBank1; }
+	Byte* getRomBank1() const { return romBank1; }
 
 	// Returns the Video RAM
-	Byte* getVideoRam() { return videoRam; }
+	Byte* getVideoRam() const { return videoRam; }
 
 	// Returns the External RAM
-	Byte* getExternalRam() { return externalRam; }
+	Byte* getExternalRam() const { return externalRam; }
 
 	// Returns the Work RAM
-	Byte* getWorkRam() { return workRam; }
+	Byte* getWorkRam() const { return workRam; }
 
 	// Returns the Echo RAM
-	Byte* getEchoRam() { return echoRam; }
+	Byte* getEchoRam() const { return echoRam; }
 
 	// Returns the OAM Table
-	Byte* getOamTable() { return oamTable; }
+	Byte* getOamTable() const { return oamTable; }
 
 	// Returns the I/O Ports
-	Byte* getIoPorts() { return ioPorts; }
+	Byte* getIoPorts() const { return ioPorts; }
 
 	// Returns the High RAM
-	Byte* getHighRam() { return highRam; }
+	Byte* getHighRam() const { return highRam; }
 
 	// Returns the Interrupt Enable Register
 	Byte* getInterruptEnableRegister() { return interruptEnableRegister; }
@@ -98,5 +98,5 @@ public:
 	bool writeMemory(Word address, Byte value);
 	Byte readMemory(Word address);
 
-	Byte operator[](Word address);
+	Byte operator[](Word address) const;
 };
