@@ -38,5 +38,4 @@ public:
 
 	// Returns the CPU
 	CPU* getCPU();
-
 };

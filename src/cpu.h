@@ -48,4 +48,10 @@ private:
         FLAG_SUBTRACT_n = 6,
         FLAG_ZERO_z = 7
     };
+
+    // Complete Address Space
+    // Where CPU can write
+    // 16 bit address space
+    // Pulled from https://gbdev.io/pandocs/Memory_Map.html
+    Byte addressSpace[0x10000];
 };
