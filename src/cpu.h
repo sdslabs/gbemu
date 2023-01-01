@@ -53,6 +53,9 @@ private:
     // Pulled from https://izik1.github.io/gbops/index.html
     int (*isa[0x100]);
 
+    // NOP
+    int NOP();
+
 public:
 	const int clockSpeed = 4194304; // 4.194304 MHz CPU
 	const int clockSpeedPerFrame = 70224; // 4194304 / 59.73fps

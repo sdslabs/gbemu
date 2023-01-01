@@ -280,3 +280,9 @@ CPU::CPU()
         &CPU::RST_38H
 	}
 }
+
+// NOP just adds 4 cycles
+// Does nothing
+int CPU::NOP() {
+    return 4;
+}
