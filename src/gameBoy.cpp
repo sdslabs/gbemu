@@ -6,6 +6,7 @@ GBE::GBE()
 {
 	// Initialize the CPU
 	gbe_cpu = new CPU();
+    update();
 }
 
 void GBE::update()
@@ -18,7 +19,7 @@ void GBE::update()
 	while (cycles < gbe_cpu->clockSpeedPerFrame)
 	{
 		// Execute the next instruction
-		// cycles += gbe_cpu->executeNextInstruction();
+		cycles += gbe_cpu->executeNextInstruction(0);
 		// updateTimers()
 		// updateGraphics()
 		// Do Interrupts()
