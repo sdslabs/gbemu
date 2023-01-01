@@ -28,4 +28,15 @@ private:
 	// Using Byte for now
 
 	Byte screenData[160][144];
+
+	CPU* gbe_cpu;
+
+public:
+	// Constructor
+	// Initializes the CPU
+	GBE();
+
+	// Returns the CPU
+	CPU* getCPU();
+
 };
