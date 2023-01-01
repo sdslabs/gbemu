@@ -1,3 +1,7 @@
 Setup
-1. Rename the game file to "game.gb" and store it in the root folder. 
-2. Compile and run parser.cpp .
+```bash
+mkdir build && cd build
+cmake ..
+cmake --build . -j8
+./gbemu
+```
