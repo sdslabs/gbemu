@@ -96,4 +96,7 @@ public:
     Byte *getInterruptEnableRegister() { return interruptEnableRegister; }
 
     bool writeMemory(Word address, Byte value);
+    Byte readMemory(Word address);
+
+    Byte operator[](Word address);
 };

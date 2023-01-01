@@ -39,7 +39,7 @@ MemoryMap::MemoryMap() {
 }
 
 // Write to memory
-// TODO: Make secure
+// TODO: Make emulation memory secure
 bool MemoryMap::writeMemory(Word address, Byte value) {
     if (address < 0x8000) {
         printf("Writing to ROM is not allowed");
@@ -78,4 +78,45 @@ bool MemoryMap::writeMemory(Word address, Byte value) {
     }
 
     return true;
+}
+
+Byte MemoryMap::readMemory(Word address) {
+    if (address < 0x4000) {
+        // Read from ROM bank 0
+        return romBank0[address];
+    } else if (address < 0x8000) {
+        // Read from ROM bank 1
+        return romBank1[address - 0x4000];
+    } else if (address < 0xA000) {
+        // Read from Video RAM
+        return videoRam[address - 0x8000];
+    } else if (address < 0xC000) {
+        // Read from External RAM
+        return externalRam[address - 0xA000];
+    } else if (address < 0xE000) {
+        // Read from Work RAM
+        return workRam[address - 0xC000];
+    } else if (address < 0xFE00) {
+        // Read from Echo RAM
+        return echoRam[address - 0xE000];
+    } else if (address < 0xFEA0) {
+        // Read from OAM Table
+        return oamTable[address - 0xFE00];
+    } else if (address < 0xFF00) {
+        // Read from unused memory
+        // TODO: Check https://gbdev.io/pandocs/Memory_Map.html#fea0-feff-range
+        return 0;
+    } else if (address < 0xFF80) {
+        // Read from I/O Ports
+        return ioPorts[address - 0xFF00];
+    } else if (address < 0xFFFF) {
+        // Read from High RAM
+        return highRam[address - 0xFF80];
+    } else if (address == 0xFFFF) {
+        // Read from Interrupt Enable Register
+        return *interruptEnableRegister;
+    } else {
+        printf("Invalid address");
+        return 0;
+    }
 }
