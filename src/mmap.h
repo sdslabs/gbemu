@@ -1,5 +1,6 @@
 #pragma once
 #include "types.h"
+#include <stdio.h>
 
 // The Memory Map for GBE
 // Pulled from https://gbdev.io/pandocs/Memory_Map.html
@@ -7,9 +8,6 @@
 class MemoryMap
 {
 private:
-    MemoryMap();
-
-public:
     // First ROM Bank
     // 16 KB 0x0000 - 0x3FFF
     // Contains the first 16 KB of the ROM
@@ -59,4 +57,43 @@ public:
     // Interrupt Enable Register
     // 1 Byte 0xFFFF
     Byte *interruptEnableRegister;
+
+public:
+    // Constructor
+    MemoryMap();
+
+    // Destructor
+    ~MemoryMap();
+
+    // Returns the ROM Bank 0
+    Byte *getRomBank0();
+
+    // Returns the ROM Bank 1
+    Byte *getRomBank1();
+
+    // Returns the Video RAM
+    Byte *getVideoRam();
+
+    // Returns the External RAM
+    Byte *getExternalRam();
+
+    // Returns the Work RAM
+    Byte *getWorkRam();
+
+    // Returns the Echo RAM
+    Byte *getEchoRam();
+
+    // Returns the OAM Table
+    Byte *getOamTable();
+
+    // Returns the I/O Ports
+    Byte *getIoPorts();
+
+    // Returns the High RAM
+    Byte *getHighRam();
+
+    // Returns the Interrupt Enable Register
+    Byte *getInterruptEnableRegister();
+
+    bool writeMemory(Word address, Byte value);
 };
