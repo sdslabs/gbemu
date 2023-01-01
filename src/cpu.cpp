@@ -24,12 +24,14 @@ CPU::CPU()
 
 // NOP just adds 4 cycles
 // Does nothing
-int CPU::NOP() {
-    printf("NOP");
-    return 4;
+int CPU::NOP()
+{
+	printf("NOP");
+	return 4;
 }
 
-int CPU::executeNextInstruction(int opcode) {
+int CPU::executeNextInstruction(int opcode)
+{
 	method_function func = method_pointer[opcode];
-    return (this->*func)();
+	return (this->*func)();
 }
