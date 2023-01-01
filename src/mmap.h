@@ -98,5 +98,5 @@ public:
 	bool writeMemory(Word address, Byte value);
 	Byte readMemory(Word address);
 
-	Byte operator[](Word address) const;
+	Byte operator[](Word address);
 };
