@@ -168,7 +168,7 @@ Byte MemoryMap::readMemory(Word address)
 	}
 }
 
-Byte MemoryMap::operator[](Word address)
+Byte MemoryMap::operator[](Word address) const
 {
-	return readMemory(address);
+	return MemoryMap::readMemory(address);
 }

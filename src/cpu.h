@@ -49,11 +49,9 @@ private:
 		FLAG_ZERO_z = 7
 	};
 
-	// Complete Address Space
-	// Where CPU can write
-	// 16 bit address space
-	// Pulled from https://gbdev.io/pandocs/Memory_Map.html
-	Byte addressSpace[0x10000];
+	// ISA
+    // Pulled from https://izik1.github.io/gbops/index.html
+    int (*isa[0x100]);
 
 public:
 	const int clockSpeed = 4194304; // 4.194304 MHz CPU
