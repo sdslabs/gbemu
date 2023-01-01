@@ -120,3 +120,7 @@ Byte MemoryMap::readMemory(Word address) {
         return 0;
     }
 }
+
+Byte MemoryMap::operator[](Word address) {
+    return readMemory(address);
+}
