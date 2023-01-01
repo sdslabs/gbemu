@@ -37,29 +37,28 @@ private:
 	// Program Counter
 	Register reg_PC;
 
-    // Flags
-    // Pulled from https://gbdev.io/pandocs/CPU_Registers_and_Flags.html
-    // Naming convention is: FLAG_<name>_<bit>
-    // Bit 0-3 are not used
-    enum Flags
-    {
-        FLAG_CARRY_c = 4,
-        FLAG_HALF_CARRY_h = 5,
-        FLAG_SUBTRACT_n = 6,
-        FLAG_ZERO_z = 7
-    };
+	// Flags
+	// Pulled from https://gbdev.io/pandocs/CPU_Registers_and_Flags.html
+	// Naming convention is: FLAG_<name>_<bit>
+	// Bit 0-3 are not used
+	enum Flags
+	{
+		FLAG_CARRY_c = 4,
+		FLAG_HALF_CARRY_h = 5,
+		FLAG_SUBTRACT_n = 6,
+		FLAG_ZERO_z = 7
+	};
 
-    // Complete Address Space
-    // Where CPU can write
-    // 16 bit address space
-    // Pulled from https://gbdev.io/pandocs/Memory_Map.html
-    Byte addressSpace[0x10000];
+	// Complete Address Space
+	// Where CPU can write
+	// 16 bit address space
+	// Pulled from https://gbdev.io/pandocs/Memory_Map.html
+	Byte addressSpace[0x10000];
 
 public:
-    const int clockSpeed = 4194304; // 4.194304 MHz CPU
-    const int clockSpeedPerFrame = 70224; // 4194304 / 59.73fps
+	const int clockSpeed = 4194304; // 4.194304 MHz CPU
+	const int clockSpeedPerFrame = 70224; // 4194304 / 59.73fps
 
-    
-    CPU();
-    int executeNextInstruction();
+	CPU();
+	int executeNextInstruction();
 };

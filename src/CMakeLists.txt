@@ -1,7 +1,17 @@
 set(SOURCES
-  gameBoy.h
-  types.h
-  )
+        # -------
+        # Source Files
+        cpu.cpp
+        gameBoy.cpp
+        mmap.cpp
+
+        # -------
+        # Header Files
+        cpu.h
+        gameBoy.h
+        mmap.h
+        types.h
+        )
 
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 
