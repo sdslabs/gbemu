@@ -6,7 +6,7 @@ GBE::GBE()
 {
 	// Initialize the CPU
 	gbe_cpu = new CPU();
-    update();
+	update();
 }
 
 void GBE::update()

@@ -50,7 +50,7 @@ private:
 	};
 
 	// ISA
-    // Pulled from https://izik1.github.io/gbops/index.html
+	// Pulled from https://izik1.github.io/gbops/index.html
 	typedef int (CPU::*method_function)();
 	method_function method_pointer[0x01] = {
 		&CPU::NOP
@@ -311,8 +311,8 @@ private:
 		// &CPU::RST_38H
 	};
 
-    // NOP
-    int NOP();
+	// NOP
+	int NOP();
 
 public:
 	const int clockSpeed = 4194304; // 4.194304 MHz CPU
