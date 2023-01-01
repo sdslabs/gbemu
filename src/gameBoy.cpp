@@ -8,12 +8,6 @@ GBE::GBE()
     gbe_cpu = new CPU();
 }
 
-CPU* GBE::getCPU()
-{
-    // Getter of CPU
-    return gbe_cpu;
-}
-
 void GBE::update()
 {
     // Update function of the GBE

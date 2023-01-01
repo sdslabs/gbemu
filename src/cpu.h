@@ -59,5 +59,7 @@ public:
     const int clockSpeed = 4194304; // 4.194304 MHz CPU
     const int clockSpeedPerFrame = 70224; // 4194304 / 59.73fps
 
+    
+    CPU();
     int executeNextInstruction();
 };

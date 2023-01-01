@@ -38,47 +38,8 @@ MemoryMap::MemoryMap() {
     interruptEnableRegister = new Byte;
 }
 
-Byte *MemoryMap::getRomBank0() {
-    return romBank0;
-}
-
-Byte *MemoryMap::getRomBank1() {
-    return romBank1;
-}
-
-Byte *MemoryMap::getVideoRam() {
-    return videoRam;
-}
-
-Byte *MemoryMap::getExternalRam() {
-    return externalRam;
-}
-
-Byte *MemoryMap::getWorkRam() {
-    return workRam;
-}
-
-Byte *MemoryMap::getEchoRam() {
-    return echoRam;
-}
-
-Byte *MemoryMap::getOamTable() {
-    return oamTable;
-}
-
-Byte *MemoryMap::getIoPorts() {
-    return ioPorts;
-}
-
-Byte *MemoryMap::getHighRam() {
-    return highRam;
-}
-
-Byte *MemoryMap::getInterruptEnableRegister() {
-    return interruptEnableRegister;
-}
-
 // Write to memory
+// TODO: Make secure
 bool MemoryMap::writeMemory(Word address, Byte value) {
     if (address < 0x8000) {
         printf("Writing to ROM is not allowed");

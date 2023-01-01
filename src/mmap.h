@@ -66,34 +66,34 @@ public:
     ~MemoryMap();
 
     // Returns the ROM Bank 0
-    Byte *getRomBank0();
+    Byte *getRomBank0() { return romBank0; }
 
     // Returns the ROM Bank 1
-    Byte *getRomBank1();
+    Byte *getRomBank1() { return romBank1; }
 
     // Returns the Video RAM
-    Byte *getVideoRam();
+    Byte *getVideoRam() { return videoRam; }
 
     // Returns the External RAM
-    Byte *getExternalRam();
+    Byte *getExternalRam() { return externalRam; }
 
     // Returns the Work RAM
-    Byte *getWorkRam();
+    Byte *getWorkRam() { return workRam; }
 
     // Returns the Echo RAM
-    Byte *getEchoRam();
+    Byte *getEchoRam() { return echoRam; }
 
     // Returns the OAM Table
-    Byte *getOamTable();
+    Byte *getOamTable() { return oamTable; }
 
     // Returns the I/O Ports
-    Byte *getIoPorts();
+    Byte *getIoPorts() { return ioPorts; }
 
     // Returns the High RAM
-    Byte *getHighRam();
+    Byte *getHighRam() { return highRam; }
 
     // Returns the Interrupt Enable Register
-    Byte *getInterruptEnableRegister();
+    Byte *getInterruptEnableRegister() { return interruptEnableRegister; }
 
     bool writeMemory(Word address, Byte value);
 };

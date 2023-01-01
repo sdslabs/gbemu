@@ -43,5 +43,5 @@ public:
 	GBE();
 
 	// Returns the CPU
-	CPU* getCPU();
+	CPU* getCPU() { return gbe_cpu; };
 };
