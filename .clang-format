@@ -1,0 +1,11 @@
+---
+AccessModifierOffset: '-4'
+BasedOnStyle: WebKit
+PointerAlignment: Left
+BreakBeforeBraces: Allman
+SortIncludes: 'false'
+Standard: Auto
+TabWidth: '4'
+UseTab: ForIndentation
+NamespaceIndentation: All
+FixNamespaceComments: false
