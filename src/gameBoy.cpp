@@ -14,11 +14,12 @@ GBE::GBE()
 	gbe_cpu->setMemory(gbe_mMap);
 
 	gbe_mMap->debugWriteMemory(0x0100, 0x00);
-	gbe_mMap->debugWriteMemory(0x0101, 0x01);
-	gbe_mMap->debugWriteMemory(0x0102, 0x80);
-	gbe_mMap->debugWriteMemory(0x0103, 0x01); 
-	gbe_mMap->debugWriteMemory(0x0104, 0x02);
-	gbe_mMap->debugWriteMemory(0x0105, 0x04);
+
+	// Dec B
+	gbe_mMap->debugWriteMemory(0x0102, 0x05);
+
+	//RLCA
+	gbe_mMap->debugWriteMemory(0x0103, 0x07);
 
 	update();
 }

@@ -94,9 +94,48 @@ int CPU::DEC_B()
     return 4;
 }
 int CPU::LD_B_u8() { return 0; }
-int CPU::RLCA() { return 0; }
+int CPU::RLCA()
+{
+    reg_AF.lo &= ~FLAG_ZERO_z;
+    reg_AF.lo &= ~FLAG_SUBTRACT_n;
+    reg_AF.lo &= ~FLAG_HALF_CARRY_h;
+
+    if (reg_AF.hi >> 7 == 1)
+    {
+        reg_AF.lo |= FLAG_CARRY_c;
+    }
+    else
+    {
+        reg_AF.lo &= ~FLAG_CARRY_c;
+    }
+
+    reg_AF.hi = (reg_AF.hi << 1) | (reg_AF.hi >> 7);
+
+    reg_PC.dat += 1;
+    printf("RLCA\n");
+    return 4;
+}
 int CPU::LD_u16_SP() { return 0; }
-int CPU::ADD_HL_BC() { return 0; }
+int CPU::ADD_HL_BC()
+{
+	reg_AF.lo &= ~FLAG_SUBTRACT_n;
+    reg_AF.lo &= ~FLAG_HALF_CARRY_h;
+
+    if ((reg_HL.dat + reg_BC.dat) >> 16 == 1)
+    {
+        reg_AF.lo |= FLAG_CARRY_c;
+    }
+    else
+    {
+        reg_AF.lo &= ~FLAG_CARRY_c;
+    }
+
+    reg_HL.dat += reg_BC.dat;
+
+    reg_PC.dat += 1;
+    printf("ADD HL, BC\n");
+    return 8;
+}
 int CPU::LD_A_BC() { return 0; }
 int CPU::DEC_BC() { return 0; }
 int CPU::INC_C() { return 0; }
