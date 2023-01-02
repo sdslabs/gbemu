@@ -1,5 +1,6 @@
 #pragma once
 #include "types.h"
+#include "mmap.h"
 
 // CPU Register
 // Pulled from https://gbdev.io/pandocs/CPU_Registers_and_Flags.html
@@ -49,12 +50,15 @@ private:
 		FLAG_ZERO_z = 7
 	};
 
+	// Memory Map
+	MemoryMap *mMap;
+
 	// ISA
 	// Pulled from https://izik1.github.io/gbops/index.html
 	typedef int (CPU::*method_function)();
-	method_function method_pointer[0x01] = {
-		&CPU::NOP
-		// &CPU::LD_BC_u16,
+	method_function method_pointer[0x02] = {
+		&CPU::NOP,
+		&CPU::LD_BC_u16
 		// &CPU::LD_BC_A,
 		// &CPU::INC_BC,
 		// &CPU::INC_B,
@@ -314,10 +318,17 @@ private:
 	// NOP
 	int NOP();
 
+	// LD nn, nn
+	int LD_BC_u16();
+
 public:
 	const int clockSpeed = 4194304; // 4.194304 MHz CPU
 	const int clockSpeedPerFrame = 70224; // 4194304 / 59.73fps
 
 	CPU();
-	int executeNextInstruction(int opcode);
+
+	// set the memory map
+	void setMemory(MemoryMap* memory) { mMap = memory; }
+
+	int executeNextInstruction();
 };

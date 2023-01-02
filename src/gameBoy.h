@@ -1,6 +1,7 @@
 #pragma once
 #include "types.h"
 #include "cpu.h"
+#include "memoryMap.h"
 
 // GBE stands for GameBoyEmulator
 
@@ -31,6 +32,9 @@ private:
 
 	// Pointer to CPU
 	CPU* gbe_cpu;
+
+	// Pointer to the MemoryMap
+	MemoryMap* gbe_mMap;
 
 	// Update function of the GBE
 	// Will be called every frame

@@ -6,6 +6,13 @@ GBE::GBE()
 {
 	// Initialize the CPU
 	gbe_cpu = new CPU();
+
+	// Initialize the MemoryMap
+	gbe_mMap = new MemoryMap();
+
+	// Unify the CPU and MemoryMap
+	gbe_cpu->setMemory(gbe_mMap);
+
 	update();
 }
 
