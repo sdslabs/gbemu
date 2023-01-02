@@ -1,7 +1,7 @@
 #pragma once
 #include "types.h"
 #include "cpu.h"
-#include "memoryMap.h"
+#include "mmap.h"
 
 // GBE stands for GameBoyEmulator
 
