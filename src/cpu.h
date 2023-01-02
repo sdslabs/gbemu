@@ -44,10 +44,10 @@ private:
 	// Bit 0-3 are not used
 	enum Flags
 	{
-		FLAG_CARRY_c = 4,
-		FLAG_HALF_CARRY_h = 5,
-		FLAG_SUBTRACT_n = 6,
-		FLAG_ZERO_z = 7
+		FLAG_CARRY_c = 0x10,
+		FLAG_HALF_CARRY_h = 0x20,
+		FLAG_SUBTRACT_n = 0x40,
+		FLAG_ZERO_z = 0x80
 	};
 
 	// Memory Map
