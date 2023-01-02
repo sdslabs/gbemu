@@ -27,7 +27,7 @@ CPU::CPU()
 int CPU::NOP()
 {
 	reg_PC.dat += 1;
-	printf("NOP");
+	printf("NOP\n");
 	return 4;
 }
 
@@ -40,8 +40,22 @@ int CPU::LD_BC_u16()
 	// OR the second byte
 	reg_BC.dat = ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2];
 	reg_PC.dat += 3;
-	printf("LD BC, u16");
+	printf("LD BC, u16\n");
 	return 12;
+}
+
+// LD (BC), A
+// Loads the contents of A into the memory address pointed to by BC
+int CPU::LD_BC_A()
+{
+	// Write the contents of A into the memory address pointed to by BC
+	mMap->writeMemory(reg_BC.dat, reg_AF.lo);
+
+	// Increment the program counter
+	reg_PC.dat += 1;
+
+	printf("LD (BC), A\n");
+	return 8;
 }
 
 int CPU::executeNextInstruction()

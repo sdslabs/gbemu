@@ -56,10 +56,10 @@ private:
 	// ISA
 	// Pulled from https://izik1.github.io/gbops/index.html
 	typedef int (CPU::*method_function)();
-	method_function method_pointer[0x02] = {
+	method_function method_pointer[0x03] = {
 		&CPU::NOP,
-		&CPU::LD_BC_u16
-		// &CPU::LD_BC_A,
+		&CPU::LD_BC_u16,
+		&CPU::LD_BC_A
 		// &CPU::INC_BC,
 		// &CPU::INC_B,
 		// &CPU::DEC_B,
@@ -321,6 +321,9 @@ private:
 	// LD nn, nn
 	int LD_BC_u16();
 
+	// LD (BC), A
+	int LD_BC_A();
+
 public:
 	const int clockSpeed = 4194304; // 4.194304 MHz CPU
 	const int clockSpeedPerFrame = 70224; // 4194304 / 59.73fps
@@ -329,6 +332,8 @@ public:
 
 	// set the memory map
 	void setMemory(MemoryMap* memory) { mMap = memory; }
+
+	void set_reg_BC(Word value) { reg_BC.dat = value; }
 
 	int executeNextInstruction();
 };

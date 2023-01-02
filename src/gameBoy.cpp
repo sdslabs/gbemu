@@ -17,6 +17,9 @@ GBE::GBE()
 	gbe_mMap->debugWriteMemory(0x0101, 0x01);
 	gbe_mMap->debugWriteMemory(0x0102, 0x02);
 	gbe_mMap->debugWriteMemory(0x0103, 0x03);
+	gbe_cpu->set_reg_BC(0x8001); 
+	gbe_mMap->debugWriteMemory(0x0104, 0x02);
+	gbe_mMap->debugWriteMemory(0x0105, 0x04);
 
 	update();
 }
