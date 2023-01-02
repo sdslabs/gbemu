@@ -26,12 +26,25 @@ CPU::CPU()
 // Does nothing
 int CPU::NOP()
 {
+	reg_PC.dat += 1;
 	printf("NOP");
 	return 4;
 }
 
-int CPU::executeNextInstruction(int opcode)
+// LD BC, u16
+// Loads a 16 bit immediate value into BC
+int CPU::LD_BC_u16()
 {
-	method_function func = method_pointer[opcode];
-	return (this->*func)();
+	// Load the next 2 bytes into BC
+	
+	reg_PC.dat += 3;
+	printf("LD BC, u16");
+	return 12;
+}
+
+int CPU::executeNextInstruction()
+{
+	// Get the opcode
+	Byte opcode = *mMap[reg_PC.dat];	
+	return (this->*method_pointer[opcode])();
 }
