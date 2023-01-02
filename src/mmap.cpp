@@ -103,6 +103,10 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 	return true;
 }
 
+void MemoryMap::debugWriteMemory(Word address, Byte value) {
+	romBank0[address] = value;
+}
+
 Byte MemoryMap::readMemory(Word address)
 {
 	if (address < 0x4000)
