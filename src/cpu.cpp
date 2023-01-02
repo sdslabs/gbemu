@@ -36,7 +36,9 @@ int CPU::NOP()
 int CPU::LD_BC_u16()
 {
 	// Load the next 2 bytes into BC
-	
+	// Left shift the first byte by 8 bits
+	// OR the second byte
+	reg_BC.dat = ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2];
 	reg_PC.dat += 3;
 	printf("LD BC, u16");
 	return 12;
@@ -45,6 +47,6 @@ int CPU::LD_BC_u16()
 int CPU::executeNextInstruction()
 {
 	// Get the opcode
-	Byte opcode = *mMap[reg_PC.dat];	
+	Byte opcode = (*mMap)[reg_PC.dat];	
 	return (this->*method_pointer[opcode])();
 }
