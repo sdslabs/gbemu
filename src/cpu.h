@@ -38,6 +38,9 @@ private:
 	// Program Counter
 	Register reg_PC;
 
+	// Low PowerMode Bool
+	bool isLowPower;
+
 	// Flags
 	// Pulled from https://gbdev.io/pandocs/CPU_Registers_and_Flags.html
 	// Naming convention is: FLAG_<name>_<bit>
