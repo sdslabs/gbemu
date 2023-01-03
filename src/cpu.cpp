@@ -58,6 +58,8 @@ int CPU::LD_BC_A()
 	return 8;
 }
 
+// INC BC
+// Increments the contents of BC
 int CPU::INC_BC()
 {
 	reg_BC.dat += 1;
@@ -66,6 +68,9 @@ int CPU::INC_BC()
     return 8;
 }
 int CPU::INC_B() { return 0; }
+
+// DEC B
+// Decrements the contents of B
 int CPU::DEC_B()
 {
 	reg_BC.hi -= 1;
@@ -94,12 +99,16 @@ int CPU::DEC_B()
     return 4;
 }
 int CPU::LD_B_u8() { return 0; }
+
+// RLCA
+// Rotate A left
 int CPU::RLCA()
 {
     reg_AF.lo &= ~FLAG_ZERO_z;
     reg_AF.lo &= ~FLAG_SUBTRACT_n;
     reg_AF.lo &= ~FLAG_HALF_CARRY_h;
 
+	// store bit 7 in carry flag
     if (reg_AF.hi >> 7 == 1)
     {
         reg_AF.lo |= FLAG_CARRY_c;
@@ -109,6 +118,7 @@ int CPU::RLCA()
         reg_AF.lo &= ~FLAG_CARRY_c;
     }
 
+	// Rotate A left by 1
     reg_AF.hi = (reg_AF.hi << 1) | (reg_AF.hi >> 7);
 
     reg_PC.dat += 1;
@@ -116,11 +126,15 @@ int CPU::RLCA()
     return 4;
 }
 int CPU::LD_u16_SP() { return 0; }
+
+// ADD HL, BC
+// Adds the contents of BC to HL
 int CPU::ADD_HL_BC()
 {
-	reg_AF.lo &= ~FLAG_SUBTRACT_n;
-    reg_AF.lo &= ~FLAG_HALF_CARRY_h;
+	// set subtract flag to 0
+    reg_AF.lo &= ~FLAG_SUBTRACT_n;
 
+	// set carry flag if there is a carry from bit 11
     if ((reg_HL.dat + reg_BC.dat) >> 16 == 1)
     {
         reg_AF.lo |= FLAG_CARRY_c;
@@ -137,19 +151,124 @@ int CPU::ADD_HL_BC()
     return 8;
 }
 int CPU::LD_A_BC() { return 0; }
-int CPU::DEC_BC() { return 0; }
+
+// DEC BC
+// Decrement BC
+int CPU::DEC_BC()
+{
+	reg_BC.dat -= 1;
+    reg_PC.dat += 1;
+    printf("DEC BC\n");
+    return 8;
+}
 int CPU::INC_C() { return 0; }
-int CPU::DEC_C() { return 0; }
+
+// DEC C
+// Decrement C
+int CPU::DEC_C()
+{
+	reg_BC.lo -= 1;
+
+	// set zero flag if C is 0
+    if (reg_BC.lo == 0)
+    {
+        reg_AF.lo |= FLAG_ZERO_z;
+    }
+    else
+    {
+        reg_AF.lo &= ~FLAG_ZERO_z;
+    }
+
+	// set subtract flag to 1
+    reg_AF.lo |= FLAG_SUBTRACT_n;
+
+
+    reg_PC.dat += 1;
+    printf("DEC C\n");
+    return 4;
+}
 int CPU::LD_C_u8() { return 0; }
-int CPU::RRCA() { return 0; }
+
+// RRCA
+// Rotate A right
+int CPU::RRCA()
+{
+	// Set zero flag to 0
+    reg_AF.lo &= ~FLAG_ZERO_z;
+
+	// Set subtract flag to 0
+    reg_AF.lo &= ~FLAG_SUBTRACT_n;
+
+    if (reg_AF.hi & 1 == 1)
+    {
+        reg_AF.lo |= FLAG_CARRY_c;
+    }
+    else
+    {
+        reg_AF.lo &= ~FLAG_CARRY_c;
+    }
+
+    reg_AF.hi = (reg_AF.hi >> 1) | (reg_AF.hi << 7);
+
+    reg_PC.dat += 1;
+    printf("RRCA\n");
+    return 4;
+}
 int CPU::STOP() { return 0; }
-int CPU::LD_DE_u16() { return 0; }
+
+// LD DE, u16
+// Loads a 16 bit immediate value into DE
+int CPU::LD_DE_u16()
+{
+	reg_DE.dat = ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2];
+    reg_PC.dat += 3;
+    printf("LD DE, u16\n");
+    return 12;
+}
 int CPU::LD_DE_A() { return 0; }
-int CPU::INC_DE() { return 0; }
+
+// INC DE
+// Increment DE
+int CPU::INC_DE()
+{
+	reg_DE.dat += 1;
+    reg_PC.dat += 1;
+    printf("INC DE\n");
+    return 8;
+}
 int CPU::INC_D() { return 0; }
-int CPU::DEC_D() { return 0; }
+
+// DEC D
+// Decrement D
+int CPU::DEC_D()
+{
+    reg_DE.hi -= 1;
+
+	// set zero flag if D is 0
+    if (reg_DE.hi == 0)
+    {
+        reg_AF.lo |= FLAG_ZERO_z;
+    }
+    else
+    {
+        reg_AF.lo &= ~FLAG_ZERO_z;
+    }
+
+	//set subtract flag to 1
+    reg_AF.lo |= FLAG_SUBTRACT_n;
+
+    reg_PC.dat += 1;
+    printf("DEC D\n");
+    return 4;
+}
 int CPU::LD_D_u8() { return 0; }
-int CPU::RLA() { return 0; }
+
+// RLA
+// Rotate A left through carry flag
+int CPU::RLA()
+{
+	return 0;
+}
 int CPU::JR_r8() { return 0; }
 int CPU::ADD_HL_DE() { return 0; }
 int CPU::LD_A_DE() { return 0; }
@@ -159,7 +278,16 @@ int CPU::DEC_E() { return 0; }
 int CPU::LD_E_u8() { return 0; }
 int CPU::RRA() { return 0; }
 int CPU::JR_NZ_r8() { return 0; }
-int CPU::LD_HL_u16() { return 0; }
+
+// LD HL, u16
+// Loads a 16 bit immediate value into HL
+int CPU::LD_HL_u16()
+{
+	reg_HL.dat = ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2];
+    reg_PC.dat += 3;
+    printf("LD HL, u16\n");
+    return 12;
+}
 int CPU::LD_HLp_A() { return 0; }
 int CPU::INC_HL() { return 0; }
 int CPU::INC_H() { return 0; }
@@ -175,7 +303,13 @@ int CPU::DEC_L() { return 0; }
 int CPU::LD_L_u8() { return 0; }
 int CPU::CPL() { return 0; }
 int CPU::JR_NC_r8() { return 0; }
-int CPU::LD_SP_u16() { return 0; }
+int CPU::LD_SP_u16()
+{
+	reg_SP.dat = ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2];
+    reg_PC.dat += 3;
+    printf("LD SP, u16\n");
+    return 12;
+}
 int CPU::LD_HLm_A() { return 0; }
 int CPU::INC_SP() { return 0; }
 int CPU::INC_HLp() { return 0; }
@@ -190,13 +324,49 @@ int CPU::INC_A() { return 0; }
 int CPU::DEC_A() { return 0; }
 int CPU::LD_A_u8() { return 0; }
 int CPU::CCF() { return 0; }
-int CPU::LD_B_B() { return 0; }
+
+// LD B, B
+// Loads B into B
+int CPU::LD_B_B()
+{
+	reg_BC.hi = reg_BC.hi;
+    reg_PC.dat += 1;
+    printf("LD B, B\n");
+    return 4;
+}
 int CPU::LD_B_C() { return 0; }
-int CPU::LD_B_D() { return 0; }
+
+// LD B, D
+// Loads D into B
+int CPU::LD_B_D()
+{
+	reg_BC.hi = reg_DE.hi;
+    reg_PC.dat += 1;
+    printf("LD B, D\n");
+    return 4;
+}
 int CPU::LD_B_E() { return 0; }
-int CPU::LD_B_H() { return 0; }
+
+// LD B, H
+// Loads H into B
+int CPU::LD_B_H()
+{
+	reg_BC.hi = reg_HL.hi;
+    reg_PC.dat += 1;
+    printf("LD B, H\n");
+    return 4;
+}
 int CPU::LD_B_L() { return 0; }
-int CPU::LD_B_HLp() { return 0; }
+
+// LD B, (HL)
+// Loads the value at address HL into B
+int CPU::LD_B_HLp()
+{
+	reg_BC.hi = (*mMap)[reg_HL.dat];
+    reg_PC.dat += 1;
+    printf("LD B, (HL)\n");
+    return 8;
+}
 int CPU::LD_B_A() { return 0; }
 int CPU::LD_C_B() { return 0; }
 int CPU::LD_C_C() { return 0; }
@@ -337,7 +507,13 @@ int CPU::RST_08H() { return 0; }
 int CPU::RET_NC() { return 0; }
 int CPU::POP_DE() { return 0; }
 int CPU::JP_NC_u16() { return 0; }
-int CPU::UNKNOWN() { return 0; }
+
+int CPU::UNKNOWN()
+{
+	const char *s = NULL;
+	printf( "%c\n", s[0] );
+	return 0;
+}
 int CPU::NC_u16() { return 0; }
 int CPU::PUSH_DE() { return 0; }
 int CPU::SUB_u8() { return 0; }
@@ -348,7 +524,12 @@ int CPU::JP_C_u16() { return 0; }
 int CPU::CALL_C_u16() { return 0; }
 int CPU::SBC_A_u8() { return 0; }
 int CPU::RST_18H() { return 0; }
-int CPU::LDH_a8_A() { return 0; }
+// LDH (a8), A
+// Load A into (0xFF00 + a8)
+int CPU::LDH_a8_A()
+{
+    return 0;
+}
 int CPU::POP_HL() { return 0; }
 int CPU::LDH_C_A() { return 0; }
 int CPU::PUSH_HL() { return 0; }
@@ -356,19 +537,62 @@ int CPU::AND_u8() { return 0; }
 int CPU::RST_20H() { return 0; }
 int CPU::ADD_SP_i8() { return 0; }
 int CPU::JP_HL() { return 0; }
-int CPU::LD_a16_A() { return 0; }
+
+// LD (u16), A
+// Load A into (u16)
+int CPU::LD_a16_A()
+{
+	// u16 is ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2]
+	// Writing the value of A into the (u16)
+	mMap->debugWriteMemory(((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2],(*mMap)[reg_AF.hi]);
+	reg_PC.dat += 3;
+	printf("LD (u16), A\n");
+	return 16;
+}
 int CPU::XOR_u8() { return 0; }
 int CPU::RST_28H() { return 0; }
 int CPU::LDH_A_a8() { return 0; }
 int CPU::POP_AF() { return 0; }
-int CPU::LDH_A_C() { return 0; }
+
+// LDH A, (C)
+// Load (0xFF00 + C) into A
+int CPU::LDH_A_C()
+{
+	reg_AF.hi = (*mMap)[0xFF00 + reg_BC.lo];
+	reg_PC.dat += 1;
+    return 8;
+}
 int CPU::DI() { return 0; }
 int CPU::PUSH_AF() { return 0; }
 int CPU::OR_u8() { return 0; }
 int CPU::RST_30H() { return 0; }
-int CPU::LD_HL_SP_i8() { return 0; }
-int CPU::LD_SP_HL() { return 0; }
-int CPU::LD_A_a16() { return 0; }
+// LD HL, SP + i8
+// Load SP + i8 into HL
+int CPU::LD_HL_SP_i8()
+{
+    reg_HL.dat = reg_SP.dat + (int8_t)(*mMap)[reg_PC.dat + 1];
+    reg_PC.dat += 2;
+    return 12;
+}
+
+// LD SP, HL
+// Load HL into SP
+int CPU::LD_SP_HL()
+{
+	reg_SP.dat = reg_HL.dat;
+    reg_PC.dat += 1;
+    return 8;
+}
+
+// LD A, (u16)
+// Load (u16) into A
+int CPU::LD_A_a16()
+{
+	reg_AF.hi = (*mMap)[((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2]];
+    reg_PC.dat += 3;
+    printf("LD A, (HL)\n");
+    return 16;
+}
 int CPU::EI() { return 0; }
 int CPU::CP_u8() { return 0; }
 int CPU::RST_38H() { return 0; }

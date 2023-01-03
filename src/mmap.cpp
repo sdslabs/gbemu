@@ -103,7 +103,8 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 	return true;
 }
 
-void MemoryMap::debugWriteMemory(Word address, Byte value) {
+void MemoryMap::debugWriteMemory(Word address, Byte value)
+{
 	romBank0[address] = value;
 }
 
