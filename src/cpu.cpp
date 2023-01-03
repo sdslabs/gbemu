@@ -73,6 +73,7 @@ int CPU::INC_B() { return 0; }
 // Decrements the contents of B
 int CPU::DEC_B()
 {
+	bool flag = (reg_BC.hi & 0x10) == 0x10;
 	reg_BC.hi -= 1;
 	if (reg_BC.hi == 0)
 	{
@@ -85,7 +86,7 @@ int CPU::DEC_B()
 
 	reg_AF.lo |= FLAG_SUBTRACT_n;
 
-	if (reg_BC.hi == 0xFF)
+	if ((reg_BC.hi & 0x10) == 0x00 && flag)
 	{
 		reg_AF.lo |= FLAG_HALF_CARRY_h;
     }
@@ -95,7 +96,9 @@ int CPU::DEC_B()
     }
 
     reg_PC.dat += 1;
-    printf("DEC B\n");
+    printf("DEC B\n" );
+    printf("%d\n", reg_BC.hi);
+	printf("%d\n", reg_AF.lo);
     return 4;
 }
 int CPU::LD_B_u8() { return 0; }
@@ -199,7 +202,7 @@ int CPU::RRCA()
 	// Set subtract flag to 0
     reg_AF.lo &= ~FLAG_SUBTRACT_n;
 
-    if (reg_AF.hi & 1 == 1)
+    if ((reg_AF.hi & 1) == 1)
     {
         reg_AF.lo |= FLAG_CARRY_c;
     }
