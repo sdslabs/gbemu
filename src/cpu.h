@@ -574,6 +574,8 @@ public:
 	// set the memory map
 	void setMemory(MemoryMap* memory) { mMap = memory; }
 
+	void set_reg_A(Byte value) { reg_AF.hi = value; }
+
 	void set_reg_BC(Word value) { reg_BC.dat = value; }
 
 	int executeNextInstruction();
