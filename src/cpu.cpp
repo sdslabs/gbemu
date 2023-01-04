@@ -52,7 +52,7 @@ int CPU::LD_BC_u16()
 int CPU::LD_BC_A()
 {
 	// Write the contents of A into the memory address pointed to by BC
-	mMap->writeMemory(reg_BC.dat, reg_AF.lo);
+	mMap->writeMemory(reg_BC.dat, reg_AF.hi);
 
 	// Increment the program counter
 	reg_PC.dat += 1;
