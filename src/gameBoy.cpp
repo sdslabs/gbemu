@@ -58,6 +58,41 @@ GBE::GBE()
 	// Final State: BC = 0x10FF, Flag_N = 0, Flag_H = 1, Flag_Z = 0
 	gbe_mMap->debugWriteMemory(0x0108, 0x04);
 
+	// DEC B
+	// Decrements the value of B by 1
+	// Final State: BC = 0x09FF, Flag_N = 1, Flag_H = 1, Flag_Z = 0
+	gbe_mMap->debugWriteMemory(0x0109, 0x05);
+
+	// Set BC = 0X01FF to test DEC B for Z flag
+	gbe_cpu->set_reg_BC(0x01FF);
+
+	// DEC B
+	// Decrements the value of B by 1
+	// Final State: BC = 0x00FF, Flag_N = 1, Flag_H = 0, Flag_Z = 1
+	gbe_mMap->debugWriteMemory(0x010A, 0x05);
+
+	// Set BC = 0X020F to test DEC B
+	gbe_cpu->set_reg_BC(0x020F);
+
+	// DEC B
+	// Decrements the value of B by 1
+	// Final State: BC = 0x010F, Flag_N = 1, Flag_H = 0, Flag_Z = 0
+	gbe_mMap->debugWriteMemory(0x010B, 0x05);
+
+	// LD B, u8
+	// Loads an 8 bit immediate into the register B
+	// Final State: BC = 0x69FF
+	gbe_mMap->debugWriteMemory(0x010C, 0x06);
+	gbe_mMap->debugWriteMemory(0x010D, 0x69);
+
+	// RLCA
+	// Rotates the value of the accumulator to the left
+	// Final State: AF = 0x8040, Flag_C = 0
+	gbe_mMap->debugWriteMemory(0x010E, 0x07);
+
+	// Set A = 0x80 to test RLCA for C Flag
+	
+
 	// //RLCA
 	// gbe_mMap->debugWriteMemory(0x0103, 0x07);
 
