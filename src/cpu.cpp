@@ -733,7 +733,7 @@ int CPU::RST_30H() { return 0; }
 // Load SP + i8 into HL
 int CPU::LD_HL_SP_i8()
 {
-    reg_HL.dat = reg_SP.dat + (Byte)(*mMap)[reg_PC.dat + 1];
+    reg_HL.dat = reg_SP.dat + (*mMap)[reg_PC.dat + 1];
     reg_PC.dat += 2;
     return 12;
 }
