@@ -39,7 +39,7 @@ GBE::GBE()
 
 	// INC B
 	// Increments the value of B by 1
-	// Final State: BC = 0xE102, Flag_N = 0, Flag_H = 0, Flag_Z = 0
+	// Final State: BC = 0xE102, Flag_N = 0, Flag_H = 0, Flag_Z = 0, AF = 0110
 	gbe_mMap->debugWriteMemory(0x0106, 0x04);
 
 	// Set BC = 0XFFFF to test INC B for Z flag
@@ -49,7 +49,7 @@ GBE::GBE()
 
 	// INC B
 	// Increments the value of B by 1
-	// Final State: BC = 0x00FF, Flag_N = 0, Flag_H = 0, Flag_Z = 1
+	// Final State: BC = 0x00FF, Flag_N = 0, Flag_H = 1, Flag_Z = 1, AF = 01B0
 	gbe_mMap->debugWriteMemory(0x010A, 0x04);
 
 	// Set BC = 0X0FFF to test INC B for H flag
@@ -59,12 +59,12 @@ GBE::GBE()
 
 	// INC B
 	// Increments the value of B by 1
-	// Final State: BC = 0x10FF, Flag_N = 0, Flag_H = 1, Flag_Z = 0
+	// Final State: BC = 0x10FF, Flag_N = 0, Flag_H = 1, Flag_Z = 0, AF = 0130
 	gbe_mMap->debugWriteMemory(0x010E, 0x04);
 
 	// DEC B
 	// Decrements the value of B by 1
-	// Final State: BC = 0x09FF, Flag_N = 1, Flag_H = 1, Flag_Z = 0
+	// Final State: BC = 0x09FF, Flag_N = 1, Flag_H = 1, Flag_Z = 0, AF = 0170
 	gbe_mMap->debugWriteMemory(0x010F, 0x05);
 
 	// Set BC = 0X01FF to test DEC B for Z flag
@@ -74,7 +74,7 @@ GBE::GBE()
 
 	// DEC B
 	// Decrements the value of B by 1
-	// Final State: BC = 0x00FF, Flag_N = 1, Flag_H = 0, Flag_Z = 1
+	// Final State: BC = 0x00FF, Flag_N = 1, Flag_H = 0, Flag_Z = 1, AF = 01D0
 	gbe_mMap->debugWriteMemory(0x0113, 0x05);
 
 	// Set BC = 0X020F to test DEC B
@@ -84,7 +84,7 @@ GBE::GBE()
 
 	// DEC B
 	// Decrements the value of B by 1
-	// Final State: BC = 0x010F, Flag_N = 1, Flag_H = 0, Flag_Z = 0
+	// Final State: BC = 0x010F, Flag_N = 1, Flag_H = 0, Flag_Z = 0, AF = 0150
 	gbe_mMap->debugWriteMemory(0x0117, 0x05);
 
 	// LD B, u8
@@ -95,7 +95,7 @@ GBE::GBE()
 
 	// RLCA
 	// Rotates the value of the accumulator to the left
-	// Final State: AF = 0x8040, Flag_C = 0
+	// Final State: AF = 0x0200, Flag_C = 0
 	gbe_mMap->debugWriteMemory(0x011A, 0x07);
 
 	// Set A = 0x80 to test RLCA for C Flag
