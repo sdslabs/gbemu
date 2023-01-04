@@ -105,7 +105,7 @@ GBE::GBE()
 	// gbe_mMap->debugWriteMemory(0x0107, 0x69);
 
 	// Seg fault to end using UNKOWN
-	gbe_mMap->debugWriteMemory(0x0109, 0xEB);
+	gbe_mMap->debugWriteMemory(0x010F, 0xEB);
 
 	update();
 }
