@@ -411,6 +411,17 @@ int CPU::DEC_D()
 	//set subtract flag to 1
     reg_AF.lo |= FLAG_SUBTRACT_n;
 
+	// set half carry flag if there was a borrow from bit 4
+	// Only way to have a borrow is if you are left with 0x0F
+	if ((reg_DE.hi & 0x0F) == 0x0F)
+	{
+		reg_AF.lo |= FLAG_HALF_CARRY_h;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_HALF_CARRY_h;
+	}
+
     reg_PC.dat += 1;
     printf("DEC D\n");
     return 4;
@@ -430,16 +441,208 @@ int CPU::LD_D_u8()
 // Rotate A left through carry flag
 int CPU::RLA()
 {
-	return 0;
+	// Set zero flag to 0
+	reg_AF.lo &= ~FLAG_ZERO_z;
+
+	// Set subtract flag to 0
+	reg_AF.lo &= ~FLAG_SUBTRACT_n;
+
+	// Set Half Carry flag to 1 if bit 3 is 1
+	// Example: 0000 1000 will become 0001 0000
+	if ((reg_AF.hi & 0x80) == 0x80)
+	{
+		reg_AF.lo |= FLAG_CARRY_c;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_CARRY_c;
+	}
+
+	// Shift A left by 1
+	reg_AF.hi = (reg_AF.hi << 1) | (reg_AF.hi >> 7);
+
+	reg_PC.dat += 1;
+	printf("RLA\n");
+	return 4;
 }
-int CPU::JR_r8() { return 0; }
-int CPU::ADD_HL_DE() { return 0; }
-int CPU::LD_A_DE() { return 0; }
-int CPU::DEC_DE() { return 0; }
-int CPU::INC_E() { return 0; }
-int CPU::DEC_E() { return 0; }
-int CPU::LD_E_u8() { return 0; }
-int CPU::RRA() { return 0; }
+
+// JR i8
+// Add a signed 8 bit immediate value to the program counter
+int CPU::JR_i8()
+{
+	// TODO: Check if this is correct
+	reg_PC.dat += (Byte)(*mMap)[reg_PC.dat + 1];
+	printf("JR i8\n");
+	return 12;
+}
+
+// ADD HL, DE
+// Add DE to HL
+int CPU::ADD_HL_DE()
+{
+	// Set subtract flag to 0
+	reg_AF.lo &= ~FLAG_SUBTRACT_n;
+
+	// Set Half Carry flag to 1 if bit 11 is 1
+	// Example: 0000 1000 0000 0000 will become 0001 0000 0000 0000
+	if ((reg_HL.dat & 0x0800) == 0x0800)
+	{
+		reg_AF.lo |= FLAG_HALF_CARRY_h;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_HALF_CARRY_h;
+	}
+
+	// Set Carry flag to 1 if bit 15 is 1
+	// Example: 1000 0000 0000 0000 will become 0000 0000 0000 0001
+	if ((reg_HL.dat & 0x8000) == 0x8000)
+	{
+		reg_AF.lo |= FLAG_CARRY_c;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_CARRY_c;
+	}
+
+	// Add HL and DE
+	reg_HL.dat += reg_DE.dat;
+
+	reg_PC.dat += 1;
+	printf("ADD HL, DE");
+	return 8;
+}
+
+// LD A, (DE)
+// Loads the contents of the memory address pointed to by DE into A
+int CPU::LD_A_DE()
+{
+	reg_AF.hi = (*mMap)[reg_DE.dat];
+	reg_PC.dat += 1;
+	printf("LD A, (DE)\n");
+	return 8;
+}
+
+// DEC DE
+// Decrement DE
+int CPU::DEC_DE()
+{
+	reg_DE.dat -= 1;
+	reg_PC.dat += 1;
+	printf("DEC DE\n");
+	return 8;
+}
+
+// INC E
+// Increment E
+int CPU::INC_E()
+{
+	reg_DE.lo += 1;
+
+	// Set zero flag to 1 if E is 0
+	if (reg_DE.lo == 0)
+	{
+		reg_AF.lo |= FLAG_ZERO_z;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_ZERO_z;
+	}
+
+	// Set subtract flag to 0
+	reg_AF.lo &= ~FLAG_SUBTRACT_n;
+
+	// There will only be 0000 if there was a half carry
+	if ((reg_DE.lo & 0x0F) == 0)
+	{
+		reg_AF.lo |= FLAG_HALF_CARRY_h;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_HALF_CARRY_h;
+	}
+
+	reg_PC.dat += 1;
+	printf("INC E\n");
+	return 4;
+}
+
+// DEC E
+// Decrement E
+int CPU::DEC_E()
+{
+	reg_DE.lo -= 1;
+
+	// Set zero flag to 1 if E is 0
+	if (reg_DE.lo == 0)
+	{
+		reg_AF.lo |= FLAG_ZERO_z;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_ZERO_z;
+	}
+
+	// Set subtract flag to 1
+	reg_AF.lo |= FLAG_SUBTRACT_n;
+
+	// Set half carry flag to 1 if there was a borrow from bit 4
+	// Only way to have a borrow is if you are left with 0x0F
+	if ((reg_DE.lo & 0x0F) == 0x0F)
+	{
+		reg_AF.lo |= FLAG_HALF_CARRY_h;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_HALF_CARRY_h;
+	}
+
+	reg_PC.dat += 1;
+	printf("DEC E\n");
+	return 4;
+}
+
+// LD E, u8
+// Loads an 8 bit immediate value into E
+int CPU::LD_E_u8()
+{
+	reg_DE.lo = (*mMap)[reg_PC.dat + 1];
+	reg_PC.dat += 2;
+	printf("LD E, u8\n");
+	return 8;
+}
+
+// RRA
+// Rotate A right through carry flag
+int CPU::RRA()
+{
+	// Set zero flag to 0
+	reg_AF.lo &= ~FLAG_ZERO_z;
+
+	// Set subtract flag to 0
+	reg_AF.lo &= ~FLAG_SUBTRACT_n;
+
+	// Set Half Carry flag to 0
+	reg_AF.lo &= ~FLAG_HALF_CARRY_h;
+
+	// Set Carry flag to 1 if bit 0 is 1
+	// Example: 1000 0001 will become 0100 0000
+	if (reg_AF.hi & 0x01)
+	{
+		reg_AF.lo |= FLAG_CARRY_c;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_CARRY_c;
+	}
+
+	// Shift A right by 1
+	reg_AF.hi = (reg_AF.hi >> 1) | (reg_AF.hi << 7);
+
+	reg_PC.dat += 1;
+	printf("RRA\n");
+	return 4;
+}
 int CPU::JR_NZ_r8() { return 0; }
 
 // LD HL, u16
@@ -733,7 +936,7 @@ int CPU::RST_30H() { return 0; }
 // Load SP + i8 into HL
 int CPU::LD_HL_SP_i8()
 {
-    reg_HL.dat = reg_SP.dat + (int8_t)(*mMap)[reg_PC.dat + 1];
+    reg_HL.dat = reg_SP.dat + (Byte)(*mMap)[reg_PC.dat + 1];
     reg_PC.dat += 2;
     return 12;
 }

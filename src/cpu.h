@@ -84,7 +84,7 @@ private:
 		&CPU::DEC_D,
 		&CPU::LD_D_u8,
 		&CPU::RLA,
-		&CPU::JR_r8,
+		&CPU::JR_i8,
 		&CPU::ADD_HL_DE,
 		&CPU::LD_A_DE,
 		&CPU::DEC_DE,
@@ -342,7 +342,7 @@ private:
 	int DEC_D();
 	int LD_D_u8();
 	int RLA();
-	int JR_r8();
+	int JR_i8();
 	int ADD_HL_DE();
 	int LD_A_DE();
 	int DEC_DE();
