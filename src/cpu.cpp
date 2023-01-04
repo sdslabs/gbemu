@@ -20,6 +20,9 @@ CPU::CPU()
 	reg_DE.dat = 0x00D8;
 	reg_HL.dat = 0x014D;
 	reg_SP.dat = 0xFFFE;
+
+	// Set isLowPower to false
+	isLowPower = false;
 }
 
 // NOP just adds 4 cycles
@@ -67,10 +70,39 @@ int CPU::INC_BC()
     printf("INC BC\n");
     return 8;
 }
-int CPU::INC_B() { return 0; }
+
+// INC B
+// Increments the contents of B
+int CPU::INC_B()
+{
+	reg_BC.hi += 1;
+	if (reg_BC.hi == 0)
+	{
+		reg_AF.lo |= FLAG_ZERO_z;
+    }
+    else
+    {
+        reg_AF.lo &= ~FLAG_ZERO_z;
+	}
+
+	reg_AF.lo &= ~FLAG_SUBTRACT_n;
+
+	if ((reg_BC.hi & 0x0F) == 0)
+	{
+		reg_AF.lo |= FLAG_HALF_CARRY_h;
+    }
+    else
+    {
+        reg_AF.lo &= ~FLAG_HALF_CARRY_h;
+	}
+    reg_PC.dat += 1;
+    printf("INC B\n");
+    return 4;
+}
 
 // DEC B
 // Decrements the contents of B
+// TODO: Dec B can be checked if B is 0001 0000
 int CPU::DEC_B()
 {
 	bool flag = (reg_BC.hi & 0x10) == 0x10;
@@ -97,11 +129,18 @@ int CPU::DEC_B()
 
     reg_PC.dat += 1;
     printf("DEC B\n" );
-    printf("%d\n", reg_BC.hi);
-	printf("%d\n", reg_AF.lo);
     return 4;
 }
-int CPU::LD_B_u8() { return 0; }
+
+// LD B, u8
+// Loads an 8 bit immediate value into B
+int CPU::LD_B_u8()
+{
+	reg_BC.hi = (*mMap)[reg_PC.dat + 1];
+    reg_PC.dat += 2;
+    printf("LD B, u8\n");
+    return 8;
+}
 
 // RLCA
 // Rotate A left
@@ -128,7 +167,26 @@ int CPU::RLCA()
     printf("RLCA\n");
     return 4;
 }
-int CPU::LD_u16_SP() { return 0; }
+
+// LD (u16), SP
+// Loads the contents of SP into the memory address pointed to by the next 2 bytes
+int CPU::LD_u16_SP()
+{
+	// Load the next 2 bytes into a 16 bit value
+    // Left shift the first byte by 8 bits
+    // OR the second byte
+    Word address = ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2];
+
+    // Write the contents of SP into the memory address pointed to by the next 2 bytes
+    mMap->writeMemory(address, reg_SP.dat & 0xFF);
+    mMap->writeMemory(address + 1, reg_SP.dat >> 8);
+
+    // Increment the program counter
+    reg_PC.dat += 3;
+
+    printf("LD (u16), SP\n");
+    return 20;
+}
 
 // ADD HL, BC
 // Adds the contents of BC to HL
@@ -153,7 +211,16 @@ int CPU::ADD_HL_BC()
     printf("ADD HL, BC\n");
     return 8;
 }
-int CPU::LD_A_BC() { return 0; }
+
+// LD A, (BC)
+// Loads the contents of the memory address pointed to by BC into A
+int CPU::LD_A_BC()
+{
+	reg_AF.lo = (*mMap)[reg_BC.dat];
+    reg_PC.dat += 1;
+    printf("LD A, (BC)\n");
+    return 8;
+}
 
 // DEC BC
 // Decrement BC
@@ -164,7 +231,37 @@ int CPU::DEC_BC()
     printf("DEC BC\n");
     return 8;
 }
-int CPU::INC_C() { return 0; }
+
+// INC C
+// Increment C
+int CPU::INC_C()
+{
+    reg_BC.lo += 1;
+    if (reg_BC.lo == 0)
+    {
+        reg_AF.lo |= FLAG_ZERO_z;
+    }
+    else
+    {
+        reg_AF.lo &= ~FLAG_ZERO_z;
+    }
+
+    reg_AF.lo &= ~FLAG_SUBTRACT_n;
+
+	// There will only be 0000 if there was a half carry
+    if ((reg_BC.lo & 0x0F) == 0)
+    {
+        reg_AF.lo |= FLAG_HALF_CARRY_h;
+    }
+    else
+    {
+        reg_AF.lo &= ~FLAG_HALF_CARRY_h;
+    }
+
+    reg_PC.dat += 1;
+    printf("INC C\n");
+    return 4;
+}
 
 // DEC C
 // Decrement C
@@ -190,7 +287,16 @@ int CPU::DEC_C()
     printf("DEC C\n");
     return 4;
 }
-int CPU::LD_C_u8() { return 0; }
+
+// LD C, u8
+// Loads an 8 bit immediate value into C
+int CPU::LD_C_u8()
+{
+	reg_BC.lo = (*mMap)[reg_PC.dat + 1];
+    reg_PC.dat += 2;
+    printf("LD C, u8\n");
+    return 8;
+}
 
 // RRCA
 // Rotate A right
@@ -217,7 +323,13 @@ int CPU::RRCA()
     printf("RRCA\n");
     return 4;
 }
-int CPU::STOP() { return 0; }
+int CPU::STOP()
+{
+	isLowPower = true;
+	reg_PC.dat += 2;
+	printf("STOP\n");
+    return 0;
+}
 
 // LD DE, u16
 // Loads a 16 bit immediate value into DE
@@ -228,7 +340,16 @@ int CPU::LD_DE_u16()
     printf("LD DE, u16\n");
     return 12;
 }
-int CPU::LD_DE_A() { return 0; }
+
+// LD (DE), A
+// Loads the contents of A into the memory address pointed to by DE
+int CPU::LD_DE_A()
+{
+	mMap->writeMemory((*mMap)[reg_DE.dat], reg_AF.hi);
+	reg_PC.dat += 1;
+	printf("LD (DE), A\n");
+	return 8;
+}
 
 // INC DE
 // Increment DE
@@ -239,7 +360,37 @@ int CPU::INC_DE()
     printf("INC DE\n");
     return 8;
 }
-int CPU::INC_D() { return 0; }
+
+// INC D
+// Increment D
+int CPU::INC_D()
+{
+	reg_DE.hi += 1;
+	if (reg_DE.hi == 0)
+	{
+		reg_AF.lo |= FLAG_ZERO_z;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_ZERO_z;
+	}
+
+	reg_AF.lo &= ~FLAG_SUBTRACT_n;
+
+	// There will only be 0000 if there was a half carry
+	if ((reg_DE.hi & 0x0F) == 0)
+	{
+		reg_AF.lo |= FLAG_HALF_CARRY_h;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_HALF_CARRY_h;
+	}
+
+	reg_PC.dat += 1;
+	printf("INC D\n");
+	return 4;
+}
 
 // DEC D
 // Decrement D
@@ -264,7 +415,16 @@ int CPU::DEC_D()
     printf("DEC D\n");
     return 4;
 }
-int CPU::LD_D_u8() { return 0; }
+
+// LD D, u8
+// Loads an 8 bit immediate value into D
+int CPU::LD_D_u8()
+{
+	reg_DE.hi = (*mMap)[reg_PC.dat + 1];
+	reg_PC.dat += 2;
+	printf("LD D, u8\n");
+	return 8;
+}
 
 // RLA
 // Rotate A left through carry flag
