@@ -323,6 +323,9 @@ int CPU::RRCA()
     printf("RRCA\n");
     return 4;
 }
+
+// STOP
+// Stops the CPU until an interrupt occurs
 int CPU::STOP()
 {
 	isLowPower = true;
@@ -772,17 +775,180 @@ int CPU::LD_H_u8()
 // Decimal adjust register A
 int CPU::DAA()
 {
-
+	return 0;
 }
-int CPU::JR_Z_r8() { return 0; }
-int CPU::ADD_HL_HL() { return 0; }
-int CPU::LD_A_HLp() { return 0; }
-int CPU::DEC_HL() { return 0; }
-int CPU::INC_L() { return 0; }
-int CPU::DEC_L() { return 0; }
-int CPU::LD_L_u8() { return 0; }
-int CPU::CPL() { return 0; }
-int CPU::JR_NC_r8() { return 0; }
+
+// JR Z, i8
+// Add a signed 8 bit immediate value to the program counter if zero flag is 1
+int CPU::JR_Z_r8()
+{
+	if (reg_AF.lo & FLAG_ZERO_z)
+	{
+		reg_PC.dat += (Byte)(*mMap)[reg_PC.dat + 1];
+	}
+}
+
+// ADD HL, HL
+// Add HL to HL
+int CPU::ADD_HL_HL()
+{
+	// Set subtract flag to 0
+	reg_AF.lo &= ~FLAG_SUBTRACT_n;
+
+	// Set half carry flag to 1 if there was a carry from bit 11
+	// Example: 0000 1000 0000 0000 + 0000 1000 0000 0000 = 0001 0000 0000 0000
+	if (reg_HL.dat & 0x0800)
+	{
+		reg_AF.lo |= FLAG_HALF_CARRY_h;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_HALF_CARRY_h;
+	}
+
+	// Set carry flag to 1 if there was a carry from bit 15
+	// Example: 1000 0000 0000 0000 + 1000 0000 0000 0000 = 0000 0000 0000 0000
+	if (reg_HL.dat & 0x8000)
+	{
+		reg_AF.lo |= FLAG_CARRY_c;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_CARRY_c;
+	}
+
+	reg_HL.dat += reg_HL.dat;
+	reg_PC.dat += 1;
+	printf("ADD HL, HL\n");
+	return 8;
+}
+
+// LD A, (HL+)
+// Loads the contents of the memory address pointed to by HL into A and increments HL
+int CPU::LD_A_HLp()
+{
+	reg_AF.hi = (*mMap)[reg_HL.dat];
+	reg_HL.dat += 1;
+	reg_PC.dat += 1;
+	printf("LD A, (HL+)\n");
+	return 8;
+}
+
+// DEC HL
+// Decrement HL
+int CPU::DEC_HL()
+{
+	reg_HL.dat -= 1;
+	reg_PC.dat += 1;
+	printf("DEC HL\n");
+	return 8;
+}
+
+// INC L
+// Increment L
+int CPU::INC_L()
+{
+	reg_HL.lo += 1;
+
+	// Set zero flag to 1 if L is 0
+	if (reg_HL.lo == 0)
+	{
+		reg_AF.lo |= FLAG_ZERO_z;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_ZERO_z;
+	}
+
+	// Set subtract flag to 0
+	reg_AF.lo &= ~FLAG_SUBTRACT_n;
+
+	// There will only be 0000 if there was a half carry
+	if (!(reg_HL.lo & 0x0F))
+	{
+		reg_AF.lo |= FLAG_HALF_CARRY_h;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_HALF_CARRY_h;
+	}
+
+	reg_PC.dat += 1;
+	printf("INC L\n");
+	return 4;
+}
+
+// DEC L
+// Decrement L
+int CPU::DEC_L()
+{
+	reg_HL.lo -= 1;
+
+	// Set zero flag to 1 if L is 0
+	if (reg_HL.lo == 0)
+	{
+		reg_AF.lo |= FLAG_ZERO_z;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_ZERO_z;
+	}
+
+	// Set subtract flag to 1
+	reg_AF.lo |= FLAG_SUBTRACT_n;
+
+	// Set half carry flag to 1 if there was a borrow from bit 4
+	// Only way to have a borrow is if you are left with 0x0F
+	if ((reg_HL.lo & 0x0F) == 0x0F)
+	{
+		reg_AF.lo |= FLAG_HALF_CARRY_h;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_HALF_CARRY_h;
+	}
+
+	reg_PC.dat += 1;
+	return 4;
+}
+
+// LD L, u8
+// Loads an 8 bit immediate value into L
+int CPU::LD_L_u8()
+{
+	reg_HL.lo = (*mMap)[reg_PC.dat + 1];
+	reg_PC.dat += 2;
+	printf("LD L, u8\n");
+	return 8;
+}
+
+// CPL
+// Complement A
+int CPU::CPL()
+{
+	reg_AF.hi = ~reg_AF.hi;
+	reg_AF.lo |= FLAG_SUBTRACT_n;
+	reg_AF.lo |= FLAG_HALF_CARRY_h;
+	reg_PC.dat += 1;
+	printf("CPL\n");
+	return 4;
+}
+
+// JR NC, i8
+// Add a signed 8 bit immediate value to the program counter if carry flag is 0
+int CPU::JR_NC_i8()
+{
+	if (!(reg_AF.lo & FLAG_CARRY_c))
+	{
+		reg_PC.dat += (Byte)(*mMap)[reg_PC.dat + 1];
+	}
+
+	//TODO: Check if this is correct
+	return 12;
+}
+
+// LD SP, u16
+// Loads a 16 bit immediate value into SP
 int CPU::LD_SP_u16()
 {
 	reg_SP.dat = ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2];
@@ -790,10 +956,101 @@ int CPU::LD_SP_u16()
     printf("LD SP, u16\n");
     return 12;
 }
-int CPU::LD_HLm_A() { return 0; }
-int CPU::INC_SP() { return 0; }
-int CPU::INC_HLp() { return 0; }
-int CPU::DEC_HLp() { return 0; }
+
+// LD (HL-), A
+// Loads the contents of A into the memory address pointed to by HL and decrements HL
+int CPU::LD_HLm_A()
+{
+	mMap->writeMemory((*mMap)[reg_HL.dat], reg_AF.hi);
+	reg_HL.dat -= 1;
+	reg_PC.dat += 1;
+	printf("LD (HL-), A\n");
+	return 8;
+}
+
+// INC SP
+// Increment SP
+int CPU::INC_SP()
+{
+	reg_SP.dat += 1;
+	reg_PC.dat += 1;
+	printf("INC SP\n");
+	return 8;
+}
+
+// INC (HL)
+// Increment the contents of the memory address pointed to by HL
+int CPU::INC_HLp()
+{
+	Byte temp = (*mMap)[reg_HL.dat];
+	temp += 1;
+
+	// Set zero flag to 1 if the result is 0
+	if (temp == 0)
+	{
+		reg_AF.lo |= FLAG_ZERO_z;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_ZERO_z;
+	}
+
+	// Set subtract flag to 0
+	reg_AF.lo &= ~FLAG_SUBTRACT_n;
+
+	// Set half carry flag to 1 if there was a carry from bit 3
+	// Example: 0000 1111 + 0000 0001 = 0001 0000
+	if (temp & 0x10)
+	{
+		reg_AF.lo |= FLAG_HALF_CARRY_h;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_HALF_CARRY_h;
+	}
+
+	mMap->writeMemory((*mMap)[reg_HL.dat], temp);
+	reg_PC.dat += 1;
+	printf("INC (HL)\n");
+	return 12;
+}
+
+// DEC (HL)
+// Decrement the contents of the memory address pointed to by HL
+int CPU::DEC_HLp()
+{
+	Byte temp = (*mMap)[reg_HL.dat];
+	temp -= 1;
+
+	// Set zero flag to 1 if the result is 0
+	if (temp == 0)
+	{
+		reg_AF.lo |= FLAG_ZERO_z;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_ZERO_z;
+	}
+
+	// Set subtract flag to 1
+	reg_AF.lo |= FLAG_SUBTRACT_n;
+
+	// Set half carry flag to 1 if there was a borrow from bit 4
+	// Only way to have a borrow is if you are left with 0x0F
+	if ((temp & 0x0F) == 0x0F)
+	{
+		reg_AF.lo |= FLAG_HALF_CARRY_h;
+	}
+	else
+	{
+		reg_AF.lo &= ~FLAG_HALF_CARRY_h;
+	}
+
+	mMap->writeMemory((*mMap)[reg_HL.dat], temp);
+	reg_PC.dat += 1;
+	printf("DEC (HL)\n");
+	return 12;
+}
 int CPU::LD_HLp_u8() { return 0; }
 int CPU::SCF() { return 0; }
 int CPU::JR_C_r8() { return 0; }

@@ -108,7 +108,7 @@ private:
 		&CPU::DEC_L,
 		&CPU::LD_L_u8,
 		&CPU::CPL,
-		&CPU::JR_NC_r8,
+		&CPU::JR_NC_i8,
 		&CPU::LD_SP_u16,
 		&CPU::LD_HLm_A,
 		&CPU::INC_SP,
@@ -366,7 +366,7 @@ private:
 	int DEC_L();
 	int LD_L_u8();
 	int CPL();
-	int JR_NC_r8();
+	int JR_NC_i8();
 	int LD_SP_u16();
 	int LD_HLm_A();
 	int INC_SP();
