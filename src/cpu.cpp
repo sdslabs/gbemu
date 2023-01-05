@@ -2,20 +2,30 @@
 #include "cpu.h"
 #include <stdio.h>
 
+// Setters of Flags
+// Flags are stored in the higher 4 bits of the F register
+// Flags are set by bitwise OR
 #define SET_ZERO_FLAG reg_AF.lo |= FLAG_ZERO_z
-#define SET_CARRY_FLAG reg_AF.lo |= FLAG_CARRY_c
-#define SET_HALF_CARRY_FLAG reg_AF.lo |= FLAG_HALF_CARRY_h
 #define SET_SUBTRACT_FLAG reg_AF.lo |= FLAG_SUBTRACT_n
+#define SET_HALF_CARRY_FLAG reg_AF.lo |= FLAG_HALF_CARRY_h
+#define SET_CARRY_FLAG reg_AF.lo |= FLAG_CARRY_c
 
+// Unsetters of Flags
+// Flags are stored in the higher 4 bits of the F register
+// Flags are unset by bitwise AND
 #define UNSET_ZERO_FLAG reg_AF.lo &= ~FLAG_ZERO_z
-#define UNSET_CARRY_FLAG reg_AF.lo &= ~FLAG_CARRY_c
-#define UNSET_HALF_CARRY_FLAG reg_AF.lo &= ~FLAG_HALF_CARRY_h
 #define UNSET_SUBTRACT_FLAG reg_AF.lo &= ~FLAG_SUBTRACT_n
+#define UNSET_HALF_CARRY_FLAG reg_AF.lo &= ~FLAG_HALF_CARRY_h
+#define UNSET_CARRY_FLAG reg_AF.lo &= ~FLAG_CARRY_c
 
-#define GET_ZERO_FLAG ((reg_AF.lo & FLAG_ZERO_z) >> 3)
-#define GET_CARRY_FLAG ((reg_AF.lo & FLAG_CARRY_c) >> 4)
-#define GET_HALF_CARRY_FLAG ((reg_AF.lo & FLAG_HALF_CARRY_h) >> 5)
+// Getters of Flags
+// Flags are stored in the higher 4 bits of the F register
+// Flags are retrieved by bitwise AND
+// Flags are shifted to the right by 7, 6, 5, and 4 bits respectively
+#define GET_ZERO_FLAG ((reg_AF.lo & FLAG_ZERO_z) >> 7)
 #define GET_SUBTRACT_FLAG ((reg_AF.lo & FLAG_SUBTRACT_n) >> 6)
+#define GET_HALF_CARRY_FLAG ((reg_AF.lo & FLAG_HALF_CARRY_h) >> 5)
+#define GET_CARRY_FLAG ((reg_AF.lo & FLAG_CARRY_c) >> 4) 
 
 CPU::CPU()
 {
