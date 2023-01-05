@@ -17,7 +17,6 @@
 #define GET_HALF_CARRY_FLAG ((reg_AF.lo & FLAG_HALF_CARRY_h) >> 5)
 #define GET_SUBTRACT_FLAG ((reg_AF.lo & FLAG_SUBTRACT_n) >> 6)
 
-
 CPU::CPU()
 {
 
@@ -82,9 +81,9 @@ int CPU::LD_BC_A()
 int CPU::INC_BC()
 {
 	reg_BC.dat += 1;
-    reg_PC.dat += 1;
-    printf("INC BC\n");
-    return 8;
+	reg_PC.dat += 1;
+	printf("INC BC\n");
+	return 8;
 }
 
 // INC B
@@ -102,9 +101,9 @@ int CPU::INC_B()
 	// Set the half carry flag if there is carry from bit 3, otherwise unset it
 	reg_BC.hi & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
-    reg_PC.dat += 1;
-    printf("INC B\n");
-    return 4;
+	reg_PC.dat += 1;
+	printf("INC B\n");
+	return 4;
 }
 
 // DEC B
@@ -122,9 +121,9 @@ int CPU::DEC_B()
 	// Set the subtract flag
 	SET_SUBTRACT_FLAG;
 
-    reg_PC.dat += 1;
-    printf("DEC B\n" );
-    return 4;
+	reg_PC.dat += 1;
+	printf("DEC B\n");
+	return 4;
 }
 
 // LD B, u8
@@ -132,9 +131,9 @@ int CPU::DEC_B()
 int CPU::LD_B_u8()
 {
 	reg_BC.hi = (*mMap)[reg_PC.dat + 1];
-    reg_PC.dat += 2;
-    printf("LD B, u8\n");
-    return 8;
+	reg_PC.dat += 2;
+	printf("LD B, u8\n");
+	return 8;
 }
 
 // RLCA
@@ -146,14 +145,14 @@ int CPU::RLCA()
 	UNSET_HALF_CARRY_FLAG;
 
 	// store bit 7 in carry flag
-    reg_AF.hi >> 7 ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+	reg_AF.hi >> 7 ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	// Rotate A left by 1
-    reg_AF.hi = (reg_AF.hi << 1) | (reg_AF.hi >> 7);
+	reg_AF.hi = (reg_AF.hi << 1) | (reg_AF.hi >> 7);
 
-    reg_PC.dat += 1;
-    printf("RLCA\n");
-    return 4;
+	reg_PC.dat += 1;
+	printf("RLCA\n");
+	return 4;
 }
 
 // LD (u16), SP
@@ -161,19 +160,19 @@ int CPU::RLCA()
 int CPU::LD_u16_SP()
 {
 	// Load the next 2 bytes into a 16 bit value
-    // Left shift the first byte by 8 bits
-    // OR the second byte
-    Word address = ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2];
+	// Left shift the first byte by 8 bits
+	// OR the second byte
+	Word address = ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2];
 
-    // Write the contents of SP into the memory address pointed to by the next 2 bytes
-    mMap->writeMemory(address, reg_SP.lo);
-    mMap->writeMemory(address + 1, reg_SP.hi);
+	// Write the contents of SP into the memory address pointed to by the next 2 bytes
+	mMap->writeMemory(address, reg_SP.lo);
+	mMap->writeMemory(address + 1, reg_SP.hi);
 
-    // Increment the program counter
-    reg_PC.dat += 3;
+	// Increment the program counter
+	reg_PC.dat += 3;
 
-    printf("LD (u16), SP\n");
-    return 20;
+	printf("LD (u16), SP\n");
+	return 20;
 }
 
 // ADD HL, BC
@@ -182,7 +181,7 @@ int CPU::ADD_HL_BC()
 {
 	// Set the half carry flag if there is carry from bit 11, otherwise unset it
 	// TODO: profile (a) ? vs (a>>11) ?. byte is 0 or bit is 0 with bit shifts
-	(reg_HL.dat&0x0FFF + reg_BC.dat&0x0FFF) & 0x1000 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	(reg_HL.dat & 0x0FFF + reg_BC.dat & 0x0FFF) & 0x1000 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	// Set the carry flag if there is carry from bit 15, otherwise unset it
 	Word temp = reg_HL.dat;
@@ -205,9 +204,9 @@ int CPU::ADD_HL_BC()
 int CPU::LD_A_BC()
 {
 	reg_AF.lo = (*mMap)[reg_BC.dat];
-    reg_PC.dat += 1;
-    printf("LD A, (BC)\n");
-    return 8;
+	reg_PC.dat += 1;
+	printf("LD A, (BC)\n");
+	return 8;
 }
 
 // DEC BC
@@ -215,9 +214,9 @@ int CPU::LD_A_BC()
 int CPU::DEC_BC()
 {
 	reg_BC.dat -= 1;
-    reg_PC.dat += 1;
-    printf("DEC BC\n");
-    return 8;
+	reg_PC.dat += 1;
+	printf("DEC BC\n");
+	return 8;
 }
 
 // INC C
@@ -256,7 +255,7 @@ int CPU::DEC_C()
 	SET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-	printf("DEC C\n" );
+	printf("DEC C\n");
 	return 4;
 }
 
@@ -265,9 +264,9 @@ int CPU::DEC_C()
 int CPU::LD_C_u8()
 {
 	reg_BC.lo = (*mMap)[reg_PC.dat + 1];
-    reg_PC.dat += 2;
-    printf("LD C, u8\n");
-    return 8;
+	reg_PC.dat += 2;
+	printf("LD C, u8\n");
+	return 8;
 }
 
 // RRCA
@@ -275,24 +274,23 @@ int CPU::LD_C_u8()
 int CPU::RRCA()
 {
 	// Unset zero flag
-    UNSET_ZERO_FLAG;
+	UNSET_ZERO_FLAG;
 
 	// Unset subtract flag
 	UNSET_SUBTRACT_FLAG;
 
 	// Set carry flag if bit 0 is set, unset it otherwise
-    (reg_AF.hi & 1) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+	(reg_AF.hi & 1) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	// Unset half carry flag
 	UNSET_HALF_CARRY_FLAG;
 
-
 	// Rotate A right by 1
-    reg_AF.hi = (reg_AF.hi >> 1) | (reg_AF.hi << 7);
+	reg_AF.hi = (reg_AF.hi >> 1) | (reg_AF.hi << 7);
 
-    reg_PC.dat += 1;
-    printf("RRCA\n");
-    return 4;
+	reg_PC.dat += 1;
+	printf("RRCA\n");
+	return 4;
 }
 
 // STOP
@@ -302,7 +300,7 @@ int CPU::STOP()
 	isLowPower = true;
 	reg_PC.dat += 2;
 	printf("STOP\n");
-    return 0;
+	return 0;
 }
 
 // LD DE, u16
@@ -310,9 +308,9 @@ int CPU::STOP()
 int CPU::LD_DE_u16()
 {
 	reg_DE.dat = ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2];
-    reg_PC.dat += 3;
-    printf("LD DE, u16\n");
-    return 12;
+	reg_PC.dat += 3;
+	printf("LD DE, u16\n");
+	return 12;
 }
 
 // LD (DE), A
@@ -330,9 +328,9 @@ int CPU::LD_DE_A()
 int CPU::INC_DE()
 {
 	reg_DE.dat += 1;
-    reg_PC.dat += 1;
-    printf("INC DE\n");
-    return 8;
+	reg_PC.dat += 1;
+	printf("INC DE\n");
+	return 8;
 }
 
 // INC D
@@ -371,7 +369,7 @@ int CPU::DEC_D()
 	SET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-	printf("DEC D\n" );
+	printf("DEC D\n");
 	return 4;
 }
 
@@ -423,7 +421,7 @@ int CPU::ADD_HL_DE()
 {
 	// Set the half carry flag if there is carry from bit 11, otherwise unset it
 	// TODO: profile (a) ? vs (a>>11) ?. byte is 0 or bit is 0 with bit shifts
-	(reg_HL.dat&0x0FFF + reg_DE.dat&0x0FFF) & 0x1000 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	(reg_HL.dat & 0x0FFF + reg_DE.dat & 0x0FFF) & 0x1000 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	// Set the carry flag if there is carry from bit 15, otherwise unset it
 	Word temp = reg_HL.dat;
@@ -497,7 +495,7 @@ int CPU::DEC_E()
 	SET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-	printf("DEC E\n" );
+	printf("DEC E\n");
 	return 4;
 }
 
@@ -540,12 +538,12 @@ int CPU::RRA()
 // Add a signed 8 bit immediate value to the program counter if zero flag is 0
 int CPU::JR_NZ_r8()
 {
-	if(!(reg_AF.lo & FLAG_ZERO_z))
+	if (!(reg_AF.lo & FLAG_ZERO_z))
 	{
 		reg_PC.dat += (Byte)(*mMap)[reg_PC.dat + 1];
 	}
 
-	//TODO: dependent on branch taken or not
+	// TODO: dependent on branch taken or not
 	return 12;
 }
 
@@ -554,9 +552,9 @@ int CPU::JR_NZ_r8()
 int CPU::LD_HL_u16()
 {
 	reg_HL.dat = ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2];
-    reg_PC.dat += 3;
-    printf("LD HL, u16\n");
-    return 12;
+	reg_PC.dat += 3;
+	printf("LD HL, u16\n");
+	return 12;
 }
 
 // LD (HL+), A
@@ -616,7 +614,7 @@ int CPU::DEC_H()
 	SET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-	printf("DEC H\n" );
+	printf("DEC H\n");
 	return 4;
 }
 
@@ -730,7 +728,7 @@ int CPU::DEC_L()
 	SET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-	printf("DEC L\n" );
+	printf("DEC L\n");
 	return 4;
 }
 
@@ -770,7 +768,7 @@ int CPU::JR_NC_i8()
 		reg_PC.dat += (Byte)(*mMap)[reg_PC.dat + 1];
 	}
 
-	//TODO: Check if this is correct
+	// TODO: Check if this is correct
 	return 12;
 }
 
@@ -779,9 +777,9 @@ int CPU::JR_NC_i8()
 int CPU::LD_SP_u16()
 {
 	reg_SP.dat = ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2];
-    reg_PC.dat += 3;
-    printf("LD SP, u16\n");
-    return 12;
+	reg_PC.dat += 3;
+	printf("LD SP, u16\n");
+	return 12;
 }
 
 // LD (HL-), A
@@ -887,7 +885,7 @@ int CPU::JR_C_r8()
 		reg_PC.dat += (Byte)(*mMap)[reg_PC.dat + 1];
 	}
 
-	//TODO: Check if this is correct
+	// TODO: Check if this is correct
 	return 12;
 }
 
@@ -897,7 +895,7 @@ int CPU::ADD_HL_SP()
 {
 	// Set the half carry flag if there is carry from bit 11, otherwise unset it
 	// TODO: profile (a) ? vs (a>>11) ?. byte is 0 or bit is 0 with bit shifts
-	(reg_HL.dat&0x0FFF + reg_SP.dat&0x0FFF) & 0x1000 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	(reg_HL.dat & 0x0FFF + reg_SP.dat & 0x0FFF) & 0x1000 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	// Set the carry flag if there is carry from bit 15, otherwise unset it
 	Word temp = reg_HL.dat;
@@ -996,7 +994,7 @@ int CPU::CCF()
 	UNSET_HALF_CARRY_FLAG;
 
 	// Complement carry flag
-	reg_AF.lo & FLAG_CARRY_c ? UNSET_CARRY_FLAG : SET_CARRY_FLAG;
+	reg_AF.lo& FLAG_CARRY_c ? UNSET_CARRY_FLAG : SET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
 	printf("CCF\n");
@@ -1007,9 +1005,9 @@ int CPU::CCF()
 // Loads B into B
 int CPU::LD_B_B()
 {
-    reg_PC.dat += 1;
-    printf("LD B, B\n");
-    return 4;
+	reg_PC.dat += 1;
+	printf("LD B, B\n");
+	return 4;
 }
 
 // LD B, C
@@ -1027,9 +1025,9 @@ int CPU::LD_B_C()
 int CPU::LD_B_D()
 {
 	reg_BC.hi = reg_DE.hi;
-    reg_PC.dat += 1;
-    printf("LD B, D\n");
-    return 4;
+	reg_PC.dat += 1;
+	printf("LD B, D\n");
+	return 4;
 }
 
 // LD B, E
@@ -1047,9 +1045,9 @@ int CPU::LD_B_E()
 int CPU::LD_B_H()
 {
 	reg_BC.hi = reg_HL.hi;
-    reg_PC.dat += 1;
-    printf("LD B, H\n");
-    return 4;
+	reg_PC.dat += 1;
+	printf("LD B, H\n");
+	return 4;
 }
 
 // LD B, L
@@ -1067,9 +1065,9 @@ int CPU::LD_B_L()
 int CPU::LD_B_HLp()
 {
 	reg_BC.hi = (*mMap)[reg_HL.dat];
-    reg_PC.dat += 1;
-    printf("LD B, (HL)\n");
-    return 8;
+	reg_PC.dat += 1;
+	printf("LD B, (HL)\n");
+	return 8;
 }
 
 // LD B, A
@@ -3318,8 +3316,8 @@ int CPU::JP_NC_u16()
 
 int CPU::UNKNOWN()
 {
-	const char *s = NULL;
-	printf( "%c\n", s[0] );
+	const char* s = NULL;
+	printf("%c\n", s[0]);
 	return 0;
 }
 
@@ -3541,7 +3539,7 @@ int CPU::LD_a16_A()
 {
 	// u16 is ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2]
 	// Writing the value of A into the (u16)
-	mMap->debugWriteMemory(((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2],(*mMap)[reg_AF.hi]);
+	mMap->debugWriteMemory(((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2], (*mMap)[reg_AF.hi]);
 	reg_PC.dat += 3;
 	printf("LD (u16), A\n");
 	return 16;
@@ -3606,7 +3604,7 @@ int CPU::LDH_A_C()
 {
 	reg_AF.hi = (*mMap)[0xFF00 + reg_BC.lo];
 	reg_PC.dat += 1;
-    return 8;
+	return 8;
 }
 
 // DI
@@ -3666,9 +3664,9 @@ int CPU::RST_30H()
 // Load SP + i8 into HL
 int CPU::LD_HL_SP_i8()
 {
-    reg_HL.dat = reg_SP.dat + (Byte)(*mMap)[reg_PC.dat + 1];
-    reg_PC.dat += 2;
-    return 12;
+	reg_HL.dat = reg_SP.dat + (Byte)(*mMap)[reg_PC.dat + 1];
+	reg_PC.dat += 2;
+	return 12;
 }
 
 // LD SP, HL
@@ -3676,8 +3674,8 @@ int CPU::LD_HL_SP_i8()
 int CPU::LD_SP_HL()
 {
 	reg_SP.dat = reg_HL.dat;
-    reg_PC.dat += 1;
-    return 8;
+	reg_PC.dat += 1;
+	return 8;
 }
 
 // LD A, (u16)
@@ -3685,9 +3683,9 @@ int CPU::LD_SP_HL()
 int CPU::LD_A_a16()
 {
 	reg_AF.hi = (*mMap)[((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2]];
-    reg_PC.dat += 3;
-    printf("LD A, (HL)\n");
-    return 16;
+	reg_PC.dat += 3;
+	printf("LD A, (HL)\n");
+	return 16;
 }
 
 // EI
