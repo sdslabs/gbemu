@@ -28,18 +28,16 @@ GBE::GBE()
 	gbe_mMap->debugWriteMemory(0x0107, 0x00);
 	gbe_mMap->debugWriteMemory(0x0108, 0x05);
 
-
-
-//	//RLCA
-//	gbe_mMap->debugWriteMemory(0x0103, 0x07);
-//
-//	// LD (BC), A
-//	gbe_mMap->debugWriteMemory(0x0104, 0x02);
-//
-//	// LD (u16), A
-//	gbe_mMap->debugWriteMemory(0x0105, 0xEA);
-//	gbe_mMap->debugWriteMemory(0x0106, 0x69);
-//	gbe_mMap->debugWriteMemory(0x0107, 0x69);
+	//	//RLCA
+	//	gbe_mMap->debugWriteMemory(0x0103, 0x07);
+	//
+	//	// LD (BC), A
+	//	gbe_mMap->debugWriteMemory(0x0104, 0x02);
+	//
+	//	// LD (u16), A
+	//	gbe_mMap->debugWriteMemory(0x0105, 0xEA);
+	//	gbe_mMap->debugWriteMemory(0x0106, 0x69);
+	//	gbe_mMap->debugWriteMemory(0x0107, 0x69);
 
 	// Seg fault to end using UNKOWN
 	gbe_mMap->debugWriteMemory(0x0109, 0xEB);
