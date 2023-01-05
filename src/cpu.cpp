@@ -2549,30 +2549,476 @@ int CPU::AND_A_A()
 	printf("AND A, A\n");
 	return 4;
 }
-int CPU::XOR_A_B() { return 0; }
-int CPU::XOR_A_C() { return 0; }
-int CPU::XOR_A_D() { return 0; }
-int CPU::XOR_A_E() { return 0; }
-int CPU::XOR_A_H() { return 0; }
-int CPU::XOR_A_L() { return 0; }
-int CPU::XOR_A_HLp() { return 0; }
-int CPU::XOR_A_A() { return 0; }
-int CPU::OR_A_B() { return 0; }
-int CPU::OR_A_C() { return 0; }
-int CPU::OR_A_D() { return 0; }
-int CPU::OR_A_E() { return 0; }
-int CPU::OR_A_H() { return 0; }
-int CPU::OR_A_L() { return 0; }
-int CPU::OR_A_HLp() { return 0; }
-int CPU::OR_A_A() { return 0; }
-int CPU::CP_A_B() { return 0; }
-int CPU::CP_A_C() { return 0; }
-int CPU::CP_A_D() { return 0; }
-int CPU::CP_A_E() { return 0; }
-int CPU::CP_A_H() { return 0; }
-int CPU::CP_A_L() { return 0; }
-int CPU::CP_A_HLp() { return 0; }
-int CPU::CP_A_A() { return 0; }
+
+// XOR A, B
+// Performs bitwise XOR on A and B
+int CPU::XOR_A_B()
+{
+	// Unset half carry, subtract and carry flags
+	UNSET_HALF_CARRY_FLAG;
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi ^= reg_BC.hi;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("XOR A, B\n");
+	return 4;
+}
+
+// XOR A, C
+// Performs bitwise XOR on A and C
+int CPU::XOR_A_C()
+{
+	// Unset half carry, subtract and carry flags
+	UNSET_HALF_CARRY_FLAG;
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi ^= reg_BC.lo;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("XOR A, C\n");
+	return 4;
+}
+
+// XOR A, D
+// Performs bitwise XOR on A and D
+int CPU::XOR_A_D()
+{
+	// Unset half carry, subtract and carry flags
+	UNSET_HALF_CARRY_FLAG;
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi ^= reg_DE.hi;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("XOR A, D\n");
+	return 4;
+}
+
+// XOR A, E
+// Performs bitwise XOR on A and E
+int CPU::XOR_A_E()
+{
+	// Unset half carry, subtract and carry flags
+	UNSET_HALF_CARRY_FLAG;
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi ^= reg_DE.lo;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("XOR A, E\n");
+	return 4;
+}
+
+// XOR A, H
+// Performs bitwise XOR on A and H
+int CPU::XOR_A_H()
+{
+	// Unset half carry, subtract and carry flags
+	UNSET_HALF_CARRY_FLAG;
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi ^= reg_HL.hi;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("XOR A, H\n");
+	return 4;
+}
+
+// XOR A, L
+// Performs bitwise XOR on A and L
+int CPU::XOR_A_L()
+{
+	// Unset half carry, subtract and carry flags
+	UNSET_HALF_CARRY_FLAG;
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi ^= reg_HL.lo;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("XOR A, L\n");
+	return 4;
+}
+
+// XOR A, (HL)
+// Performs bitwise XOR on A and value at address HL
+int CPU::XOR_A_HLp()
+{
+	// Unset half carry, subtract and carry flags
+	UNSET_HALF_CARRY_FLAG;
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi ^= (*mMap)[reg_HL.dat];
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("XOR A, (HL)\n");
+	return 8;
+}
+
+// XOR A, A
+// Performs bitwise XOR on A and A
+int CPU::XOR_A_A()
+{
+	// Unset half carry, subtract and carry flags
+	UNSET_HALF_CARRY_FLAG;
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi = 0;
+
+	// Set zero flag if result is zero
+	SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("XOR A, A\n");
+	return 4;
+}
+
+// OR A, B
+// Performs bitwise OR on A and B
+int CPU::OR_A_B()
+{
+	// Unset half carry, subtract and carry flags
+	UNSET_HALF_CARRY_FLAG;
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi |= reg_BC.hi;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("OR A, B\n");
+	return 4;
+}
+
+// OR A, C
+// Performs bitwise OR on A and C
+int CPU::OR_A_C()
+{
+	// Unset half carry, subtract and carry flags
+	UNSET_HALF_CARRY_FLAG;
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi |= reg_BC.lo;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("OR A, C\n");
+	return 4;
+}
+
+// OR A, D
+// Performs bitwise OR on A and D
+int CPU::OR_A_D()
+{
+	// Unset half carry, subtract and carry flags
+	UNSET_HALF_CARRY_FLAG;
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi |= reg_DE.hi;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("OR A, D\n");
+	return 4;
+}
+
+// OR A, E
+// Performs bitwise OR on A and E
+int CPU::OR_A_E()
+{
+	// Unset half carry, subtract and carry flags
+	UNSET_HALF_CARRY_FLAG;
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi |= reg_DE.lo;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("OR A, E\n");
+	return 4;
+}
+
+// OR A, H
+// Performs bitwise OR on A and H
+int CPU::OR_A_H()
+{
+	// Unset half carry, subtract and carry flags
+	UNSET_HALF_CARRY_FLAG;
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi |= reg_HL.hi;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("OR A, H\n");
+	return 4;
+}
+
+// OR A, L
+// Performs bitwise OR on A and L
+int CPU::OR_A_L()
+{
+	// Unset half carry, subtract and carry flags
+	UNSET_HALF_CARRY_FLAG;
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi |= reg_HL.lo;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("OR A, L\n");
+	return 4;
+}
+
+// OR A, (HL)
+// Performs bitwise OR on A and value at address HL
+int CPU::OR_A_HLp()
+{
+	// Unset half carry, subtract and carry flags
+	UNSET_HALF_CARRY_FLAG;
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi |= (*mMap)[reg_HL.dat];
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("OR A, (HL)\n");
+	return 8;
+}
+
+// OR A, A
+// Performs bitwise OR on A and A
+int CPU::OR_A_A()
+{
+	// Unset half carry, subtract and carry flags
+	UNSET_HALF_CARRY_FLAG;
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("OR A, A\n");
+	return 4;
+}
+
+// CP A, B
+// Subtracts B from A and set flags accordingly, but don't store the result.
+int CPU::CP_A_B()
+{
+	// Unset half carry and subtract flags
+	UNSET_SUBTRACT_FLAG;
+
+	// Set carry flag if A < B
+	reg_AF.hi < reg_BC.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set zero flag if A == B
+	reg_AF.hi == reg_BC.hi ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
+
+	// Set half carry flag if lower nibble of A < lower nibble of B
+	(reg_AF.hi & 0x0F) < (reg_BC.hi & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("CP A, B\n");
+	return 4;
+}
+
+// CP A, C
+// Subtracts C from A and set flags accordingly, but don't store the result.
+int CPU::CP_A_C()
+{
+	// Unset half carry and subtract flags
+	UNSET_SUBTRACT_FLAG;
+
+	// Set carry flag if A < C
+	reg_AF.hi < reg_BC.lo ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set zero flag if A == C
+	reg_AF.hi == reg_BC.lo ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
+
+	// Set half carry flag if lower nibble of A < lower nibble of C
+	(reg_AF.hi & 0x0F) < (reg_BC.lo & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("CP A, C\n");
+	return 4;
+}
+
+// CP A, D
+// Subtracts D from A and set flags accordingly, but don't store the result.
+int CPU::CP_A_D()
+{
+	// Unset half carry and subtract flags
+	UNSET_SUBTRACT_FLAG;
+
+	// Set carry flag if A < D
+	reg_AF.hi < reg_DE.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set zero flag if A == D
+	reg_AF.hi == reg_DE.hi ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
+
+	// Set half carry flag if lower nibble of A < lower nibble of D
+	(reg_AF.hi & 0x0F) < (reg_DE.hi & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("CP A, D\n");
+	return 4;
+}
+
+// CP A, E
+// Subtracts E from A and set flags accordingly, but don't store the result.
+int CPU::CP_A_E()
+{
+	// Unset half carry and subtract flags
+	UNSET_SUBTRACT_FLAG;
+
+	// Set carry flag if A < E
+	reg_AF.hi < reg_DE.lo ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set zero flag if A == E
+	reg_AF.hi == reg_DE.lo ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
+
+	// Set half carry flag if lower nibble of A < lower nibble of E
+	(reg_AF.hi & 0x0F) < (reg_DE.lo & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("CP A, E\n");
+	return 4;
+}
+
+// CP A, H
+// Subtracts H from A and set flags accordingly, but don't store the result.
+int CPU::CP_A_H()
+{
+	// Unset half carry and subtract flags
+	UNSET_SUBTRACT_FLAG;
+
+	// Set carry flag if A < H
+	reg_AF.hi < reg_HL.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set zero flag if A == H
+	reg_AF.hi == reg_HL.hi ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
+
+	// Set half carry flag if lower nibble of A < lower nibble of H
+	(reg_AF.hi & 0x0F) < (reg_HL.hi & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("CP A, H\n");
+	return 4;
+}
+
+// CP A, L
+// Subtracts L from A and set flags accordingly, but don't store the result.
+int CPU::CP_A_L()
+{
+	// Unset half carry and subtract flags
+	UNSET_SUBTRACT_FLAG;
+
+	// Set carry flag if A < L
+	reg_AF.hi < reg_HL.lo ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set zero flag if A == L
+	reg_AF.hi == reg_HL.lo ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
+
+	// Set half carry flag if lower nibble of A < lower nibble of L
+	(reg_AF.hi & 0x0F) < (reg_HL.lo & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("CP A, L\n");
+	return 4;
+}
+
+// CP A, (HL)
+// Subtracts value at address HL from A and set flags accordingly, but don't store the result.
+int CPU::CP_A_HLp()
+{
+	// Unset half carry and subtract flags
+	UNSET_SUBTRACT_FLAG;
+
+	// Set carry flag if A < value at address HL
+	reg_AF.hi < (*mMap)[reg_HL.dat] ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set zero flag if A == value at address HL
+	reg_AF.hi == (*mMap)[reg_HL.dat] ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
+
+	// Set half carry flag if lower nibble of A < lower nibble of value at address HL
+	(reg_AF.hi & 0x0F) < ((*mMap)[reg_HL.dat] & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("CP A, (HL)\n");
+	return 8;
+}
+
+// CP A, A
+// Subtracts A from A and set flags accordingly, but don't store the result.
+int CPU::CP_A_A()
+{
+	// Unset half carry and subtract flags
+	UNSET_SUBTRACT_FLAG;
+
+	// Unset carry flag
+	UNSET_CARRY_FLAG;
+
+	// Set zero flag
+	SET_ZERO_FLAG;
+
+	// Set half carry flag
+	UNSET_HALF_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("CP A, A\n");
+	return 4;
+}
 int CPU::RET_NZ() { return 0; }
 int CPU::POP_BC() { return 0; }
 int CPU::JP_NZ_u16() { return 0; }
