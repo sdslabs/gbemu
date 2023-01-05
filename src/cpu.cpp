@@ -911,22 +911,102 @@ int CPU::LD_A_HLm()
 	printf("LD A, (HL-)\n");
 	return 8;
 }
-int CPU::DEC_SP() { return 0; }
-int CPU::INC_A() { return 0; }
-int CPU::DEC_A() { return 0; }
-int CPU::LD_A_u8() { return 0; }
-int CPU::CCF() { return 0; }
+
+// DEC SP
+// Decrement SP
+int CPU::DEC_SP()
+{
+	reg_SP.dat -= 1;
+	reg_PC.dat += 1;
+	printf("DEC SP\n");
+	return 8;
+}
+
+// INC A
+// Increment A
+int CPU::INC_A()
+{
+	// Unset zero flag if A is 0, set it otherwise
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	// Unset subtract flag
+	UNSET_SUBTRACT_FLAG;
+
+	// Set the half carry flag if there is carry from bit 3, otherwise unset it
+	reg_AF.hi & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	reg_AF.hi += 1;
+	reg_PC.dat += 1;
+	printf("INC A\n");
+	return 4;
+}
+
+// DEC A
+// Decrement A
+int CPU::DEC_A()
+{
+	// Set the half carry flag if there is borrow from bit 4, otherwise unset it
+	reg_AF.hi & 0x0F ? UNSET_HALF_CARRY_FLAG : SET_HALF_CARRY_FLAG;
+
+	reg_AF.hi -= 1;
+
+	// Set the zero flag if A is 0, unset it otherwise
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	// Set the subtract flag
+	SET_SUBTRACT_FLAG;
+
+	reg_PC.dat += 1;
+	printf("DEC A\n");
+	return 4;
+}
+
+// LD A, u8
+// Loads an 8 bit immediate value into A
+int CPU::LD_A_u8()
+{
+	reg_AF.hi = (*mMap)[reg_PC.dat + 1];
+	reg_PC.dat += 2;
+	printf("LD A, u8\n");
+	return 8;
+}
+
+// CCF
+// Complement carry flag
+int CPU::CCF()
+{
+	// Unset subtract flag
+	UNSET_SUBTRACT_FLAG;
+
+	// Unset half carry flag
+	UNSET_HALF_CARRY_FLAG;
+
+	// Complement carry flag
+	reg_AF.lo & FLAG_CARRY_c ? UNSET_CARRY_FLAG : SET_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("CCF\n");
+	return 4;
+}
 
 // LD B, B
 // Loads B into B
 int CPU::LD_B_B()
 {
-	reg_BC.hi = reg_BC.hi;
     reg_PC.dat += 1;
     printf("LD B, B\n");
     return 4;
 }
-int CPU::LD_B_C() { return 0; }
+
+// LD B, C
+// Loads C into B
+int CPU::LD_B_C()
+{
+	reg_BC.hi = reg_BC.lo;
+	reg_PC.dat += 1;
+	printf("LD B, C\n");
+	return 4;
+}
 
 // LD B, D
 // Loads D into B
@@ -937,7 +1017,16 @@ int CPU::LD_B_D()
     printf("LD B, D\n");
     return 4;
 }
-int CPU::LD_B_E() { return 0; }
+
+// LD B, E
+// Loads E into B
+int CPU::LD_B_E()
+{
+	reg_BC.hi = reg_DE.lo;
+	reg_PC.dat += 1;
+	printf("LD B, E\n");
+	return 4;
+}
 
 // LD B, H
 // Loads H into B
@@ -948,7 +1037,16 @@ int CPU::LD_B_H()
     printf("LD B, H\n");
     return 4;
 }
-int CPU::LD_B_L() { return 0; }
+
+// LD B, L
+// Loads L into B
+int CPU::LD_B_L()
+{
+	reg_BC.hi = reg_HL.lo;
+	reg_PC.dat += 1;
+	printf("LD B, L\n");
+	return 4;
+}
 
 // LD B, (HL)
 // Loads the value at address HL into B
@@ -959,63 +1057,568 @@ int CPU::LD_B_HLp()
     printf("LD B, (HL)\n");
     return 8;
 }
-int CPU::LD_B_A() { return 0; }
-int CPU::LD_C_B() { return 0; }
-int CPU::LD_C_C() { return 0; }
-int CPU::LD_C_D() { return 0; }
-int CPU::LD_C_E() { return 0; }
-int CPU::LD_C_H() { return 0; }
-int CPU::LD_C_L() { return 0; }
-int CPU::LD_C_HLp() { return 0; }
-int CPU::LD_C_A() { return 0; }
-int CPU::LD_D_B() { return 0; }
-int CPU::LD_D_C() { return 0; }
-int CPU::LD_D_D() { return 0; }
-int CPU::LD_D_E() { return 0; }
-int CPU::LD_D_H() { return 0; }
-int CPU::LD_D_L() { return 0; }
-int CPU::LD_D_HLp() { return 0; }
-int CPU::LD_D_A() { return 0; }
-int CPU::LD_E_B() { return 0; }
-int CPU::LD_E_C() { return 0; }
-int CPU::LD_E_D() { return 0; }
-int CPU::LD_E_E() { return 0; }
-int CPU::LD_E_H() { return 0; }
-int CPU::LD_E_L() { return 0; }
-int CPU::LD_E_HLp() { return 0; }
-int CPU::LD_E_A() { return 0; }
-int CPU::LD_H_B() { return 0; }
-int CPU::LD_H_C() { return 0; }
-int CPU::LD_H_D() { return 0; }
-int CPU::LD_H_E() { return 0; }
-int CPU::LD_H_H() { return 0; }
-int CPU::LD_H_L() { return 0; }
-int CPU::LD_H_HLp() { return 0; }
-int CPU::LD_H_A() { return 0; }
-int CPU::LD_L_B() { return 0; }
-int CPU::LD_L_C() { return 0; }
-int CPU::LD_L_D() { return 0; }
-int CPU::LD_L_E() { return 0; }
-int CPU::LD_L_H() { return 0; }
-int CPU::LD_L_L() { return 0; }
-int CPU::LD_L_HLp() { return 0; }
-int CPU::LD_L_A() { return 0; }
-int CPU::LD_HLp_B() { return 0; }
-int CPU::LD_HLp_C() { return 0; }
-int CPU::LD_HLp_D() { return 0; }
-int CPU::LD_HLp_E() { return 0; }
-int CPU::LD_HLp_H() { return 0; }
-int CPU::LD_HLp_L() { return 0; }
-int CPU::HALT() { return 0; }
-int CPU::LD_HLA() { return 0; }
-int CPU::LD_A_B() { return 0; }
-int CPU::LD_A_C() { return 0; }
-int CPU::LD_A_D() { return 0; }
-int CPU::LD_A_E() { return 0; }
-int CPU::LD_A_H() { return 0; }
-int CPU::LD_A_L() { return 0; }
-int CPU::LD_A_HL() { return 0; }
-int CPU::LD_A_A() { return 0; }
+
+// LD B, A
+// Loads A into B
+int CPU::LD_B_A()
+{
+	reg_BC.hi = reg_AF.hi;
+	reg_PC.dat += 1;
+	printf("LD B, A\n");
+	return 4;
+}
+
+// LD C, B
+// Loads B into C
+int CPU::LD_C_B()
+{
+	reg_BC.lo = reg_BC.hi;
+	reg_PC.dat += 1;
+	printf("LD C, B\n");
+	return 4;
+}
+
+// LD C, C
+// Loads C into C
+int CPU::LD_C_C()
+{
+	reg_BC.lo = reg_BC.lo;
+	reg_PC.dat += 1;
+	printf("LD C, C\n");
+	return 4;
+}
+
+// LD C, D
+// Loads D into C
+int CPU::LD_C_D()
+{
+	reg_BC.lo = reg_DE.hi;
+	reg_PC.dat += 1;
+	printf("LD C, D\n");
+	return 4;
+}
+
+// LD C, E
+// Loads E into C
+int CPU::LD_C_E()
+{
+	reg_BC.lo = reg_DE.lo;
+	reg_PC.dat += 1;
+	printf("LD C, E\n");
+	return 4;
+}
+
+// LD C, H
+// Loads H into C
+int CPU::LD_C_H()
+{
+	reg_BC.lo = reg_HL.hi;
+	reg_PC.dat += 1;
+	printf("LD C, H\n");
+	return 4;
+}
+
+// LD C, L
+// Loads L into C
+int CPU::LD_C_L()
+{
+	reg_BC.lo = reg_HL.lo;
+	reg_PC.dat += 1;
+	printf("LD C, L\n");
+	return 4;
+}
+
+// LD C, (HL)
+// Loads the value at address HL into C
+int CPU::LD_C_HLp()
+{
+	reg_BC.lo = (*mMap)[reg_HL.dat];
+	reg_PC.dat += 1;
+	printf("LD C, (HL)\n");
+	return 8;
+}
+
+// LD C, A
+// Loads A into C
+int CPU::LD_C_A()
+{
+	reg_BC.lo = reg_AF.hi;
+	reg_PC.dat += 1;
+	printf("LD C, A\n");
+	return 4;
+}
+
+// LD D, B
+// Loads B into D
+int CPU::LD_D_B()
+{
+	reg_DE.hi = reg_BC.hi;
+	reg_PC.dat += 1;
+	printf("LD D, B\n");
+	return 4;
+}
+
+// LD D, C
+// Loads C into D
+int CPU::LD_D_C()
+{
+	reg_DE.hi = reg_BC.lo;
+	reg_PC.dat += 1;
+	printf("LD D, C\n");
+	return 4;
+}
+
+// LD D, D
+// Loads D into D
+int CPU::LD_D_D()
+{
+	reg_PC.dat += 1;
+	printf("LD D, D\n");
+	return 4;
+}
+
+// LD D, E
+// Loads E into D
+int CPU::LD_D_E()
+{
+	reg_DE.hi = reg_DE.lo;
+	reg_PC.dat += 1;
+	printf("LD D, E\n");
+	return 4;
+}
+
+// LD D, H
+// Loads H into D
+int CPU::LD_D_H()
+{
+	reg_DE.hi = reg_HL.hi;
+	reg_PC.dat += 1;
+	printf("LD D, H\n");
+	return 4;
+}
+
+// LD D, L
+// Loads L into D
+int CPU::LD_D_L()
+{
+	reg_DE.hi = reg_HL.lo;
+	reg_PC.dat += 1;
+	printf("LD D, L\n");
+	return 4;
+}
+
+// LD D, (HL)
+// Loads the value at address HL into D
+int CPU::LD_D_HLp()
+{
+	reg_DE.hi = (*mMap)[reg_HL.dat];
+	reg_PC.dat += 1;
+	printf("LD D, (HL)\n");
+	return 8;
+}
+
+// LD D, A
+// Loads A into D
+int CPU::LD_D_A()
+{
+	reg_DE.hi = reg_AF.hi;
+	reg_PC.dat += 1;
+	printf("LD D, A\n");
+	return 4;
+}
+
+// LD E, B
+// Loads B into E
+int CPU::LD_E_B()
+{
+	reg_DE.lo = reg_BC.hi;
+	reg_PC.dat += 1;
+	printf("LD E, B\n");
+	return 4;
+}
+
+// LD E, C
+// Loads C into E
+int CPU::LD_E_C()
+{
+	reg_DE.lo = reg_BC.lo;
+	reg_PC.dat += 1;
+	printf("LD E, C\n");
+	return 4;
+}
+
+// LD E, D
+// Loads D into E
+int CPU::LD_E_D()
+{
+	reg_DE.lo = reg_DE.hi;
+	reg_PC.dat += 1;
+	printf("LD E, D\n");
+	return 4;
+}
+
+// LD E, E
+// Loads E into E
+int CPU::LD_E_E()
+{
+	reg_PC.dat += 1;
+	printf("LD E, E\n");
+	return 4;
+}
+
+// LD E, H
+// Loads H into E
+int CPU::LD_E_H()
+{
+	reg_DE.lo = reg_HL.hi;
+	reg_PC.dat += 1;
+	printf("LD E, H\n");
+	return 4;
+}
+
+// LD E, L
+// Loads L into E
+int CPU::LD_E_L()
+{
+	reg_DE.lo = reg_HL.lo;
+	reg_PC.dat += 1;
+	printf("LD E, L\n");
+	return 4;
+}
+
+// LD E, (HL)
+// Loads the value at address HL into E
+int CPU::LD_E_HLp()
+{
+	reg_DE.lo = (*mMap)[reg_HL.dat];
+	reg_PC.dat += 1;
+	printf("LD E, (HL)\n");
+	return 8;
+}
+
+// LD E, A
+// Loads A into E
+int CPU::LD_E_A()
+{
+	reg_DE.lo = reg_AF.hi;
+	reg_PC.dat += 1;
+	printf("LD E, A\n");
+	return 4;
+}
+
+// LD H, B
+// Loads B into H
+int CPU::LD_H_B()
+{
+	reg_HL.hi = reg_BC.hi;
+	reg_PC.dat += 1;
+	printf("LD H, B\n");
+	return 4;
+}
+
+// LD H, C
+// Loads C into H
+int CPU::LD_H_C()
+{
+	reg_HL.hi = reg_BC.lo;
+	reg_PC.dat += 1;
+	printf("LD H, C\n");
+	return 4;
+}
+
+// LD H, D
+// Loads D into H
+int CPU::LD_H_D()
+{
+	reg_HL.hi = reg_DE.hi;
+	reg_PC.dat += 1;
+	printf("LD H, D\n");
+	return 4;
+}
+
+// LD H, E
+// Loads E into H
+int CPU::LD_H_E()
+{
+	reg_HL.hi = reg_DE.lo;
+	reg_PC.dat += 1;
+	printf("LD H, E\n");
+	return 4;
+}
+
+// LD H, H
+// Loads H into H
+int CPU::LD_H_H()
+{
+	reg_PC.dat += 1;
+	printf("LD H, H\n");
+	return 4;
+}
+
+// LD H, L
+// Loads L into H
+int CPU::LD_H_L()
+{
+	reg_HL.hi = reg_HL.lo;
+	reg_PC.dat += 1;
+	printf("LD H, L\n");
+	return 4;
+}
+
+// LD H, (HL)
+// Loads the value at address HL into H
+int CPU::LD_H_HLp()
+{
+	reg_HL.hi = (*mMap)[reg_HL.dat];
+	reg_PC.dat += 1;
+	printf("LD H, (HL)\n");
+	return 8;
+}
+
+// LD H, A
+// Loads A into H
+int CPU::LD_H_A()
+{
+	reg_HL.hi = reg_AF.hi;
+	reg_PC.dat += 1;
+	printf("LD H, A\n");
+	return 4;
+}
+
+// LD L, B
+// Loads B into L
+int CPU::LD_L_B()
+{
+	reg_HL.lo = reg_BC.hi;
+	reg_PC.dat += 1;
+	printf("LD L, B\n");
+	return 4;
+}
+
+// LD L, C
+// Loads C into L
+int CPU::LD_L_C()
+{
+	reg_HL.lo = reg_BC.lo;
+	reg_PC.dat += 1;
+	printf("LD L, C\n");
+	return 4;
+}
+
+// LD L, D
+// Loads D into L
+int CPU::LD_L_D()
+{
+	reg_HL.lo = reg_DE.hi;
+	reg_PC.dat += 1;
+	printf("LD L, D\n");
+	return 4;
+}
+
+// LD L, E
+// Loads E into L
+int CPU::LD_L_E()
+{
+	reg_HL.lo = reg_DE.lo;
+	reg_PC.dat += 1;
+	printf("LD L, E\n");
+	return 4;
+}
+
+// LD L, H
+// Loads H into L
+int CPU::LD_L_H()
+{
+	reg_HL.lo = reg_HL.hi;
+	reg_PC.dat += 1;
+	printf("LD L, H\n");
+	return 4;
+}
+
+// LD L, L
+// Loads L into L
+int CPU::LD_L_L()
+{
+	reg_PC.dat += 1;
+	printf("LD L, L\n");
+	return 4;
+}
+
+// LD L, (HL)
+// Loads the value at address HL into L
+int CPU::LD_L_HLp()
+{
+	reg_HL.lo = (*mMap)[reg_HL.dat];
+	reg_PC.dat += 1;
+	printf("LD L, (HL)\n");
+	return 8;
+}
+
+// LD L, A
+// Loads A into L
+int CPU::LD_L_A()
+{
+	reg_HL.lo = reg_AF.hi;
+	reg_PC.dat += 1;
+	printf("LD L, A\n");
+	return 4;
+}
+
+// LD (HL), B
+// Loads B into the value at address HL
+int CPU::LD_HLp_B()
+{
+	mMap->writeMemory(reg_HL.dat, reg_BC.hi);
+	reg_PC.dat += 1;
+	printf("LD (HL), B\n");
+	return 8;
+}
+
+// LD (HL), C
+// Loads C into the value at address HL
+int CPU::LD_HLp_C()
+{
+	mMap->writeMemory(reg_HL.dat, reg_BC.lo);
+	reg_PC.dat += 1;
+	printf("LD (HL), C\n");
+	return 8;
+}
+
+// LD (HL), D
+// Loads D into the value at address HL
+int CPU::LD_HLp_D()
+{
+	mMap->writeMemory(reg_HL.dat, reg_DE.hi);
+	reg_PC.dat += 1;
+	printf("LD (HL), D\n");
+	return 8;
+}
+
+// LD (HL), E
+// Loads E into the value at address HL
+int CPU::LD_HLp_E()
+{
+	mMap->writeMemory(reg_HL.dat, reg_DE.lo);
+	reg_PC.dat += 1;
+	printf("LD (HL), E\n");
+	return 8;
+}
+
+// LD (HL), H
+// Loads H into the value at address HL
+int CPU::LD_HLp_H()
+{
+	mMap->writeMemory(reg_HL.dat, reg_HL.hi);
+	reg_PC.dat += 1;
+	printf("LD (HL), H\n");
+	return 8;
+}
+
+// LD (HL), L
+// Loads L into the value at address HL
+int CPU::LD_HLp_L()
+{
+	mMap->writeMemory(reg_HL.dat, reg_HL.lo);
+	reg_PC.dat += 1;
+	printf("LD (HL), L\n");
+	return 8;
+}
+
+// HALT
+// Halts the CPU until an interrupt occurs
+int CPU::HALT()
+{
+	return 0;
+}
+
+// LD (HL), A
+// Loads A into the value at address HL
+int CPU::LD_HLA()
+{
+	mMap->writeMemory(reg_HL.dat, reg_AF.hi);
+	reg_PC.dat += 1;
+	printf("LD (HL), A\n");
+	return 8;
+}
+
+// LD A, B
+// Loads B into A
+int CPU::LD_A_B()
+{
+	reg_AF.hi = reg_BC.hi;
+	reg_PC.dat += 1;
+	printf("LD A, B\n");
+	return 4;
+}
+
+// LD A, C
+// Loads C into A
+int CPU::LD_A_C()
+{
+	reg_AF.hi = reg_BC.lo;
+	reg_PC.dat += 1;
+	printf("LD A, C\n");
+	return 4;
+}
+
+// LD A, D
+// Loads D into A
+int CPU::LD_A_D()
+{
+	reg_AF.hi = reg_DE.hi;
+	reg_PC.dat += 1;
+	printf("LD A, D\n");
+	return 4;
+}
+
+// LD A, E
+// Loads E into A
+int CPU::LD_A_E()
+{
+	reg_AF.hi = reg_DE.lo;
+	reg_PC.dat += 1;
+	printf("LD A, E\n");
+	return 4;
+}
+
+// LD A, H
+// Loads H into A
+int CPU::LD_A_H()
+{
+	reg_AF.hi = reg_HL.hi;
+	reg_PC.dat += 1;
+	printf("LD A, H\n");
+	return 4;
+}
+
+// LD A, L
+// Loads L into A
+int CPU::LD_A_L()
+{
+	reg_AF.hi = reg_HL.lo;
+	reg_PC.dat += 1;
+	printf("LD A, L\n");
+	return 4;
+}
+
+// LD A, (HL)
+// Loads the value at address HL into A
+int CPU::LD_A_HL()
+{
+	reg_AF.hi = (*mMap)[reg_HL.dat];
+	reg_PC.dat += 1;
+	printf("LD A, (HL)\n");
+	return 8;
+}
+
+// LD A, A
+// Loads A into A
+int CPU::LD_A_A()
+{
+	reg_PC.dat += 1;
+	printf("LD A, A\n");
+	return 4;
+}
 int CPU::ADD_A_B() { return 0; }
 int CPU::ADD_A_C() { return 0; }
 int CPU::ADD_A_D() { return 0; }
