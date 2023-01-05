@@ -3085,7 +3085,7 @@ int CPU::JP_NZ_u16()
 // Jump to address u16.
 int CPU::JP_u16()
 {
-	reg_PC.dat = ((*mMap)[reg_PC.dat + 2] << 8) | (*mMap)[reg_PC.dat + 1]; 
+	reg_PC.dat = ((*mMap)[reg_PC.dat + 2] << 8) | (*mMap)[reg_PC.dat + 1];
 	printf("JP %04X\n", reg_PC.dat);
 	return 16;
 }
