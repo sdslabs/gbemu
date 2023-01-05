@@ -545,7 +545,7 @@ int CPU::JR_NZ_r8()
 		reg_PC.dat += (Byte)(*mMap)[reg_PC.dat + 1];
 	}
 
-	//TODO: What's with branch and without branch?
+	//TODO: dependent on branch taken or not
 	return 12;
 }
 
@@ -632,6 +632,7 @@ int CPU::LD_H_u8()
 
 // DAA
 // Decimal adjust register A
+// TODO: Implement DAA
 int CPU::DAA()
 {
 	return 0;
@@ -3019,25 +3020,301 @@ int CPU::CP_A_A()
 	printf("CP A, A\n");
 	return 4;
 }
-int CPU::RET_NZ() { return 0; }
-int CPU::POP_BC() { return 0; }
-int CPU::JP_NZ_u16() { return 0; }
-int CPU::JP_u16() { return 0; }
-int CPU::CALL_NZ_u16() { return 0; }
-int CPU::PUSH_BC() { return 0; }
-int CPU::ADD_A_u8() { return 0; }
-int CPU::RST_00H() { return 0; }
-int CPU::RET_Z() { return 0; }
-int CPU::RET() { return 0; }
-int CPU::JP_Z_u16() { return 0; }
-int CPU::PREFIX_CB() { return 0; }
-int CPU::CALL_Z_u16() { return 0; }
-int CPU::CALL_u16() { return 0; }
-int CPU::ADC_A_u8() { return 0; }
-int CPU::RST_08H() { return 0; }
-int CPU::RET_NC() { return 0; }
-int CPU::POP_DE() { return 0; }
-int CPU::JP_NC_u16() { return 0; }
+
+// RET NZ
+// Return if zero flag is not set.
+int CPU::RET_NZ()
+{
+	if (!GET_ZERO_FLAG)
+	{
+		reg_PC.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
+		reg_SP.dat += 2;
+		printf("RET NZ\n");
+		return 20;
+	}
+	else
+	{
+		reg_PC.dat += 1;
+		printf("RET NZ\n");
+		return 8;
+	}
+}
+
+// POP BC
+// Pop two bytes off the stack and store them in BC.
+int CPU::POP_BC()
+{
+	reg_BC.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
+	reg_SP.dat += 2;
+	reg_PC.dat += 1;
+	printf("POP BC\n");
+	return 12;
+}
+
+// JP NZ, u16
+// Jump to address u16 if zero flag is not set.
+int CPU::JP_NZ_u16()
+{
+	if (!GET_ZERO_FLAG)
+	{
+		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
+		printf("JP NZ, %04X\n", reg_PC.dat);
+		return 16;
+	}
+	else
+	{
+		reg_PC.dat += 3;
+		printf("JP NZ, %04X\n", reg_PC.dat);
+		return 12;
+	}
+}
+
+// JP u16
+// Jump to address u16.
+int CPU::JP_u16()
+{
+	reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
+	printf("JP %04X\n", reg_PC.dat);
+	return 16;
+}
+
+// CALL NZ, u16
+// Call subroutine at address u16 if zero flag is not set.
+int CPU::CALL_NZ_u16()
+{
+	if (!GET_ZERO_FLAG)
+	{
+		mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 3) >> 8);
+		mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 3) & 0xFF);
+		reg_SP.dat -= 2;
+		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
+		printf("CALL NZ, %04X\n", reg_PC.dat);
+		return 24;
+	}
+	else
+	{
+		reg_PC.dat += 3;
+		printf("CALL NZ, %04X\n", reg_PC.dat);
+		return 12;
+	}
+}
+
+// PUSH BC
+// Push BC onto the stack.
+int CPU::PUSH_BC()
+{
+	mMap->writeMemory((*mMap)[reg_SP.dat - 1], reg_BC.hi);
+	mMap->writeMemory((*mMap)[reg_SP.dat - 2], reg_BC.lo);
+	reg_SP.dat -= 2;
+	reg_PC.dat += 1;
+	printf("PUSH BC\n");
+	return 16;
+}
+
+// ADD A, u8
+// Add u8 to A and set flags accordingly.
+int CPU::ADD_A_u8()
+{
+	// Unset subtract flag
+	UNSET_SUBTRACT_FLAG;
+
+	// Set carry flag if A + u8 > 0xFF
+	reg_AF.hi + (*mMap)[reg_PC.dat + 1] > 0xFF ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set zero flag if A + u8 == 0
+	reg_AF.hi + (*mMap)[reg_PC.dat + 1] == 0 ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
+
+	// Set half carry flag if lower nibble of A + lower nibble of u8 > 0xF
+	(reg_AF.hi & 0x0F) + ((*mMap)[reg_PC.dat + 1] & 0x0F) > 0xF ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	reg_AF.hi += (*mMap)[reg_PC.dat + 1];
+	reg_PC.dat += 2;
+	printf("ADD A, %02X\n", (*mMap)[reg_PC.dat + 1]);
+	return 8;
+}
+
+// RST 00H
+// Call subroutine at address 0x0000.
+int CPU::RST_00H()
+{
+	mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 1) >> 8);
+	mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 1) & 0xFF);
+	reg_SP.dat -= 2;
+	reg_PC.dat = 0x0000;
+	printf("RST 00H\n");
+	return 16;
+}
+
+// RET Z
+// Return if zero flag is set.
+int CPU::RET_Z()
+{
+	if (GET_ZERO_FLAG)
+	{
+		reg_PC.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
+		reg_SP.dat += 2;
+		printf("RET Z\n");
+		return 20;
+	}
+	else
+	{
+		reg_PC.dat += 1;
+		printf("RET Z\n");
+		return 8;
+	}
+}
+
+// RET
+// Return.
+int CPU::RET()
+{
+	reg_PC.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
+	reg_SP.dat += 2;
+	printf("RET\n");
+	return 16;
+}
+
+// JP Z, u16
+// Jump to address u16 if zero flag is set.
+int CPU::JP_Z_u16()
+{
+	if (GET_ZERO_FLAG)
+	{
+		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
+		printf("JP Z, %04X\n", reg_PC.dat);
+		return 16;
+	}
+	else
+	{
+		reg_PC.dat += 3;
+		printf("JP Z, %04X\n", reg_PC.dat);
+		return 12;
+	}
+}
+
+// CB prefix
+// Execute CB prefixed opcode.
+// TODO: Implement CB prefixed opcodes.
+int CPU::PREFIX_CB()
+{
+	reg_PC.dat += 1;
+	printf("PREFIX CB\n");
+	return 4;
+}
+
+// CALL Z, u16
+// Call subroutine at address u16 if zero flag is set.
+int CPU::CALL_Z_u16()
+{
+	if (GET_ZERO_FLAG)
+	{
+		mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 3) >> 8);
+		mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 3) & 0xFF);
+		reg_SP.dat -= 2;
+		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
+		printf("CALL Z, %04X\n", reg_PC.dat);
+		return 24;
+	}
+	else
+	{
+		reg_PC.dat += 3;
+		printf("CALL Z, %04X\n", reg_PC.dat);
+		return 12;
+	}
+}
+
+// CALL u16
+// Call subroutine at address u16.
+int CPU::CALL_u16()
+{
+	mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 3) >> 8);
+	mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 3) & 0xFF);
+	reg_SP.dat -= 2;
+	reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
+	printf("CALL %04X\n", reg_PC.dat);
+	return 24;
+}
+
+// ADC A, u8
+// Add u8 + carry flag to A and set flags accordingly.
+int CPU::ADC_A_u8()
+{
+	// Unset subtract flag
+	UNSET_SUBTRACT_FLAG;
+
+	// Set carry flag if A + u8 + carry flag > 0xFF
+	reg_AF.hi + (*mMap)[reg_PC.dat + 1] + GET_CARRY_FLAG > 0xFF ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set zero flag if A + u8 + carry flag == 0
+	reg_AF.hi + (*mMap)[reg_PC.dat + 1] + GET_CARRY_FLAG == 0 ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
+
+	// Set half carry flag if lower nibble of A + lower nibble of u8 + carry flag > 0xF
+	(reg_AF.hi & 0x0F) + ((*mMap)[reg_PC.dat + 1] & 0x0F) + GET_CARRY_FLAG > 0xF ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	reg_AF.hi += (*mMap)[reg_PC.dat + 1] + GET_CARRY_FLAG;
+	reg_PC.dat += 2;
+	printf("ADC A, %02X\n", (*mMap)[reg_PC.dat + 1]);
+	return 8;
+}
+
+// RST 08H
+// Call subroutine at address 0x0008.
+int CPU::RST_08H()
+{
+	mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 1) >> 8);
+	mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 1) & 0xFF);
+	reg_SP.dat -= 2;
+	reg_PC.dat = 0x0008;
+	printf("RST 08H\n");
+	return 16;
+}
+
+// RET NC
+// Return if carry flag is not set.
+int CPU::RET_NC()
+{
+	if (!GET_CARRY_FLAG)
+	{
+		reg_PC.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
+		reg_SP.dat += 2;
+		printf("RET NC\n");
+		return 20;
+	}
+	else
+	{
+		reg_PC.dat += 1;
+		printf("RET NC\n");
+		return 8;
+	}
+}
+
+// POP DE
+// Pop 16-bit value from stack into DE.
+int CPU::POP_DE()
+{
+	reg_DE.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
+	reg_SP.dat += 2;
+	printf("POP DE\n");
+	return 12;
+}
+
+// JP NC, u16
+// Jump to address u16 if carry flag is not set.
+int CPU::JP_NC_u16()
+{
+	if (!GET_CARRY_FLAG)
+	{
+		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
+		printf("JP NC, %04X\n", reg_PC.dat);
+		return 16;
+	}
+	else
+	{
+		reg_PC.dat += 3;
+		printf("JP NC, %04X\n", reg_PC.dat);
+		return 12;
+	}
+}
 
 int CPU::UNKNOWN()
 {
@@ -3045,26 +3322,215 @@ int CPU::UNKNOWN()
 	printf( "%c\n", s[0] );
 	return 0;
 }
-int CPU::NC_u16() { return 0; }
-int CPU::PUSH_DE() { return 0; }
-int CPU::SUB_u8() { return 0; }
-int CPU::RST_10H() { return 0; }
-int CPU::RET_C() { return 0; }
-int CPU::RETI() { return 0; }
-int CPU::JP_C_u16() { return 0; }
-int CPU::CALL_C_u16() { return 0; }
-int CPU::SBC_A_u8() { return 0; }
-int CPU::RST_18H() { return 0; }
-// LDH (a8), A
+
+// NCALL u16
+// Call subroutine at address u16 if carry flag is not set.
+int CPU::NC_u16()
+{
+	if (!GET_CARRY_FLAG)
+	{
+		mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 3) >> 8);
+		mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 3) & 0xFF);
+		reg_SP.dat -= 2;
+		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
+		printf("NCALL %04X\n", reg_PC.dat);
+		return 24;
+	}
+	else
+	{
+		reg_PC.dat += 3;
+		printf("NCALL %04X\n", reg_PC.dat);
+		return 12;
+	}
+}
+
+// PUSH DE
+// Push 16-bit value from DE onto stack.
+int CPU::PUSH_DE()
+{
+	mMap->writeMemory((*mMap)[reg_SP.dat - 1], reg_DE.hi);
+	mMap->writeMemory((*mMap)[reg_SP.dat - 2], reg_DE.lo);
+	reg_SP.dat -= 2;
+	printf("PUSH DE\n");
+	return 16;
+}
+
+// SUB u8
+// Subtract u8 from A and set flags accordingly.
+int CPU::SUB_u8()
+{
+	// Set subtract flag
+	SET_SUBTRACT_FLAG;
+
+	// Set carry flag if A < u8
+	reg_AF.hi < (*mMap)[reg_PC.dat + 1] ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set zero flag if A == u8
+	reg_AF.hi == (*mMap)[reg_PC.dat + 1] ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
+
+	// Set half carry flag if lower nibble of A < lower nibble of u8
+	(reg_AF.hi & 0x0F) < ((*mMap)[reg_PC.dat + 1] & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	reg_AF.hi -= (*mMap)[reg_PC.dat + 1];
+	reg_PC.dat += 2;
+	printf("SUB %02X\n");
+	return 8;
+}
+
+// RST 10H
+// Call subroutine at address 0x0010.
+int CPU::RST_10H()
+{
+	mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 1) >> 8);
+	mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 1) & 0xFF);
+	reg_SP.dat -= 2;
+	reg_PC.dat = 0x0010;
+	printf("RST 10H\n");
+	return 16;
+}
+
+// RET C
+// Return if carry flag is set.
+int CPU::RET_C()
+{
+	if (GET_CARRY_FLAG)
+	{
+		reg_PC.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
+		reg_SP.dat += 2;
+		printf("RET C\n");
+		return 20;
+	}
+	else
+	{
+		reg_PC.dat += 1;
+		printf("RET C\n");
+		return 8;
+	}
+}
+
+// RETI
+// Return and enable interrupts.
+// TODO: Implement interrupts.
+int CPU::RETI()
+{
+	reg_PC.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
+	reg_SP.dat += 2;
+}
+
+// JP C, u16
+// Jump to address u16 if carry flag is set.
+int CPU::JP_C_u16()
+{
+	if (GET_CARRY_FLAG)
+	{
+		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
+		printf("JP C, %04X\n", reg_PC.dat);
+		return 16;
+	}
+	else
+	{
+		reg_PC.dat += 3;
+		printf("JP C, %04X\n", reg_PC.dat);
+		return 12;
+	}
+}
+
+// CALL C, u16
+// Call subroutine at address u16 if carry flag is set.
+int CPU::CALL_C_u16()
+{
+	if (GET_CARRY_FLAG)
+	{
+		mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 3) >> 8);
+		mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 3) & 0xFF);
+		reg_SP.dat -= 2;
+		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
+		printf("CALL C, %04X\n", reg_PC.dat);
+		return 24;
+	}
+	else
+	{
+		reg_PC.dat += 3;
+		printf("CALL C, %04X\n", reg_PC.dat);
+		return 12;
+	}
+}
+
+// SBC A, u8
+// Subtract u8 + carry flag from A and set flags accordingly.
+int CPU::SBC_A_u8()
+{
+	// Set subtract flag
+	SET_SUBTRACT_FLAG;
+
+	// Set carry flag if A < u8 + carry flag
+	reg_AF.hi < ((*mMap)[reg_PC.dat + 1] + GET_CARRY_FLAG) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set zero flag if A == u8 + carry flag
+	reg_AF.hi == ((*mMap)[reg_PC.dat + 1] + GET_CARRY_FLAG) ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
+
+	// Set half carry flag if lower nibble of A < lower nibble of u8 + carry flag
+	(reg_AF.hi & 0x0F) < (((*mMap)[reg_PC.dat + 1] + GET_CARRY_FLAG) & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	reg_AF.hi -= ((*mMap)[reg_PC.dat + 1] + GET_CARRY_FLAG);
+	reg_PC.dat += 2;
+	printf("SBC A, %02X\n", (*mMap)[reg_PC.dat + 1]);
+	return 8;
+}
+
+// RST 18H
+// Call subroutine at address 0x0018.
+int CPU::RST_18H()
+{
+	mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 1) >> 8);
+	mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 1) & 0xFF);
+	reg_SP.dat -= 2;
+	reg_PC.dat = 0x0018;
+	printf("RST 18H\n");
+	return 16;
+}
+// LD (FF00+u8),A
 // Load A into (0xFF00 + a8)
 int CPU::LDH_a8_A()
 {
-    return 0;
+	mMap->writeMemory(0xFF00 + (*mMap)[reg_PC.dat + 1], reg_AF.hi);
+	reg_PC.dat += 2;
+	printf("LDH (%02X), A\n", (*mMap)[reg_PC.dat + 1]);
+	return 12;
 }
-int CPU::POP_HL() { return 0; }
-int CPU::LDH_C_A() { return 0; }
-int CPU::PUSH_HL() { return 0; }
-int CPU::AND_u8() { return 0; }
+
+// POP HL
+// Pop 16-bit value from stack into HL.
+int CPU::POP_HL()
+{
+	reg_HL.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
+	reg_SP.dat += 2;
+	printf("POP HL\n");
+	return 12;
+}
+
+// LD (FF00+C),A
+// Load A into (0xFF00 + C)
+int CPU::LDH_C_A()
+{
+	mMap->writeMemory(0xFF00 + reg_BC.lo, reg_AF.hi);
+	printf("LD (C), A\n");
+	return 8;
+}
+
+// PUSH HL
+// Push HL onto stack.
+int CPU::PUSH_HL()
+{
+	mMap->writeMemory((*mMap)[reg_SP.dat - 1], reg_HL.hi);
+	mMap->writeMemory((*mMap)[reg_SP.dat - 2], reg_HL.lo);
+	reg_SP.dat -= 2;
+	printf("PUSH HL\n");
+	return 16;
+}
+
+//
+int CPU::AND_A_u8() { return 0; }
 int CPU::RST_20H() { return 0; }
 int CPU::ADD_SP_i8() { return 0; }
 int CPU::JP_HL() { return 0; }
@@ -3080,10 +3546,59 @@ int CPU::LD_a16_A()
 	printf("LD (u16), A\n");
 	return 16;
 }
-int CPU::XOR_u8() { return 0; }
-int CPU::RST_28H() { return 0; }
-int CPU::LDH_A_a8() { return 0; }
-int CPU::POP_AF() { return 0; }
+
+// XOR A, u8
+// XOR A with u8 and set flags accordingly.
+int CPU::XOR_A_u8()
+{
+	// Unset subtract and carry flags
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	// Unset half carry flag
+	UNSET_HALF_CARRY_FLAG;
+
+	reg_AF.hi ^= (*mMap)[reg_PC.dat + 1];
+
+	// Set zero flag if A == u8
+	reg_AF.hi ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
+
+	reg_PC.dat += 2;
+	printf("XOR A, %02X\n", (*mMap)[reg_PC.dat + 1]);
+	return 8;
+}
+
+// RST 28H
+// Call subroutine at address 0x0028.
+int CPU::RST_28H()
+{
+	mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 1) >> 8);
+	mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 1) & 0xFF);
+	reg_SP.dat -= 2;
+	reg_PC.dat = 0x0028;
+	printf("RST 28H\n");
+	return 16;
+}
+
+// LD A, (FF00+u8)
+// Load (0xFF00 + a8) into A
+int CPU::LDH_A_a8()
+{
+	reg_AF.hi = (*mMap)[0xFF00 + (*mMap)[reg_PC.dat + 1]];
+	reg_PC.dat += 2;
+	printf("LD A, (FF00+%02X)\n", (*mMap)[reg_PC.dat + 1]);
+	return 12;
+}
+
+// POP AF
+// Pop 16-bit value from stack into AF.
+int CPU::POP_AF()
+{
+	reg_AF.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
+	reg_SP.dat += 2;
+	printf("POP AF\n");
+	return 12;
+}
 
 // LDH A, (C)
 // Load (0xFF00 + C) into A
@@ -3093,10 +3608,60 @@ int CPU::LDH_A_C()
 	reg_PC.dat += 1;
     return 8;
 }
-int CPU::DI() { return 0; }
-int CPU::PUSH_AF() { return 0; }
-int CPU::OR_u8() { return 0; }
-int CPU::RST_30H() { return 0; }
+
+// DI
+// Disable interrupts
+// TODO: Implement interrupts
+int CPU::DI()
+{
+	printf("DI\n");
+	return 4;
+}
+
+// PUSH AF
+// Push AF onto stack.
+int CPU::PUSH_AF()
+{
+	mMap->writeMemory((*mMap)[reg_SP.dat - 1], reg_AF.hi);
+	mMap->writeMemory((*mMap)[reg_SP.dat - 2], reg_AF.lo);
+	reg_SP.dat -= 2;
+	printf("PUSH AF\n");
+	return 16;
+}
+
+// OR A, u8
+// OR A with u8 and set flags accordingly.
+int CPU::OR_A_u8()
+{
+	// Unset subtract and carry flags
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	// Unset half carry flag
+	UNSET_HALF_CARRY_FLAG;
+
+	reg_AF.hi |= (*mMap)[reg_PC.dat + 1];
+
+	// Set zero flag if A == u8
+	reg_AF.hi ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
+
+	reg_PC.dat += 2;
+	printf("OR A, %02X\n", (*mMap)[reg_PC.dat + 1]);
+	return 8;
+}
+
+// RST 30H
+// Call subroutine at address 0x0030.
+int CPU::RST_30H()
+{
+	mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 1) >> 8);
+	mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 1) & 0xFF);
+	reg_SP.dat -= 2;
+	reg_PC.dat = 0x0030;
+	printf("RST 30H\n");
+	return 16;
+}
+
 // LD HL, SP + i8
 // Load SP + i8 into HL
 int CPU::LD_HL_SP_i8()
@@ -3124,9 +3689,48 @@ int CPU::LD_A_a16()
     printf("LD A, (HL)\n");
     return 16;
 }
-int CPU::EI() { return 0; }
-int CPU::CP_u8() { return 0; }
-int CPU::RST_38H() { return 0; }
+
+// EI
+// Enable interrupts
+// TODO: Implement interrupts
+int CPU::EI()
+{
+	printf("EI\n");
+	return 4;
+}
+
+// CP A, u8
+// Compare A with u8 and set flags accordingly.
+int CPU::CP_u8()
+{
+	// Set subtract flag
+	SET_SUBTRACT_FLAG;
+
+	// Set half carry flag if lower nibble of A is less than lower nibble of u8
+	(reg_AF.hi & 0x0F) < ((*mMap)[reg_PC.dat + 1] & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Set carry flag if A is less than u8
+	reg_AF.hi < (*mMap)[reg_PC.dat + 1] ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set zero flag if A == u8
+	reg_AF.hi == (*mMap)[reg_PC.dat + 1] ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
+
+	reg_PC.dat += 2;
+	printf("CP A, %02X\n", (*mMap)[reg_PC.dat + 1]);
+	return 8;
+}
+
+// RST 38H
+// Call subroutine at address 0x0038.
+int CPU::RST_38H()
+{
+	mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 1) >> 8);
+	mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 1) & 0xFF);
+	reg_SP.dat -= 2;
+	reg_PC.dat = 0x0038;
+	printf("RST 38H\n");
+	return 16;
+}
 
 int CPU::executeNextInstruction()
 {

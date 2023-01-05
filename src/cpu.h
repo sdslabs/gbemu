@@ -290,7 +290,7 @@ private:
 		&CPU::UNKNOWN,
 		&CPU::UNKNOWN,
 		&CPU::PUSH_HL,
-		&CPU::AND_u8,
+		&CPU::AND_A_u8,
 		&CPU::RST_20H,
 		&CPU::ADD_SP_i8,
 		&CPU::JP_HL,
@@ -298,7 +298,7 @@ private:
 		&CPU::UNKNOWN,
 		&CPU::UNKNOWN,
 		&CPU::UNKNOWN,
-		&CPU::XOR_u8,
+		&CPU::XOR_A_u8,
 		&CPU::RST_28H,
 		&CPU::LDH_A_a8,
 		&CPU::POP_AF,
@@ -306,7 +306,7 @@ private:
 		&CPU::DI,
 		&CPU::UNKNOWN,
 		&CPU::PUSH_AF,
-		&CPU::OR_u8,
+		&CPU::OR_A_u8,
 		&CPU::RST_30H,
 		&CPU::LD_HL_SP_i8,
 		&CPU::LD_SP_HL,
@@ -544,19 +544,19 @@ private:
 	int POP_HL();
 	int LDH_C_A();
 	int PUSH_HL();
-	int AND_u8();
+	int AND_A_u8();
 	int RST_20H();
 	int ADD_SP_i8();
 	int JP_HL();
 	int LD_a16_A();
-	int XOR_u8();
+	int XOR_A_u8();
 	int RST_28H();
 	int LDH_A_a8();
 	int POP_AF();
 	int LDH_A_C();
 	int DI();
 	int PUSH_AF();
-	int OR_u8();
+	int OR_A_u8();
 	int RST_30H();
 	int LD_HL_SP_i8();
 	int LD_SP_HL();
