@@ -101,7 +101,7 @@ GBE::GBE()
 	// Set A = 0x80 to test RLCA for C Flag
 
 	// RLCA
-	// Will write later when LD A instructions have been tested
+	// TODO: Will write later when LD A instructions have been tested
 	// as that is needed to test this instruction more for flags
 
 	// LD (u16), SP
@@ -148,8 +148,96 @@ GBE::GBE()
 	// Increments the value of C by 1
 	// Final State: BC = 0xE010, Flag_N = 0, Flag_H = 1, Flag_Z = 0, AF = 0xFE20
 	gbe_mMap->debugWriteMemory(0x0128, 0x0C);
+
+	// LD BC u16
+	// Loading value 0xE0FF in BC to test Z flag of INC C
+	gbe_mMap->debugWriteMemory(0x0129, 0x01);
+	gbe_mMap->debugWriteMemory(0x012A, 0xFF);
+	gbe_mMap->debugWriteMemory(0x012B, 0xE0);
+
+	// INC C
+	// Increments the value of C by 1
+	// Final State: BC = 0xE010, Flag_N = 0, Flag_H = 1, Flag_Z = 0, AF = 0xFE20
+	gbe_mMap->debugWriteMemory(0x012C, 0x0C);
+
+	// DEC C
+	// Decrements the value of C by 1
+	// Final State: BC = 0xE0FF, Flag_N = 1, Flag_H = 1, Flag_Z = 0, AF = 0xFE60
+	gbe_mMap->debugWriteMemory(0x012D, 0x0D);
+
+	// LD BC u16
+	// Loading value 0xE001 in BC to test H flag of DEC C
+	gbe_mMap->debugWriteMemory(0x012E, 0x01);
+	gbe_mMap->debugWriteMemory(0x012F, 0x01);
+	gbe_mMap->debugWriteMemory(0x0130, 0xE0);
+
+	// DEC C
+	// Decrements the value of C by 1
+	// Final State: BC = 0xE000, Flag_N = 1, Flag_H = 0, Flag_Z = 1, AF = 0xFEB0
+	gbe_mMap->debugWriteMemory(0x0131, 0x0D);
+
+	// LD C, u8
+	// Loads an 8 bit immediate into the register C
+	// Final State: BC = 0xE069
+	gbe_mMap->debugWriteMemory(0x0132, 0x0E);
+	gbe_mMap->debugWriteMemory(0x0133, 0x69);
+
+	// RRCA
+	// Rotates the value of the accumulator to the right
+	// Final State: AF = 0x7F00, Flag_C = 0
+	gbe_mMap->debugWriteMemory(0x0134, 0x0F);
+
+	// STOP
+	// Stops the CPU until an interrupt occurs
+	gbe_mMap->debugWriteMemory(0x0135, 0x10);
+
+	// LD DE, u16
+	// Loads an 16 bit immediate into the register DE
+	// Final State: DE = 0x69E0
+	gbe_mMap->debugWriteMemory(0x0136, 0x11);
+	gbe_mMap->debugWriteMemory(0x0137, 0xE0);
+	gbe_mMap->debugWriteMemory(0x0138, 0x69);
+
+	// LD (DE), A
+	// Loads the value of the accumulator into the memory address pointed to by DE
+	// Final State: Value 0x7F at address 0x69E0
+	gbe_mMap->debugWriteMemory(0x0139, 0x12);
+
+	// INC DE
+	// Increments the value of DE by 1
+	// Final State: DE = 0x69E1
+	gbe_mMap->debugWriteMemory(0x013A, 0x13);
+
+	// INC D
+	// Increments the value of D by 1
+	// Final State: DE = 0x6AE1, Flag_N = 0, Flag_H = 0, Flag_Z = 0, AF = 0x7F00
+	gbe_mMap->debugWriteMemory(0x013B, 0x14);
+
+	// DEC D
+	// Decrements the value of D by 1
+	// Final State: DE = 0x69E1, Flag_N = 1, Flag_H = 0, Flag_Z = 0, AF = 0x7F00
+	gbe_mMap->debugWriteMemory(0x013C, 0x15);
+
+	// LD D, u8
+	// Loads an 8 bit immediate into the register D
+	// Final State: DE = 0xE0E1
+	gbe_mMap->debugWriteMemory(0x013D, 0x16);
+	gbe_mMap->debugWriteMemory(0x013E, 0xE0);
+
+	// RLA
+	// Rotates the value of the accumulator to the left
+	// Final State: AF = 0xFE00, Flag_C = 0
+	gbe_mMap->debugWriteMemory(0x013F, 0x17);
+
+	// RLA
+	// Rotates the value of the accumulator to the left
+	// Final State: AF = 0xFC00, Flag_C = 1
+	gbe_mMap->debugWriteMemory(0x0140, 0x17);
+
+
+
 	// Seg fault to end using UNKOWN
-	gbe_mMap->debugWriteMemory(0x0129, 0xEB);
+	gbe_mMap->debugWriteMemory(0x0141, 0xEB);
 
 	update();
 }
