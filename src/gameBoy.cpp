@@ -108,8 +108,8 @@ GBE::GBE()
 	// Loads the value of the stack pointer into the memory address pointed to by the immediate
 	// Final State: Value 0xFFFE at address 0XE002
 	gbe_mMap->debugWriteMemory(0x011B, 0x08);
-	gbe_mMap->debugWriteMemory(0x011C, 0xE0);
-	gbe_mMap->debugWriteMemory(0x011D, 0x02);
+	gbe_mMap->debugWriteMemory(0x011C, 0x02);
+	gbe_mMap->debugWriteMemory(0x011D, 0xE0);
 
 	// ADD HL, BC
 	// Adds the value of BC to HL
@@ -120,8 +120,8 @@ GBE::GBE()
 	// LD BC u16
 	// Loading address 0xE003 in BC to test next instruction
 	gbe_mMap->debugWriteMemory(0x011F, 0x01);
-	gbe_mMap->debugWriteMemory(0x0120, 0xE0);
-	gbe_mMap->debugWriteMemory(0x0121, 0x03);
+	gbe_mMap->debugWriteMemory(0x0120, 0x03);
+	gbe_mMap->debugWriteMemory(0x0121, 0xE0);
 
 	// LD A, (BC)
 	// Loads the value of the memory address pointed to by BC into the accumulator
@@ -141,8 +141,8 @@ GBE::GBE()
 	// LD BC u16
 	// Loading address 0xE00F in BC to test H flag of INC C
 	gbe_mMap->debugWriteMemory(0x0125, 0x01);
-	gbe_mMap->debugWriteMemory(0x0126, 0xE0);
-	gbe_mMap->debugWriteMemory(0x0127, 0x0F);
+	gbe_mMap->debugWriteMemory(0x0126, 0x0F);
+	gbe_mMap->debugWriteMemory(0x0127, 0xE0);
 
 	// INC C
 	// Increments the value of C by 1
