@@ -91,7 +91,6 @@ GBE::GBE()
 	gbe_mMap->debugWriteMemory(0x010E, 0x07);
 
 	// Set A = 0x80 to test RLCA for C Flag
-	
 
 	// //RLCA
 	// gbe_mMap->debugWriteMemory(0x0103, 0x07);
