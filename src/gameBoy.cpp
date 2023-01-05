@@ -64,7 +64,7 @@ GBE::GBE()
 
 	// DEC B
 	// Decrements the value of B by 1
-	// Final State: BC = 0x09FF, Flag_N = 1, Flag_H = 1, Flag_Z = 0, AF = 0170
+	// Final State: BC = 0x0FFF, Flag_N = 1, Flag_H = 1, Flag_Z = 0, AF = 0170
 	gbe_mMap->debugWriteMemory(0x010F, 0x05);
 
 	// Set BC = 0X01FF to test DEC B for Z flag
@@ -89,7 +89,7 @@ GBE::GBE()
 
 	// LD B, u8
 	// Loads an 8 bit immediate into the register B
-	// Final State: BC = 0x69FF
+	// Final State: BC = 0x690F
 	gbe_mMap->debugWriteMemory(0x0118, 0x06);
 	gbe_mMap->debugWriteMemory(0x0119, 0x69);
 
@@ -149,7 +149,7 @@ GBE::GBE()
 	// Final State: BC = 0xE010, Flag_N = 0, Flag_H = 1, Flag_Z = 0, AF = 0xFE20
 	gbe_mMap->debugWriteMemory(0x0128, 0x0C);
 	// Seg fault to end using UNKOWN
-	gbe_mMap->debugWriteMemory(0x011B, 0xEB);
+	gbe_mMap->debugWriteMemory(0x0129, 0xEB);
 
 	update();
 }

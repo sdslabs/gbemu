@@ -64,9 +64,10 @@ int CPU::NOP()
 int CPU::LD_BC_u16()
 {
 	// Load the next 2 bytes into BC
-	// Left shift the first byte by 8 bits
-	// OR the second byte
-	reg_BC.dat = ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2];
+	// Left shift the second byte by 8 bits
+	// OR the first byte
+	// Due to endianness, the first byte is the least significant byte
+	reg_BC.dat = ((*mMap)[reg_PC.dat + 2] << 8) | (*mMap)[reg_PC.dat + 1];
 	reg_PC.dat += 3;
 	printf("LD BC, u16\n");
 	return 12;
@@ -171,13 +172,14 @@ int CPU::RLCA()
 int CPU::LD_u16_SP()
 {
 	// Load the next 2 bytes into a 16 bit value
-	// Left shift the first byte by 8 bits
-	// OR the second byte
-	Word address = ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2];
+	// Left shift the second byte by 8 bits
+	// OR the first byte
+	// Due to endianness
+	Word address = ((*mMap)[reg_PC.dat + 2] << 8) | (*mMap)[reg_PC.dat + 1];
 
 	// Write the contents of SP into the memory address pointed to by the next 2 bytes
-	mMap->writeMemory(address, reg_SP.lo);
-	mMap->writeMemory(address + 1, reg_SP.hi);
+	mMap->writeMemory(address, reg_SP.hi);
+	mMap->writeMemory(address + 1, reg_SP.lo);
 
 	// Increment the program counter
 	reg_PC.dat += 3;
@@ -318,7 +320,7 @@ int CPU::STOP()
 // Loads a 16 bit immediate value into DE
 int CPU::LD_DE_u16()
 {
-	reg_DE.dat = ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2];
+	reg_DE.dat = ((*mMap)[reg_PC.dat + 2] << 8) | (*mMap)[reg_PC.dat + 1];
 	reg_PC.dat += 3;
 	printf("LD DE, u16\n");
 	return 12;
@@ -562,7 +564,7 @@ int CPU::JR_NZ_r8()
 // Loads a 16 bit immediate value into HL
 int CPU::LD_HL_u16()
 {
-	reg_HL.dat = ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2];
+	reg_HL.dat = ((*mMap)[reg_PC.dat + 2] << 8) | (*mMap)[reg_PC.dat + 1];
 	reg_PC.dat += 3;
 	printf("LD HL, u16\n");
 	return 12;
@@ -787,7 +789,7 @@ int CPU::JR_NC_i8()
 // Loads a 16 bit immediate value into SP
 int CPU::LD_SP_u16()
 {
-	reg_SP.dat = ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2];
+	reg_SP.dat = ((*mMap)[reg_PC.dat + 2] << 8) | (*mMap)[reg_PC.dat + 1];
 	reg_PC.dat += 3;
 	printf("LD SP, u16\n");
 	return 12;
@@ -3067,7 +3069,7 @@ int CPU::JP_NZ_u16()
 {
 	if (!GET_ZERO_FLAG)
 	{
-		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
+		reg_PC.dat = ((*mMap)[reg_PC.dat + 2] << 8) | ((*mMap)[reg_PC.dat + 1]);
 		printf("JP NZ, %04X\n", reg_PC.dat);
 		return 16;
 	}
@@ -3083,7 +3085,7 @@ int CPU::JP_NZ_u16()
 // Jump to address u16.
 int CPU::JP_u16()
 {
-	reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
+	reg_PC.dat = ((*mMap)[reg_PC.dat + 2] << 8) | (*mMap)[reg_PC.dat + 1]; 
 	printf("JP %04X\n", reg_PC.dat);
 	return 16;
 }
