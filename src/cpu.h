@@ -204,14 +204,14 @@ private:
 		&CPU::ADC_A_L,
 		&CPU::ADC_A_HLp,
 		&CPU::ADC_A_A,
-		&CPU::SUB_B,
-		&CPU::SUB_C,
-		&CPU::SUB_D,
-		&CPU::SUB_E,
-		&CPU::SUB_H,
-		&CPU::SUB_L,
-		&CPU::SUB_HLp,
-		&CPU::SUB_A,
+		&CPU::SUB_A_B,
+		&CPU::SUB_A_C,
+		&CPU::SUB_A_D,
+		&CPU::SUB_A_E,
+		&CPU::SUB_A_H,
+		&CPU::SUB_A_L,
+		&CPU::SUB_A_HLp,
+		&CPU::SUB_A_A,
 		&CPU::SBC_A_B,
 		&CPU::SBC_A_C,
 		&CPU::SBC_A_D,
@@ -220,38 +220,38 @@ private:
 		&CPU::SBC_A_L,
 		&CPU::SBC_A_HLp,
 		&CPU::SBC_A_A,
-		&CPU::AND_B,
-		&CPU::AND_C,
-		&CPU::AND_D,
-		&CPU::AND_E,
-		&CPU::AND_H,
-		&CPU::AND_L,
-		&CPU::AND_HLp,
-		&CPU::AND_A,
-		&CPU::XOR_B,
-		&CPU::XOR_C,
-		&CPU::XOR_D,
-		&CPU::XOR_E,
-		&CPU::XOR_H,
-		&CPU::XOR_L,
-		&CPU::XOR_HLp,
-		&CPU::XOR_A,
-		&CPU::OR_B,
-		&CPU::OR_C,
-		&CPU::OR_D,
-		&CPU::OR_E,
-		&CPU::OR_H,
-		&CPU::OR_L,
-		&CPU::OR_HLp,
-		&CPU::OR_A,
-		&CPU::CP_B,
-		&CPU::CP_C,
-		&CPU::CP_D,
-		&CPU::CP_E,
-		&CPU::CP_H,
-		&CPU::CP_L,
-		&CPU::CP_HLp,
-		&CPU::CP_A,
+		&CPU::AND_A_B,
+		&CPU::AND_A_C,
+		&CPU::AND_A_D,
+		&CPU::AND_A_E,
+		&CPU::AND_A_H,
+		&CPU::AND_A_L,
+		&CPU::AND_A_HLp,
+		&CPU::AND_A_A,
+		&CPU::XOR_A_B,
+		&CPU::XOR_A_C,
+		&CPU::XOR_A_D,
+		&CPU::XOR_A_E,
+		&CPU::XOR_A_H,
+		&CPU::XOR_A_L,
+		&CPU::XOR_A_HLp,
+		&CPU::XOR_A_A,
+		&CPU::OR_A_B,
+		&CPU::OR_A_C,
+		&CPU::OR_A_D,
+		&CPU::OR_A_E,
+		&CPU::OR_A_H,
+		&CPU::OR_A_L,
+		&CPU::OR_A_HLp,
+		&CPU::OR_A_A,
+		&CPU::CP_A_B,
+		&CPU::CP_A_C,
+		&CPU::CP_A_D,
+		&CPU::CP_A_E,
+		&CPU::CP_A_H,
+		&CPU::CP_A_L,
+		&CPU::CP_A_HLp,
+		&CPU::CP_A_A,
 		&CPU::RET_NZ,
 		&CPU::POP_BC,
 		&CPU::JP_NZ_u16,
@@ -462,14 +462,14 @@ private:
 	int ADC_A_L();
 	int ADC_A_HLp();
 	int ADC_A_A();
-	int SUB_B();
-	int SUB_C();
-	int SUB_D();
-	int SUB_E();
-	int SUB_H();
-	int SUB_L();
-	int SUB_HLp();
-	int SUB_A();
+	int SUB_A_B();
+	int SUB_A_C();
+	int SUB_A_D();
+	int SUB_A_E();
+	int SUB_A_H();
+	int SUB_A_L();
+	int SUB_A_HLp();
+	int SUB_A_A();
 	int SBC_A_B();
 	int SBC_A_C();
 	int SBC_A_D();
@@ -478,38 +478,38 @@ private:
 	int SBC_A_L();
 	int SBC_A_HLp();
 	int SBC_A_A();
-	int AND_B();
-	int AND_C();
-	int AND_D();
-	int AND_E();
-	int AND_H();
-	int AND_L();
-	int AND_HLp();
-	int AND_A();
-	int XOR_B();
-	int XOR_C();
-	int XOR_D();
-	int XOR_E();
-	int XOR_H();
-	int XOR_L();
-	int XOR_HLp();
-	int XOR_A();
-	int OR_B();
-	int OR_C();
-	int OR_D();
-	int OR_E();
-	int OR_H();
-	int OR_L();
-	int OR_HLp();
-	int OR_A();
-	int CP_B();
-	int CP_C();
-	int CP_D();
-	int CP_E();
-	int CP_H();
-	int CP_L();
-	int CP_HLp();
-	int CP_A();
+	int AND_A_B();
+	int AND_A_C();
+	int AND_A_D();
+	int AND_A_E();
+	int AND_A_H();
+	int AND_A_L();
+	int AND_A_HLp();
+	int AND_A_A();
+	int XOR_A_B();
+	int XOR_A_C();
+	int XOR_A_D();
+	int XOR_A_E();
+	int XOR_A_H();
+	int XOR_A_L();
+	int XOR_A_HLp();
+	int XOR_A_A();
+	int OR_A_B();
+	int OR_A_C();
+	int OR_A_D();
+	int OR_A_E();
+	int OR_A_H();
+	int OR_A_L();
+	int OR_A_HLp();
+	int OR_A_A();
+	int CP_A_B();
+	int CP_A_C();
+	int CP_A_D();
+	int CP_A_E();
+	int CP_A_H();
+	int CP_A_L();
+	int CP_A_HLp();
+	int CP_A_A();
 	int RET_NZ();
 	int POP_BC();
 	int JP_NZ_u16();

@@ -12,6 +12,11 @@
 #define UNSET_HALF_CARRY_FLAG reg_AF.lo &= ~FLAG_HALF_CARRY_h
 #define UNSET_SUBTRACT_FLAG reg_AF.lo &= ~FLAG_SUBTRACT_n
 
+#define GET_ZERO_FLAG ((reg_AF.lo & FLAG_ZERO_z) >> 3)
+#define GET_CARRY_FLAG ((reg_AF.lo & FLAG_CARRY_c) >> 4)
+#define GET_HALF_CARRY_FLAG ((reg_AF.lo & FLAG_HALF_CARRY_h) >> 5)
+#define GET_SUBTRACT_FLAG ((reg_AF.lo & FLAG_SUBTRACT_n) >> 6)
+
 
 CPU::CPU()
 {
@@ -175,23 +180,24 @@ int CPU::LD_u16_SP()
 // Adds the contents of BC to HL
 int CPU::ADD_HL_BC()
 {
+	// Set the half carry flag if there is carry from bit 11, otherwise unset it
+	// TODO: profile (a) ? vs (a>>11) ?. byte is 0 or bit is 0 with bit shifts
+	(reg_HL.dat&0x0FFF + reg_BC.dat&0x0FFF) & 0x1000 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Set the carry flag if there is carry from bit 15, otherwise unset it
+	Word temp = reg_HL.dat;
+
+	reg_HL.dat += reg_BC.dat;
+
+	// Set carry flag if overflow from a word temp
+	(reg_HL.dat < temp) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
 	// Unset subtract flag
 	UNSET_SUBTRACT_FLAG;
 
-	// set carry flag if there is a carry from bit 16
-	Word temp = reg_HL.dat;
-
-	// This is important hi and lo will not work because of edge cases.
-	// Edge case: 0x0FFF + 0x0001 = 0x1000
-	((reg_HL.dat & 0x0FFF) + (reg_BC.dat & 0x0FFF)) >> 12 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
-
-    reg_HL.dat += reg_BC.dat;
-
-	temp < reg_HL.dat ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
-
-    reg_PC.dat += 1;
-    printf("ADD HL, BC\n");
-    return 8;
+	reg_PC.dat += 1;
+	printf("ADD HL, SP\n");
+	return 8;
 }
 
 // LD A, (BC)
@@ -415,22 +421,23 @@ int CPU::JR_i8()
 // Add DE to HL
 int CPU::ADD_HL_DE()
 {
-	// Unset subtract flag to 0
-	UNSET_SUBTRACT_FLAG;
+	// Set the half carry flag if there is carry from bit 11, otherwise unset it
+	// TODO: profile (a) ? vs (a>>11) ?. byte is 0 or bit is 0 with bit shifts
+	(reg_HL.dat&0x0FFF + reg_DE.dat&0x0FFF) & 0x1000 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
-	// Set Half Carry flag to 1 if bit 11 is 1
-	// Example: 0000 1000 0000 0000 will become 0001 0000 0000 0000
-	(reg_HL.dat & 0x0800) >> 11 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	// Set the carry flag if there is carry from bit 15, otherwise unset it
+	Word temp = reg_HL.dat;
 
-	// Set Carry flag to 1 if bit 15 is 1
-	// Example: 1000 0000 0000 0000 will become 0000 0000 0000 0001
-	(reg_HL.dat & 0x8000) >> 15 ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
-
-	// Add HL and DE
 	reg_HL.dat += reg_DE.dat;
 
+	// Set carry flag if overflow from a word temp
+	(reg_HL.dat < temp) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Unset subtract flag
+	UNSET_SUBTRACT_FLAG;
+
 	reg_PC.dat += 1;
-	printf("ADD HL, DE");
+	printf("ADD HL, SP\n");
 	return 8;
 }
 
@@ -638,6 +645,9 @@ int CPU::JR_Z_r8()
 	{
 		reg_PC.dat += (Byte)(*mMap)[reg_PC.dat + 1];
 	}
+
+	printf("JR Z, i8\n");
+	return 12;
 }
 
 // ADD HL, HL
@@ -649,6 +659,7 @@ int CPU::ADD_HL_HL()
 
 	// Set half carry flag to 1 if there was a carry from bit 11
 	// Example: 0000 1000 0000 0000 + 0000 1000 0000 0000 = 0001 0000 0000 0000
+	// TODO: profile (a) ? vs (a>>11) ? byte is 0 or bit is 0 with bit shifts
 	reg_HL.dat & 0x0800 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	// Set carry flag to 1 if there was a carry from bit 15
@@ -884,14 +895,16 @@ int CPU::JR_C_r8()
 int CPU::ADD_HL_SP()
 {
 	// Set the half carry flag if there is carry from bit 11, otherwise unset it
-	(reg_HL.dat + reg_SP.dat) & 0x1000 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	// TODO: profile (a) ? vs (a>>11) ?. byte is 0 or bit is 0 with bit shifts
+	(reg_HL.dat&0x0FFF + reg_SP.dat&0x0FFF) & 0x1000 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	// Set the carry flag if there is carry from bit 15, otherwise unset it
 	Word temp = reg_HL.dat;
 
 	reg_HL.dat += reg_SP.dat;
 
-	temp < reg_HL.dat ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+	// Set carry flag if overflow from a word temp
+	(reg_HL.dat < temp) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	// Unset subtract flag
 	UNSET_SUBTRACT_FLAG;
@@ -1619,70 +1632,947 @@ int CPU::LD_A_A()
 	printf("LD A, A\n");
 	return 4;
 }
-int CPU::ADD_A_B() { return 0; }
-int CPU::ADD_A_C() { return 0; }
-int CPU::ADD_A_D() { return 0; }
-int CPU::ADD_A_E() { return 0; }
-int CPU::ADD_A_H() { return 0; }
-int CPU::ADD_A_L() { return 0; }
-int CPU::ADD_A_HLp() { return 0; }
-int CPU::ADD_A_A() { return 0; }
-int CPU::ADC_A_B() { return 0; }
-int CPU::ADC_A_C() { return 0; }
-int CPU::ADC_A_D() { return 0; }
-int CPU::ADC_A_E() { return 0; }
-int CPU::ADC_A_H() { return 0; }
-int CPU::ADC_A_L() { return 0; }
-int CPU::ADC_A_HLp() { return 0; }
-int CPU::ADC_A_A() { return 0; }
-int CPU::SUB_B() { return 0; }
-int CPU::SUB_C() { return 0; }
-int CPU::SUB_D() { return 0; }
-int CPU::SUB_E() { return 0; }
-int CPU::SUB_H() { return 0; }
-int CPU::SUB_L() { return 0; }
-int CPU::SUB_HLp() { return 0; }
-int CPU::SUB_A() { return 0; }
-int CPU::SBC_A_B() { return 0; }
-int CPU::SBC_A_C() { return 0; }
-int CPU::SBC_A_D() { return 0; }
-int CPU::SBC_A_E() { return 0; }
-int CPU::SBC_A_H() { return 0; }
-int CPU::SBC_A_L() { return 0; }
-int CPU::SBC_A_HLp() { return 0; }
-int CPU::SBC_A_A() { return 0; }
-int CPU::AND_B() { return 0; }
-int CPU::AND_C() { return 0; }
-int CPU::AND_D() { return 0; }
-int CPU::AND_E() { return 0; }
-int CPU::AND_H() { return 0; }
-int CPU::AND_L() { return 0; }
-int CPU::AND_HLp() { return 0; }
-int CPU::AND_A() { return 0; }
-int CPU::XOR_B() { return 0; }
-int CPU::XOR_C() { return 0; }
-int CPU::XOR_D() { return 0; }
-int CPU::XOR_E() { return 0; }
-int CPU::XOR_H() { return 0; }
-int CPU::XOR_L() { return 0; }
-int CPU::XOR_HLp() { return 0; }
-int CPU::XOR_A() { return 0; }
-int CPU::OR_B() { return 0; }
-int CPU::OR_C() { return 0; }
-int CPU::OR_D() { return 0; }
-int CPU::OR_E() { return 0; }
-int CPU::OR_H() { return 0; }
-int CPU::OR_L() { return 0; }
-int CPU::OR_HLp() { return 0; }
-int CPU::OR_A() { return 0; }
-int CPU::CP_B() { return 0; }
-int CPU::CP_C() { return 0; }
-int CPU::CP_D() { return 0; }
-int CPU::CP_E() { return 0; }
-int CPU::CP_H() { return 0; }
-int CPU::CP_L() { return 0; }
-int CPU::CP_HLp() { return 0; }
-int CPU::CP_A() { return 0; }
+
+// ADD A, B
+// Adds B to A
+int CPU::ADD_A_B()
+{
+	// Set zero flag if result is zero
+	reg_AF.hi + reg_BC.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	// Set carry flag if carry from bit 7
+	// Set the carry flag if there is carry from bit 15, otherwise unset it
+	Byte temp = reg_AF.hi;
+
+	reg_AF.hi += reg_BC.hi;
+
+	// Set carry flag if overflow from a byte temp
+	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("ADD A, B\n");
+	return 4;
+}
+
+// ADD A, C
+// Adds C to A
+int CPU::ADD_A_C()
+{
+	// Set zero flag if result is zero
+	reg_AF.hi + reg_BC.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	// Set carry flag if carry from bit 7
+	// Set the carry flag if there is carry from bit 15, otherwise unset it
+	Byte temp = reg_AF.hi;
+
+	reg_AF.hi += reg_BC.lo;
+
+	// Set carry flag if overflow from a byte temp
+	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("ADD A, C\n");
+	return 4;
+}
+
+// ADD A, D
+// Adds D to A
+int CPU::ADD_A_D()
+{
+	// Set zero flag if result is zero
+	reg_AF.hi + reg_DE.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	// Set carry flag if carry from bit 7
+	// Set the carry flag if there is carry from bit 15, otherwise unset it
+	Byte temp = reg_AF.hi;
+
+	reg_AF.hi += reg_DE.hi;
+
+	// Set carry flag if overflow from a byte temp
+	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("ADD A, D\n");
+	return 4;
+}
+
+// ADD A, E
+// Adds E to A
+int CPU::ADD_A_E()
+{
+	// Set zero flag if result is zero
+	reg_AF.hi + reg_DE.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	// Set carry flag if carry from bit 7
+	// Set the carry flag if there is carry from bit 15, otherwise unset it
+	Byte temp = reg_AF.hi;
+
+	reg_AF.hi += reg_DE.lo;
+
+	// Set carry flag if overflow from a byte temp
+	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("ADD A, E\n");
+	return 4;
+}
+
+// ADD A, H
+// Adds H to A
+int CPU::ADD_A_H()
+{
+
+	// Set zero flag if result is zero
+	reg_AF.hi + reg_HL.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	// Set carry flag if carry from bit 7
+	// Set the carry flag if there is carry from bit 15, otherwise unset it
+	Byte temp = reg_AF.hi;
+
+	reg_AF.hi += reg_HL.hi;
+
+	// Set carry flag if overflow from a byte temp
+	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("ADD A, H\n");
+	return 4;
+}
+
+// ADD A, L
+// Adds L to A
+int CPU::ADD_A_L()
+{
+	// Set zero flag if result is zero
+	reg_AF.hi + reg_HL.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	// Set carry flag if carry from bit 7
+	// Set the carry flag if there is carry from bit 15, otherwise unset it
+	Byte temp = reg_AF.hi;
+
+	reg_AF.hi += reg_HL.lo;
+
+	// Set carry flag if overflow from a byte temp
+	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("ADD A, L\n");
+	return 4;
+}
+
+// ADD A, (HL)
+// Adds the value at address HL to A
+int CPU::ADD_A_HLp()
+{
+	// Set zero flag if result is zero
+	reg_AF.hi + (*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	// Set carry flag if carry from bit 7
+	// Set the carry flag if there is carry from bit 15, otherwise unset it
+	Byte temp = reg_AF.hi;
+
+	reg_AF.hi += (*mMap)[reg_HL.dat];
+
+	// Set carry flag if overflow from a byte temp
+	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("ADD A, (HL)\n");
+	return 8;
+}
+
+// ADD A, A
+// Adds A to A
+int CPU::ADD_A_A()
+{
+	// Set zero flag if result is zero
+	reg_AF.hi + reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	// Set carry flag if carry from bit 7
+	// Set the carry flag if there is carry from bit 15, otherwise unset it
+	Byte temp = reg_AF.hi;
+
+	reg_AF.hi += reg_AF.hi;
+
+	// Set carry flag if overflow from a byte temp
+	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("ADD A, A\n");
+	return 4;
+}
+
+// ADC A, B
+// Adds B to A with carry
+int CPU::ADC_A_B()
+{
+	// Set zero flag if result is zero
+	reg_AF.hi + reg_BC.hi + GET_CARRY_FLAG ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	// Set carry flag if carry from bit 7
+	// Set the carry flag if there is carry from bit 15, otherwise unset it
+	Byte temp = reg_AF.hi;
+
+	reg_AF.hi += reg_BC.hi + GET_CARRY_FLAG;
+
+	// Set carry flag if overflow from a byte temp
+	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("ADC A, B\n");
+	return 4;
+}
+
+// ADC A, C
+// Adds C to A with carry
+int CPU::ADC_A_C()
+{
+	// Set zero flag if result is zero
+	reg_AF.hi + reg_BC.lo + GET_CARRY_FLAG ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	// Set half carry flag if carry from bit 3
+	((reg_AF.hi & 0x0F) + (reg_BC.lo & 0x0F) + GET_CARRY_FLAG) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Unset subtract flag
+	UNSET_SUBTRACT_FLAG;
+
+	// Set carry flag if carry from bit 7
+	// Set the carry flag if there is carry from bit 15, otherwise unset it
+	Byte temp = reg_AF.hi;
+
+	reg_AF.hi += reg_BC.lo + GET_CARRY_FLAG;
+
+	// Set carry flag if overflow from a byte temp
+	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("ADC A, D\n");
+	return 4;
+}
+
+// ADC A, D
+// Adds D to A with carry
+int CPU::ADC_A_D()
+{
+	// Set zero flag if result is zero
+	reg_AF.hi + reg_DE.hi + GET_CARRY_FLAG ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	// Set half carry flag if carry from bit 3
+	((reg_AF.hi & 0x0F) + (reg_DE.hi & 0x0F) + GET_CARRY_FLAG) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Unset subtract flag
+	UNSET_SUBTRACT_FLAG;
+
+	// Set carry flag if carry from bit 7
+	// Set the carry flag if there is carry from bit 15, otherwise unset it
+	Byte temp = reg_AF.hi;
+
+	reg_AF.hi += reg_DE.hi + GET_CARRY_FLAG;
+
+	// Set carry flag if overflow from a byte temp
+	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("ADC A, D\n");
+	return 4;
+}
+
+// ADC A, E
+// Adds E to A with carry
+int CPU::ADC_A_E()
+{
+	// Set zero flag if result is zero
+	reg_AF.hi + reg_DE.lo + GET_CARRY_FLAG ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	// Set half carry flag if carry from bit 3
+	((reg_AF.hi & 0x0F) + (reg_DE.lo & 0x0F) + GET_CARRY_FLAG) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Unset subtract flag
+	UNSET_SUBTRACT_FLAG;
+
+	// Set carry flag if carry from bit 7
+	// Set the carry flag if there is carry from bit 15, otherwise unset it
+	Byte temp = reg_AF.hi;
+
+	reg_AF.hi += reg_DE.lo + GET_CARRY_FLAG;
+
+	// Set carry flag if overflow from a byte temp
+	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("ADC A, E\n");
+	return 4;
+}
+
+// ADC A, H
+// Adds H to A with carry
+int CPU::ADC_A_H()
+{
+	// Set zero flag if result is zero
+	reg_AF.hi + reg_HL.hi + GET_CARRY_FLAG ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	// Set half carry flag if carry from bit 3
+	((reg_AF.hi & 0x0F) + (reg_HL.hi & 0x0F) + GET_CARRY_FLAG) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Unset subtract flag
+	UNSET_SUBTRACT_FLAG;
+
+	// Set carry flag if carry from bit 7
+	// Set the carry flag if there is carry from bit 15, otherwise unset it
+	Byte temp = reg_AF.hi;
+
+	reg_AF.hi += reg_HL.hi + GET_CARRY_FLAG;
+
+	// Set carry flag if overflow from a byte temp
+	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("ADC A, H\n");
+	return 4;
+}
+
+// ADC A, L
+// Adds L to A with carry
+int CPU::ADC_A_L()
+{
+	// Set zero flag if result is zero
+	reg_AF.hi + reg_HL.lo + GET_CARRY_FLAG ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	// Set half carry flag if carry from bit 3
+	((reg_AF.hi & 0x0F) + (reg_HL.lo & 0x0F) + GET_CARRY_FLAG) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Unset subtract flag
+	UNSET_SUBTRACT_FLAG;
+
+	// Set carry flag if carry from bit 7
+	// Set the carry flag if there is carry from bit 15, otherwise unset it
+	Byte temp = reg_AF.hi;
+
+	reg_AF.hi += reg_HL.lo + GET_CARRY_FLAG;
+
+	// Set carry flag if overflow from a byte temp
+	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("ADC A, L\n");
+	return 4;
+}
+
+// ADC A, (HL)
+int CPU::ADC_A_HLp()
+{
+	// Set zero flag if result is zero
+	reg_AF.hi + (*mMap)[reg_HL.dat] + GET_CARRY_FLAG ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	// Set half carry flag if carry from bit 3
+	((reg_AF.hi & 0x0F) + ((*mMap)[reg_HL.dat] & 0x0F) + GET_CARRY_FLAG) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Unset subtract flag
+	UNSET_SUBTRACT_FLAG;
+
+	// Set carry flag if carry from bit 7
+	// Set the carry flag if there is carry from bit 15, otherwise unset it
+	Byte temp = reg_AF.hi;
+
+	reg_AF.hi += (*mMap)[reg_HL.dat] + GET_CARRY_FLAG;
+
+	// Set carry flag if overflow from a byte temp
+	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("ADC A, (HL)\n");
+	return 8;
+}
+
+// ADC A, A
+// Adds A to A with carry
+int CPU::ADC_A_A()
+{
+	// Set zero flag if result is zero
+	reg_AF.hi + reg_AF.hi + GET_CARRY_FLAG ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	// Set half carry flag if carry from bit 3
+	((reg_AF.hi & 0x0F) + (reg_AF.hi & 0x0F) + GET_CARRY_FLAG) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Unset subtract flag
+	UNSET_SUBTRACT_FLAG;
+
+	// Set carry flag if carry from bit 7
+	// Set the carry flag if there is carry from bit 15, otherwise unset it
+	Byte temp = reg_AF.hi;
+
+	reg_AF.hi += reg_AF.hi + GET_CARRY_FLAG;
+
+	// Set carry flag if overflow from a byte temp
+	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	reg_PC.dat += 1;
+	printf("ADC A, A\n");
+	return 4;
+}
+
+// SUB A, B
+// Subtracts B from A
+int CPU::SUB_A_B()
+{
+	// Set half carry flag if borrow from bit 4
+	(reg_AF.hi & 0x0F) < (reg_BC.hi & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Set subtract flag
+	SET_SUBTRACT_FLAG;
+
+	// Set carry flag if borrow from bit 7
+	// Set the carry flag if there is borrow from bit 15, otherwise unset it
+	Byte temp = reg_AF.hi;
+
+	reg_AF.hi -= reg_BC.hi;
+
+	// Set carry flag if overflow from a byte temp
+	temp < reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("SUB A, B\n");
+	return 4;
+}
+
+// SUB A, C
+// Subtracts C from A
+int CPU::SUB_A_C()
+{
+	// Set half carry flag if borrow from bit 4
+	(reg_AF.hi & 0x0F) < (reg_BC.lo & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Set carry flag if borrow from bit 7 i.e. C > A
+	(reg_AF.hi < reg_BC.lo) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set subtract flag
+	SET_SUBTRACT_FLAG;
+
+	reg_AF.hi -= reg_BC.lo;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("SUB A, C\n");
+	return 4;
+}
+
+// SUB A, D
+// Subtracts D from A
+int CPU::SUB_A_D()
+{
+	// Set half carry flag if borrow from bit 4
+	(reg_AF.hi & 0x0F) < (reg_DE.hi & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Set carry flag if borrow from bit 7 i.e. D > A
+	(reg_AF.hi < reg_DE.hi) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set subtract flag
+	SET_SUBTRACT_FLAG;
+
+	reg_AF.hi -= reg_DE.hi;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("SUB A, D\n");
+	return 4;
+}
+
+// SUB A, E
+// Subtracts E from A
+int CPU::SUB_A_E()
+{
+	// Set half carry flag if borrow from bit 4
+	(reg_AF.hi & 0x0F) < (reg_DE.lo & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Set carry flag if borrow from bit 7 i.e. E > A
+	(reg_AF.hi < reg_DE.lo) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set subtract flag
+	SET_SUBTRACT_FLAG;
+
+	reg_AF.hi -= reg_DE.lo;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("SUB A, E\n");
+	return 4;
+}
+
+// SUB A, H
+// Subtracts H from A
+int CPU::SUB_A_H()
+{
+	// Set half carry flag if borrow from bit 4
+	(reg_AF.hi & 0x0F) < (reg_HL.hi & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Set carry flag if borrow from bit 7 i.e. H > A
+	(reg_AF.hi < reg_HL.hi) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set subtract flag
+	SET_SUBTRACT_FLAG;
+
+	reg_AF.hi -= reg_HL.hi;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("SUB A, H\n");
+	return 4;
+}
+
+// SUB A, L
+// Subtracts L from A
+int CPU::SUB_A_L()
+{
+	// Set half carry flag if borrow from bit 4
+	(reg_AF.hi & 0x0F) < (reg_HL.lo & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Set carry flag if borrow from bit 7 i.e. L > A
+	(reg_AF.hi < reg_HL.lo) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set subtract flag
+	SET_SUBTRACT_FLAG;
+
+	reg_AF.hi -= reg_HL.lo;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("SUB A, L\n");
+	return 4;
+}
+
+// SUB A, (HL)
+// Subtracts value at address HL from A
+int CPU::SUB_A_HLp()
+{
+	// Set half carry flag if borrow from bit 4
+	(reg_AF.hi & 0x0F) < ((*mMap)[reg_HL.dat] & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Set carry flag if borrow from bit 7 i.e. (HL) > A
+	(reg_AF.hi < (*mMap)[reg_HL.dat]) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set subtract flag
+	SET_SUBTRACT_FLAG;
+
+	reg_AF.hi -= (*mMap)[reg_HL.dat];
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("SUB A, (HL)\n");
+	return 8;
+}
+
+// SUB A, A
+int CPU::SUB_A_A()
+{
+	// Set subtract flag
+	SET_SUBTRACT_FLAG;
+
+	// Set zero flag
+	SET_ZERO_FLAG;
+
+	// Unset half carry flag
+	UNSET_HALF_CARRY_FLAG;
+
+	// Unset carry flag
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi = 0;
+
+	reg_PC.dat += 1;
+	printf("SUB A, A\n");
+	return 4;
+}
+
+// SBC A, B
+// Subtracts B + carry flag from A
+int CPU::SBC_A_B()
+{
+	// Set half carry flag if borrow from bit 4
+	(reg_AF.hi & 0x0F) < (reg_BC.hi & 0x0F) + GET_CARRY_FLAG ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Set carry flag if borrow from bit 7 i.e. B + C > A
+	(reg_AF.hi < (reg_BC.hi + GET_CARRY_FLAG)) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set subtract flag
+	SET_SUBTRACT_FLAG;
+
+	reg_AF.hi -= (reg_BC.hi + GET_CARRY_FLAG);
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("SBC A, B\n");
+	return 4;
+}
+
+// SBC A, C
+// Subtracts C + carry flag from A
+int CPU::SBC_A_C()
+{
+	// Set half carry flag if borrow from bit 4
+	(reg_AF.hi & 0x0F) < (reg_BC.lo & 0x0F) + GET_CARRY_FLAG ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Set carry flag if borrow from bit 7 i.e. C + C > A
+	(reg_AF.hi < (reg_BC.lo + GET_CARRY_FLAG)) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set subtract flag
+	SET_SUBTRACT_FLAG;
+
+	reg_AF.hi -= (reg_BC.lo + GET_CARRY_FLAG);
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("SBC A, C\n");
+	return 4;
+}
+
+// SBC A, D
+// Subtracts D + carry flag from A
+int CPU::SBC_A_D()
+{
+	// Set half carry flag if borrow from bit 4
+	(reg_AF.hi & 0x0F) < (reg_DE.hi & 0x0F) + GET_CARRY_FLAG ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Set carry flag if borrow from bit 7 i.e. D + C > A
+	(reg_AF.hi < (reg_DE.hi + GET_CARRY_FLAG)) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set subtract flag
+	SET_SUBTRACT_FLAG;
+
+	reg_AF.hi -= (reg_DE.hi + GET_CARRY_FLAG);
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("SBC A, D\n");
+	return 4;
+}
+
+// SBC A, E
+// Subtracts E + carry flag from A
+int CPU::SBC_A_E()
+{
+	// Set half carry flag if borrow from bit 4
+	(reg_AF.hi & 0x0F) < (reg_DE.lo & 0x0F) + GET_CARRY_FLAG ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Set carry flag if borrow from bit 7 i.e. E + C > A
+	(reg_AF.hi < (reg_DE.lo + GET_CARRY_FLAG)) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set subtract flag
+	SET_SUBTRACT_FLAG;
+
+	reg_AF.hi -= (reg_DE.lo + GET_CARRY_FLAG);
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("SBC A, E\n");
+	return 4;
+}
+
+// SBC A, H
+// Subtracts H + carry flag from A
+int CPU::SBC_A_H()
+{
+	// Set half carry flag if borrow from bit 4
+	(reg_AF.hi & 0x0F) < (reg_HL.hi & 0x0F) + GET_CARRY_FLAG ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Set carry flag if borrow from bit 7 i.e. H + C > A
+	(reg_AF.hi < (reg_HL.hi + GET_CARRY_FLAG)) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set subtract flag
+	SET_SUBTRACT_FLAG;
+
+	reg_AF.hi -= (reg_HL.hi + GET_CARRY_FLAG);
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("SBC A, H\n");
+	return 4;
+}
+
+// SBC A, L
+// Subtracts L + carry flag from A
+int CPU::SBC_A_L()
+{
+	// Set half carry flag if borrow from bit 4
+	(reg_AF.hi & 0x0F) < (reg_HL.lo & 0x0F) + GET_CARRY_FLAG ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Set carry flag if borrow from bit 7 i.e. L + C > A
+	(reg_AF.hi < (reg_HL.lo + GET_CARRY_FLAG)) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set subtract flag
+	SET_SUBTRACT_FLAG;
+
+	reg_AF.hi -= (reg_HL.lo + GET_CARRY_FLAG);
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("SBC A, L\n");
+	return 4;
+}
+
+// SBC A, (HL)
+// Subtracts value at address HL + carry flag from A
+int CPU::SBC_A_HLp()
+{
+	// Set half carry flag if borrow from bit 4
+	(reg_AF.hi & 0x0F) < ((*mMap)[reg_HL.dat] & 0x0F) + GET_CARRY_FLAG ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Set carry flag if borrow from bit 7 i.e. (HL) + C > A
+	(reg_AF.hi < ((*mMap)[reg_HL.dat] + GET_CARRY_FLAG)) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set subtract flag
+	SET_SUBTRACT_FLAG;
+
+	reg_AF.hi -= ((*mMap)[reg_HL.dat] + GET_CARRY_FLAG);
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("SBC A, (HL)\n");
+	return 8;
+}
+
+// SBC A, A
+// Subtracts A + carry flag from A
+int CPU::SBC_A_A()
+{
+	// Set half carry flag if borrow from bit 4
+	(reg_AF.hi & 0x0F) < (reg_AF.hi & 0x0F) + GET_CARRY_FLAG ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Set carry flag if borrow from bit 7 i.e. A + C > A
+	(reg_AF.hi < (reg_AF.hi + GET_CARRY_FLAG)) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set subtract flag
+	SET_SUBTRACT_FLAG;
+
+	reg_AF.hi -= (reg_AF.hi + GET_CARRY_FLAG);
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("SBC A, A\n");
+	return 4;
+}
+
+// AND A, B
+// Performs bitwise AND on A and B
+int CPU::AND_A_B()
+{
+	// Set half carry flag
+	SET_HALF_CARRY_FLAG;
+
+	// Unset subtract and carry flags
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi &= reg_BC.hi;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("AND A, B\n");
+	return 4;
+}
+
+// AND A, C
+// Performs bitwise AND on A and C
+int CPU::AND_A_C()
+{
+	// Set half carry flag
+	SET_HALF_CARRY_FLAG;
+
+	// Unset subtract and carry flags
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi &= reg_BC.lo;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("AND A, C\n");
+	return 4;
+}
+
+// AND A, D
+// Performs bitwise AND on A and D
+int CPU::AND_A_D()
+{
+	// Set half carry flag
+	SET_HALF_CARRY_FLAG;
+
+	// Unset subtract and carry flags
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi &= reg_DE.hi;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("AND A, D\n");
+	return 4;
+}
+
+// AND A, E
+// Performs bitwise AND on A and E
+int CPU::AND_A_E()
+{
+	// Set half carry flag
+	SET_HALF_CARRY_FLAG;
+
+	// Unset subtract and carry flags
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi &= reg_DE.lo;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("AND A, E\n");
+	return 4;
+}
+
+// AND A, H
+// Performs bitwise AND on A and H
+int CPU::AND_A_H()
+{
+	// Set half carry flag
+	SET_HALF_CARRY_FLAG;
+
+	// Unset subtract and carry flags
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi &= reg_HL.hi;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("AND A, H\n");
+	return 4;
+}
+
+// AND A, L
+// Performs bitwise AND on A and L
+int CPU::AND_A_L()
+{
+	// Set half carry flag
+	SET_HALF_CARRY_FLAG;
+
+	// Unset subtract and carry flags
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi &= reg_HL.lo;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("AND A, L\n");
+	return 4;
+}
+
+// AND A, (HL)
+// Performs bitwise AND on A and value at address HL
+int CPU::AND_A_HLp()
+{
+	// Set half carry flag
+	SET_HALF_CARRY_FLAG;
+
+	// Unset subtract and carry flags
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi &= (*mMap)[reg_HL.dat];
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("AND A, (HL)\n");
+	return 8;
+}
+
+// AND A, A
+// Performs bitwise AND on A and A
+int CPU::AND_A_A()
+{
+	// Set half carry flag
+	SET_HALF_CARRY_FLAG;
+
+	// Unset subtract and carry flags
+	UNSET_SUBTRACT_FLAG;
+	UNSET_CARRY_FLAG;
+
+	reg_AF.hi &= reg_AF.hi;
+
+	// Set zero flag if result is zero
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
+	reg_PC.dat += 1;
+	printf("AND A, A\n");
+	return 4;
+}
+int CPU::XOR_A_B() { return 0; }
+int CPU::XOR_A_C() { return 0; }
+int CPU::XOR_A_D() { return 0; }
+int CPU::XOR_A_E() { return 0; }
+int CPU::XOR_A_H() { return 0; }
+int CPU::XOR_A_L() { return 0; }
+int CPU::XOR_A_HLp() { return 0; }
+int CPU::XOR_A_A() { return 0; }
+int CPU::OR_A_B() { return 0; }
+int CPU::OR_A_C() { return 0; }
+int CPU::OR_A_D() { return 0; }
+int CPU::OR_A_E() { return 0; }
+int CPU::OR_A_H() { return 0; }
+int CPU::OR_A_L() { return 0; }
+int CPU::OR_A_HLp() { return 0; }
+int CPU::OR_A_A() { return 0; }
+int CPU::CP_A_B() { return 0; }
+int CPU::CP_A_C() { return 0; }
+int CPU::CP_A_D() { return 0; }
+int CPU::CP_A_E() { return 0; }
+int CPU::CP_A_H() { return 0; }
+int CPU::CP_A_L() { return 0; }
+int CPU::CP_A_HLp() { return 0; }
+int CPU::CP_A_A() { return 0; }
 int CPU::RET_NZ() { return 0; }
 int CPU::POP_BC() { return 0; }
 int CPU::JP_NZ_u16() { return 0; }
