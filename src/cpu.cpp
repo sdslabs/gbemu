@@ -178,8 +178,8 @@ int CPU::LD_u16_SP()
 	Word address = ((*mMap)[reg_PC.dat + 2] << 8) | (*mMap)[reg_PC.dat + 1];
 
 	// Write the contents of SP into the memory address pointed to by the next 2 bytes
-	mMap->writeMemory(address, reg_SP.hi);
-	mMap->writeMemory(address + 1, reg_SP.lo);
+	mMap->writeMemory(address, reg_SP.lo);
+	mMap->writeMemory(address + 1, reg_SP.hi);
 
 	// Increment the program counter
 	reg_PC.dat += 3;
@@ -216,7 +216,7 @@ int CPU::ADD_HL_BC()
 // Loads the contents of the memory address pointed to by BC into A
 int CPU::LD_A_BC()
 {
-	reg_AF.lo = (*mMap)[reg_BC.dat];
+	reg_AF.hi = (*mMap)[reg_BC.dat];
 	reg_PC.dat += 1;
 	printf("LD A, (BC)\n");
 	return 8;
