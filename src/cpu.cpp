@@ -708,7 +708,7 @@ int CPU::DEC_HL()
 int CPU::INC_L()
 {
 	// Set the half carry flag if there is carry from bit 3, otherwise unset it
-	((reg_HL.lo & 0x0F) == 0x0F ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	((reg_HL.lo & 0x0F) == 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	reg_HL.lo += 1;
 
@@ -970,7 +970,7 @@ int CPU::INC_A()
 int CPU::DEC_A()
 {
 	// Set the half carry flag if there is borrow from bit 4, otherwise unset it
-	((reg_AF.hi & 0x0F) == 0x0F ? UNSET_HALF_CARRY_FLAG : SET_HALF_CARRY_FLAG;
+	((reg_AF.hi & 0x0F) == 0x0F) ? UNSET_HALF_CARRY_FLAG : SET_HALF_CARRY_FLAG;
 
 	reg_AF.hi -= 1;
 
