@@ -3413,6 +3413,8 @@ int CPU::RETI()
 {
 	reg_PC.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
 	reg_SP.dat += 2;
+	printf("RETI\n");
+	return 16;
 }
 
 // JP C, u16
