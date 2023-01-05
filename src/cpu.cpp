@@ -25,7 +25,7 @@
 #define GET_ZERO_FLAG ((reg_AF.lo & FLAG_ZERO_z) >> 7)
 #define GET_SUBTRACT_FLAG ((reg_AF.lo & FLAG_SUBTRACT_n) >> 6)
 #define GET_HALF_CARRY_FLAG ((reg_AF.lo & FLAG_HALF_CARRY_h) >> 5)
-#define GET_CARRY_FLAG ((reg_AF.lo & FLAG_CARRY_c) >> 4) 
+#define GET_CARRY_FLAG ((reg_AF.lo & FLAG_CARRY_c) >> 4)
 
 CPU::CPU()
 {
@@ -102,7 +102,7 @@ int CPU::INC_B()
 {
 
 	// Set the half carry flag if there is carry from bit 3, otherwise unset it
-	reg_BC.hi & 0x0F ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	((reg_BC.hi & 0x0F) == 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	reg_BC.hi += 1;
 
@@ -127,7 +127,7 @@ int CPU::DEC_B()
 	reg_BC.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	// Set the half carry flag if there is borrow from bit 4, otherwise unset it
-	reg_BC.hi & 0x0F ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	((reg_BC.hi & 0x0F) == 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	// Set the subtract flag
 	SET_SUBTRACT_FLAG;
@@ -235,7 +235,7 @@ int CPU::DEC_BC()
 int CPU::INC_C()
 {
 	// Set the half carry flag if there is carry from bit 3, otherwise unset it
-	reg_BC.lo & 0x0F ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	((reg_BC.lo & 0x0F) == 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	reg_BC.lo += 1;
 
@@ -260,7 +260,7 @@ int CPU::DEC_C()
 	reg_BC.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	// Set the half carry flag if there is borrow from bit 4, otherwise unset it
-	reg_BC.lo & 0x0F ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	((reg_BC.lo & 0x0F) == 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	// Set the subtract flag
 	SET_SUBTRACT_FLAG;
@@ -349,7 +349,7 @@ int CPU::INC_DE()
 int CPU::INC_D()
 {
 	// Set the half carry flag if there is carry from bit 3, otherwise unset it
-	reg_DE.hi & 0x0F ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	((reg_DE.hi & 0x0F) == 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	reg_DE.hi += 1;
 
@@ -374,7 +374,7 @@ int CPU::DEC_D()
 	reg_DE.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	// Set the half carry flag if there is borrow from bit 4, otherwise unset it
-	reg_DE.hi & 0x0F ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	((reg_DE.hi & 0x0F) == 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	// Set the subtract flag
 	SET_SUBTRACT_FLAG;
@@ -475,7 +475,7 @@ int CPU::DEC_DE()
 int CPU::INC_E()
 {
 	// Set the half carry flag if there is carry from bit 3, otherwise unset it
-	reg_DE.lo & 0x0F ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	((reg_DE.lo & 0x0F) == 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	reg_DE.lo += 1;
 
@@ -500,7 +500,7 @@ int CPU::DEC_E()
 	reg_DE.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	// Set the half carry flag if there is borrow from bit 4, otherwise unset it
-	reg_DE.lo & 0x0F ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	((reg_DE.lo & 0x0F) == 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	// Set the subtract flag
 	SET_SUBTRACT_FLAG;
@@ -594,7 +594,7 @@ int CPU::INC_HL()
 int CPU::INC_H()
 {
 	// Set the half carry flag if there is carry from bit 3, otherwise unset it
-	reg_HL.hi & 0x0F ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	((reg_HL.hi & 0x0F) == 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	reg_HL.hi += 1;
 
@@ -619,7 +619,7 @@ int CPU::DEC_H()
 	reg_HL.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	// Set the half carry flag if there is borrow from bit 4, otherwise unset it
-	reg_HL.hi & 0x0F ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	((reg_HL.hi & 0x0F) == 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	// Set the subtract flag
 	SET_SUBTRACT_FLAG;
@@ -708,7 +708,7 @@ int CPU::DEC_HL()
 int CPU::INC_L()
 {
 	// Set the half carry flag if there is carry from bit 3, otherwise unset it
-	reg_HL.lo & 0x0F ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	((reg_HL.lo & 0x0F) == 0x0F ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	reg_HL.lo += 1;
 
@@ -733,7 +733,7 @@ int CPU::DEC_L()
 	reg_HL.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	// Set the half carry flag if there is borrow from bit 4, otherwise unset it
-	reg_HL.lo & 0x0F ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	((reg_HL.lo & 0x0F) == 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	// Set the subtract flag
 	SET_SUBTRACT_FLAG;
@@ -843,7 +843,7 @@ int CPU::DEC_HLp()
 	Byte temp = (*mMap)[reg_HL.dat];
 
 	// Set the half carry flag if there is borrow from bit 4, otherwise unset it
-	temp & 0x0F ? UNSET_HALF_CARRY_FLAG : SET_HALF_CARRY_FLAG;
+	((temp & 0x0F) == 0x0F) ? UNSET_HALF_CARRY_FLAG : SET_HALF_CARRY_FLAG;
 
 	temp -= 1;
 
@@ -950,7 +950,7 @@ int CPU::DEC_SP()
 int CPU::INC_A()
 {
 	// Set the half carry flag if there is carry from bit 3, otherwise unset it
-	reg_AF.hi & 0x0F ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	(reg_AF.hi & 0x0F) == 0x0F ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	reg_AF.hi += 1;
 
@@ -970,7 +970,7 @@ int CPU::INC_A()
 int CPU::DEC_A()
 {
 	// Set the half carry flag if there is borrow from bit 4, otherwise unset it
-	reg_AF.hi & 0x0F ? UNSET_HALF_CARRY_FLAG : SET_HALF_CARRY_FLAG;
+	((reg_AF.hi & 0x0F) == 0x0F ? UNSET_HALF_CARRY_FLAG : SET_HALF_CARRY_FLAG;
 
 	reg_AF.hi -= 1;
 
