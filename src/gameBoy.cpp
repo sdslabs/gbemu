@@ -24,8 +24,8 @@ GBE::GBE()
 	// Loads a 16 bit immediate into the register BC
 	// Final State: BC = 0XE001
 	gbe_mMap->debugWriteMemory(0x0101, 0x01);
-	gbe_mMap->debugWriteMemory(0x0102, 0xE0);
-	gbe_mMap->debugWriteMemory(0x0103, 0x01);
+	gbe_mMap->debugWriteMemory(0x0102, 0x01);
+	gbe_mMap->debugWriteMemory(0x0103, 0xE0);
 
 	// LD (BC), A
 	// Loads the value of the accumulator into the memory address pointed to by BC
@@ -54,8 +54,8 @@ GBE::GBE()
 
 	// Set BC = 0X0FFF to test INC B for H flag
 	gbe_mMap->debugWriteMemory(0x010B, 0x01);
-	gbe_mMap->debugWriteMemory(0x010C, 0x0F);
-	gbe_mMap->debugWriteMemory(0x010D, 0xFF);
+	gbe_mMap->debugWriteMemory(0x010C, 0xFF);
+	gbe_mMap->debugWriteMemory(0x010D, 0x0F);
 
 	// INC B
 	// Increments the value of B by 1
@@ -69,8 +69,8 @@ GBE::GBE()
 
 	// Set BC = 0X01FF to test DEC B for Z flag
 	gbe_mMap->debugWriteMemory(0x0110, 0x01);
-	gbe_mMap->debugWriteMemory(0x0111, 0x01);
-	gbe_mMap->debugWriteMemory(0x0112, 0xFF);
+	gbe_mMap->debugWriteMemory(0x0111, 0xFF);
+	gbe_mMap->debugWriteMemory(0x0112, 0x01);
 
 	// DEC B
 	// Decrements the value of B by 1
@@ -79,8 +79,8 @@ GBE::GBE()
 
 	// Set BC = 0X020F to test DEC B
 	gbe_mMap->debugWriteMemory(0x0114, 0x01);
-	gbe_mMap->debugWriteMemory(0x0115, 0x02);
-	gbe_mMap->debugWriteMemory(0x0116, 0x0F);
+	gbe_mMap->debugWriteMemory(0x0115, 0x0F);
+	gbe_mMap->debugWriteMemory(0x0116, 0x02);
 
 	// DEC B
 	// Decrements the value of B by 1
