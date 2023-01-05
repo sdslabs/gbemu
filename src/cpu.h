@@ -294,7 +294,7 @@ private:
 		&CPU::RST_20H,
 		&CPU::ADD_SP_i8,
 		&CPU::JP_HL,
-		&CPU::LD_a16_A,
+		&CPU::LD_u16_A,
 		&CPU::UNKNOWN,
 		&CPU::UNKNOWN,
 		&CPU::UNKNOWN,
@@ -310,7 +310,7 @@ private:
 		&CPU::RST_30H,
 		&CPU::LD_HL_SP_i8,
 		&CPU::LD_SP_HL,
-		&CPU::LD_A_a16,
+		&CPU::LD_A_u16,
 		&CPU::EI,
 		&CPU::UNKNOWN,
 		&CPU::UNKNOWN,
@@ -548,7 +548,7 @@ private:
 	int RST_20H();
 	int ADD_SP_i8();
 	int JP_HL();
-	int LD_a16_A();
+	int LD_u16_A();
 	int XOR_A_u8();
 	int RST_28H();
 	int LDH_A_a8();
@@ -560,7 +560,7 @@ private:
 	int RST_30H();
 	int LD_HL_SP_i8();
 	int LD_SP_HL();
-	int LD_A_a16();
+	int LD_A_u16();
 	int EI();
 	int CP_u8();
 	int RST_38H();

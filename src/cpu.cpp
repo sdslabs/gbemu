@@ -3190,7 +3190,7 @@ int CPU::JP_Z_u16()
 {
 	if (GET_ZERO_FLAG)
 	{
-		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
+		reg_PC.dat = (*mMap)[reg_PC.dat + 2] | ((*mMap)[reg_PC.dat + 1] << 8);
 		printf("JP Z, %04X\n", reg_PC.dat);
 		return 16;
 	}
@@ -3314,7 +3314,7 @@ int CPU::JP_NC_u16()
 {
 	if (!GET_CARRY_FLAG)
 	{
-		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
+		reg_PC.dat = (*mMap)[reg_PC.dat + 2] | ((*mMap)[reg_PC.dat + 1] << 8);
 		printf("JP NC, %04X\n", reg_PC.dat);
 		return 16;
 	}
@@ -3435,7 +3435,7 @@ int CPU::JP_C_u16()
 {
 	if (GET_CARRY_FLAG)
 	{
-		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
+		reg_PC.dat = (*mMap)[reg_PC.dat + 2] | ((*mMap)[reg_PC.dat + 1] << 8);
 		printf("JP C, %04X\n", reg_PC.dat);
 		return 16;
 	}
@@ -3549,11 +3549,11 @@ int CPU::JP_HL() { return 0; }
 
 // LD (u16), A
 // Load A into (u16)
-int CPU::LD_a16_A()
+int CPU::LD_u16_A()
 {
 	// u16 is ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2]
 	// Writing the value of A into the (u16)
-	mMap->debugWriteMemory(((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2], (*mMap)[reg_AF.hi]);
+	mMap->debugWriteMemory(((*mMap)[reg_PC.dat + 2] << 8) | (*mMap)[reg_PC.dat + 1], (*mMap)[reg_AF.hi]);
 	reg_PC.dat += 3;
 	printf("LD (u16), A\n");
 	return 16;
@@ -3694,9 +3694,9 @@ int CPU::LD_SP_HL()
 
 // LD A, (u16)
 // Load (u16) into A
-int CPU::LD_A_a16()
+int CPU::LD_A_u16()
 {
-	reg_AF.hi = (*mMap)[((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2]];
+	reg_AF.hi = (*mMap)[((*mMap)[reg_PC.dat + 2] << 8) | (*mMap)[reg_PC.dat + 1]];
 	reg_PC.dat += 3;
 	printf("LD A, (HL)\n");
 	return 16;
