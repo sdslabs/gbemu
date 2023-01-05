@@ -191,53 +191,56 @@ GBE::GBE()
 	// Stops the CPU until an interrupt occurs
 	gbe_mMap->debugWriteMemory(0x0135, 0x10);
 
+	// STOP does an unnecessary byte read
+	gbe_mMap->debugWriteMemory(0x0136, 0x00);
+
 	// LD DE, u16
 	// Loads an 16 bit immediate into the register DE
 	// Final State: DE = 0x69E0
-	gbe_mMap->debugWriteMemory(0x0136, 0x11);
-	gbe_mMap->debugWriteMemory(0x0137, 0xE0);
-	gbe_mMap->debugWriteMemory(0x0138, 0x69);
+	gbe_mMap->debugWriteMemory(0x0137, 0x11);
+	gbe_mMap->debugWriteMemory(0x0138, 0xE0);
+	gbe_mMap->debugWriteMemory(0x0139, 0x69);
 
 	// LD (DE), A
 	// Loads the value of the accumulator into the memory address pointed to by DE
 	// Final State: Value 0x7F at address 0x69E0
-	gbe_mMap->debugWriteMemory(0x0139, 0x12);
+	gbe_mMap->debugWriteMemory(0x013A, 0x12);
 
 	// INC DE
 	// Increments the value of DE by 1
 	// Final State: DE = 0x69E1
-	gbe_mMap->debugWriteMemory(0x013A, 0x13);
+	gbe_mMap->debugWriteMemory(0x013B, 0x13);
 
 	// INC D
 	// Increments the value of D by 1
 	// Final State: DE = 0x6AE1, Flag_N = 0, Flag_H = 0, Flag_Z = 0, AF = 0x7F00
-	gbe_mMap->debugWriteMemory(0x013B, 0x14);
+	gbe_mMap->debugWriteMemory(0x013C, 0x14);
 
 	// DEC D
 	// Decrements the value of D by 1
 	// Final State: DE = 0x69E1, Flag_N = 1, Flag_H = 0, Flag_Z = 0, AF = 0x7F00
-	gbe_mMap->debugWriteMemory(0x013C, 0x15);
+	gbe_mMap->debugWriteMemory(0x013D, 0x15);
 
 	// LD D, u8
 	// Loads an 8 bit immediate into the register D
 	// Final State: DE = 0xE0E1
-	gbe_mMap->debugWriteMemory(0x013D, 0x16);
-	gbe_mMap->debugWriteMemory(0x013E, 0xE0);
+	gbe_mMap->debugWriteMemory(0x013E, 0x16);
+	gbe_mMap->debugWriteMemory(0x013F, 0xE0);
 
 	// RLA
 	// Rotates the value of the accumulator to the left
 	// Final State: AF = 0xFE00, Flag_C = 0
-	gbe_mMap->debugWriteMemory(0x013F, 0x17);
+	gbe_mMap->debugWriteMemory(0x0140, 0x17);
 
 	// RLA
 	// Rotates the value of the accumulator to the left
 	// Final State: AF = 0xFC00, Flag_C = 1
-	gbe_mMap->debugWriteMemory(0x0140, 0x17);
+	gbe_mMap->debugWriteMemory(0x0141, 0x17);
 
 
 
 	// Seg fault to end using UNKOWN
-	gbe_mMap->debugWriteMemory(0x0141, 0xEB);
+	gbe_mMap->debugWriteMemory(0x0142, 0xEB);
 
 	update();
 }
