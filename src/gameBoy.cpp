@@ -101,17 +101,54 @@ GBE::GBE()
 	// Set A = 0x80 to test RLCA for C Flag
 	
 
-	// //RLCA
-	// gbe_mMap->debugWriteMemory(0x0103, 0x07);
+	// RLCA
+	// Will write later when LD A instructions have been tested
+	// as that is needed to test this instruction more for flags
 
-	// // LD (BC), A
-	// gbe_mMap->debugWriteMemory(0x0104, 0x02);
+	// LD (u16), SP
+	// Loads the value of the stack pointer into the memory address pointed to by the immediate
+	// Final State: Value 0xFFFE at address 0XE002
+	gbe_mMap->debugWriteMemory(0x011B, 0x08);
+	gbe_mMap->debugWriteMemory(0x011C, 0xE0);
+	gbe_mMap->debugWriteMemory(0x011D, 0x02);
 
-	// // LD (u16), A
-	// gbe_mMap->debugWriteMemory(0x0105, 0xEA);
-	// gbe_mMap->debugWriteMemory(0x0106, 0x69);
-	// gbe_mMap->debugWriteMemory(0x0107, 0x69);
+	// ADD HL, BC
+	// Adds the value of BC to HL
+	// Final State: HL = 0x6BFC
+	// This test will fail for now, as the implementation is faulty
+	gbe_mMap->debugWriteMemory(0x011E, 0x09);
 
+	// LD BC u16
+	// Loading address 0xE003 in BC to test next instruction
+	gbe_mMap->debugWriteMemory(0x011F, 0x01);
+	gbe_mMap->debugWriteMemory(0x0120, 0xE0);
+	gbe_mMap->debugWriteMemory(0x0121, 0x03);
+
+	// LD A, (BC)
+	// Loads the value of the memory address pointed to by BC into the accumulator
+	// Final State: A = 0xFE, AF = 0xFE00
+	gbe_mMap->debugWriteMemory(0x0122, 0x0A);
+
+	// DEC BC
+	// Decrements the value of BC by 1
+	// Final State: BC = 0xE002
+	gbe_mMap->debugWriteMemory(0x0123, 0x0B);
+
+	// INC C
+	// Increments the value of C by 1
+	// Final State: BC = 0xE003, Flag_N = 0, Flag_H = 0, Flag_Z = 0, AF = 0xFE00
+	gbe_mMap->debugWriteMemory(0x0124, 0x0C);
+
+	// LD BC u16
+	// Loading address 0xE00F in BC to test H flag of INC C
+	gbe_mMap->debugWriteMemory(0x0125, 0x01);
+	gbe_mMap->debugWriteMemory(0x0126, 0xE0);
+	gbe_mMap->debugWriteMemory(0x0127, 0x0F);
+
+	// INC C
+	// Increments the value of C by 1
+	// Final State: BC = 0xE010, Flag_N = 0, Flag_H = 1, Flag_Z = 0, AF = 0xFE20
+	gbe_mMap->debugWriteMemory(0x0128, 0x0C);
 	// Seg fault to end using UNKOWN
 	gbe_mMap->debugWriteMemory(0x011B, 0xEB);
 
