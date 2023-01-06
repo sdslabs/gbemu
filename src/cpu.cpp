@@ -421,8 +421,7 @@ int CPU::RLA()
 // Add a signed 8 bit immediate value to the program counter
 int CPU::JR_i8()
 {
-	// TODO: Check if this is correct
-	reg_PC.dat += (Byte)(*mMap)[reg_PC.dat + 1];
+	reg_PC.dat += (SByte)(*mMap)[reg_PC.dat + 1] + 2;
 	printf("JR i8\n");
 	return 12;
 }
