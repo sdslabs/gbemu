@@ -218,7 +218,7 @@ GBE::GBE()
 
 	// DEC D
 	// Decrements the value of D by 1
-	// Final State: DE = 0x69E1, Flag_N = 1, Flag_H = 0, Flag_Z = 0, AF = 0x7F00
+	// Final State: DE = 0x69E1, Flag_N = 1, Flag_H = 0, Flag_Z = 0, AF = 0x7F40
 	gbe_mMap->debugWriteMemory(0x013D, 0x15);
 
 	// LD D, u8
@@ -234,7 +234,7 @@ GBE::GBE()
 
 	// RLA
 	// Rotates the value of the accumulator to the left
-	// Final State: AF = 0xFC00, Flag_C = 1
+	// Final State: AF = 0xFC10, Flag_C = 1
 	gbe_mMap->debugWriteMemory(0x0141, 0x17);
 
 
