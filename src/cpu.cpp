@@ -547,7 +547,7 @@ int CPU::RRA()
 
 // JR NZ, i8
 // Add a signed 8 bit immediate value to the program counter if zero flag is 0
-int CPU::JR_NZ_r8()
+int CPU::JR_NZ_i8()
 {
 	if (!(reg_AF.lo & FLAG_ZERO_z))
 	{
