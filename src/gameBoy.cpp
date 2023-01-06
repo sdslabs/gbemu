@@ -239,10 +239,20 @@ GBE::GBE()
 	// Final State: AF = 0xFC10, Flag_C = 1
 	gbe_mMap->debugWriteMemory(0x0141, 0x17);
 
+	// JR i8
+	// Jumps to the address at PC + i8 + 2
+	// Final State: Next instruction is selected
+	// i8 is a signed 8 bit value
+	gbe_mMap->debugWriteMemory(0x0142, 0x18);
+	gbe_mMap->debugWriteMemory(0x0143, 0x00);
 
+	// JR i8
+	// This one must go in an infinite loop
+	gbe_mMap->debugWriteMemory(0x0144, 0x18);
+	gbe_mMap->debugWriteMemory(0x0145, 0xFE);
 
 	// Seg fault to end using UNKOWN
-	gbe_mMap->debugWriteMemory(0x0142, 0xEB);
+	gbe_mMap->debugWriteMemory(0x0146, 0xEB);
 
 	update();
 }
