@@ -311,6 +311,59 @@ GBE::GBE()
 
 	// JR NZ, i8
 	// Jumps to the address at PC + i8 + 2 if the zero flag is not set
+	// Final State: Next instruction is not selected as the zero flag is not set
+	// PC = 0x015C
+	gbe_mMap->debugWriteMemory(0x0159, 0x20);
+	gbe_mMap->debugWriteMemory(0x015A, 0x01);
+
+	// NOP
+	// This must be skipped
+	gbe_mMap->debugWriteMemory(0x015B, 0x00);
+
+	// Setting the zero flag to test JR NZ, i8
+	// Load 0xFF in B and INC B
+	// Final State: BC = 0x0069, AF = 0x00B0, Flag_Z = 1
+	gbe_mMap->debugWriteMemory(0x015C, 0x06);
+	gbe_mMap->debugWriteMemory(0x015D, 0xFF);
+	gbe_mMap->debugWriteMemory(0x015E, 0x04);
+
+	// JR NZ, i8
+	// Jumps to the address at PC + i8 + 2 if the zero flag is not set
+	// Final State: Next instruction is selected as the zero flag is set
+	// PC = 0x0161
+	gbe_mMap->debugWriteMemory(0x015F, 0x20);
+	gbe_mMap->debugWriteMemory(0x0160, 0x01);
+
+	// NOP
+	// This must be executed
+	gbe_mMap->debugWriteMemory(0x0161, 0x00);
+
+	// LD HL, u16
+	// Loads a 16 bit immediate into the register HL
+	// Final State: HL = 0xC010
+	gbe_mMap->debugWriteMemory(0x0162, 0x21);
+	gbe_mMap->debugWriteMemory(0x0163, 0x10);
+	gbe_mMap->debugWriteMemory(0x0164, 0xC0);
+
+	// LD (HL+), A
+	// Loads the value of the accumulator into the memory address pointed to by HL
+	// and then increments HL
+	// Final State: HL = 0xC011, AF = 0x0010, 0X00 at 0XC010
+	gbe_mMap->debugWriteMemory(0x0165, 0x22);
+
+	// INC HL
+	// Increments the value of HL by 1
+	// Final State: HL = 0xC012
+	gbe_mMap->debugWriteMemory(0x0166, 0x23);
+
+	// INC H
+	// Increments the value of H by 1
+	// Final State: HL = 0xC113, Flag_N = 0, Flag_H = 0, Flag_Z = 0, AF = 0x0010
+	gbe_mMap->debugWriteMemory(0x0167, 0x24);
+
+
+
+
 
 	// Seg fault to end using UNKOWN
 	gbe_mMap->debugWriteMemory(0x0146, 0xEB);

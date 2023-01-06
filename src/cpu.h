@@ -92,7 +92,7 @@ private:
 		&CPU::DEC_E,
 		&CPU::LD_E_u8,
 		&CPU::RRA,
-		&CPU::JR_NZ_r8,
+		&CPU::JR_NZ_i8,
 		&CPU::LD_HL_u16,
 		&CPU::LD_HLp_A,
 		&CPU::INC_HL,
@@ -350,7 +350,7 @@ private:
 	int DEC_E();
 	int LD_E_u8();
 	int RRA();
-	int JR_NZ_r8();
+	int JR_NZ_i8();
 	int LD_HL_u16();
 	int LD_HLp_A();
 	int INC_HL();
