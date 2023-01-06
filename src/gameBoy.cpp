@@ -250,6 +250,68 @@ GBE::GBE()
 	gbe_mMap->debugWriteMemory(0x0144, 0x18);
 	gbe_mMap->debugWriteMemory(0x0145, 0xFE);
 
+	// TODO: ADD HL, DE test after implementing and testing LD HL, u16
+
+	// Loading 0x0100 into DE to test LD (DE), A
+	// Final State: DE = 0x0100
+	gbe_mMap->debugWriteMemory(0x0146, 0x11);
+	gbe_mMap->debugWriteMemory(0x0147, 0x00);
+	gbe_mMap->debugWriteMemory(0x0148, 0x01);
+
+	// LD A, (DE)
+	// Loads the value of the memory address pointed to by DE into the accumulator
+	// Final State: AF = 0x0010
+	gbe_mMap->debugWriteMemory(0x0149, 0x1A);
+
+	// DEC DE
+	// Decrements the value of DE by 1
+	// Final State: DE = 0x00FF
+	gbe_mMap->debugWriteMemory(0x014A, 0x1B);
+
+	// INC E
+	// Increments the value of E by 1
+	// Final State: DE = 0x0100, Flag_N = 0, Flag_H = 1, Flag_Z = 1, AF = 0x00A0
+	gbe_mMap->debugWriteMemory(0x014B, 0x1C);
+
+	// DEC E
+	// Decrements the value of E by 1
+	// Final State: DE = 0x00FF, Flag_N = 1, Flag_H = 1, Flag_Z = 0, AF = 0x0060
+	gbe_mMap->debugWriteMemory(0x014C, 0x1D);
+
+	// LD E, u8
+	// Loads an 8 bit immediate into the register E
+	// Final State: DE = 0x00E0
+	gbe_mMap->debugWriteMemory(0x014D, 0x1E);
+	gbe_mMap->debugWriteMemory(0x014E, 0xE0);
+
+	// Loading a value into the accumulator to test RRA
+	// Final State: DE = 0x014E, AF = 0xE000
+	gbe_mMap->debugWriteMemory(0x014F, 0x11);
+	gbe_mMap->debugWriteMemory(0x0150, 0x4E);
+	gbe_mMap->debugWriteMemory(0x0151, 0x01);
+	gbe_mMap->debugWriteMemory(0x0152, 0x1A);
+
+
+	// RRA
+	// Rotates the value of the accumulator to the right
+	// Final State: AF = 0x7000, Flag_C = 0
+	gbe_mMap->debugWriteMemory(0x0153, 0x1F);
+
+	// Loading a value into the accumulator to test RRA
+	// Final State: DE = 0x0151, AF = 0x0100
+	gbe_mMap->debugWriteMemory(0x0154, 0x11);
+	gbe_mMap->debugWriteMemory(0x0155, 0x51);
+	gbe_mMap->debugWriteMemory(0x0156, 0x01);
+	gbe_mMap->debugWriteMemory(0x0157, 0x1A);
+
+	// RRA
+	// Rotates the value of the accumulator to the right
+	// Final State: AF = 0x0010, Flag_C = 1
+	gbe_mMap->debugWriteMemory(0x0158, 0x1F);
+
+	// JR NZ, i8
+	// Jumps to the address at PC + i8 + 2 if the zero flag is not set
+
 	// Seg fault to end using UNKOWN
 	gbe_mMap->debugWriteMemory(0x0146, 0xEB);
 
