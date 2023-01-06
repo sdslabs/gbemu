@@ -208,7 +208,7 @@ int CPU::ADD_HL_BC()
 	UNSET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-	printf("ADD HL, SP\n");
+	printf("ADD HL, BC\n");
 	return 8;
 }
 
@@ -446,7 +446,7 @@ int CPU::ADD_HL_DE()
 	UNSET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-	printf("ADD HL, SP\n");
+	printf("ADD HL, DE\n");
 	return 8;
 }
 

@@ -114,7 +114,6 @@ GBE::GBE()
 	// ADD HL, BC
 	// Adds the value of BC to HL
 	// Final State: HL = 0x6BFC
-	// This test will fail for now, as the implementation is faulty
 	gbe_mMap->debugWriteMemory(0x011E, 0x09);
 
 	// LD BC u16
