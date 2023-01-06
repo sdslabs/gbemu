@@ -189,6 +189,8 @@ GBE::GBE()
 
 	// STOP
 	// Stops the CPU until an interrupt occurs
+	// Did a NOP for now, as this stops execution of code.
+	// TODO: Find a way to resume execution
 	gbe_mMap->debugWriteMemory(0x0135, 0x00);
 
 	// STOP does an unnecessary byte read
