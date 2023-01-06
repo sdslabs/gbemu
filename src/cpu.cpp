@@ -551,11 +551,12 @@ int CPU::JR_NZ_r8()
 {
 	if (!(reg_AF.lo & FLAG_ZERO_z))
 	{
-		reg_PC.dat += (Byte)(*mMap)[reg_PC.dat + 1];
+		reg_PC.dat += (SByte)(*mMap)[reg_PC.dat + 1] + 2;
+		return 12;
 	}
 
-	// TODO: dependent on branch taken or not
-	return 12;
+	reg_PC.dat += 2;
+	return 8;
 }
 
 // LD HL, u16
