@@ -361,8 +361,55 @@ GBE::GBE()
 	// Final State: HL = 0xC113, Flag_N = 0, Flag_H = 0, Flag_Z = 0, AF = 0x0010
 	gbe_mMap->debugWriteMemory(0x0167, 0x24);
 
+	// DEC H
+	// Decrements the value of H by 1
+	// Final State: HL = 0xC112, Flag_N = 1, Flag_H = 0, Flag_Z = 0, AF = 0x0050
+	gbe_mMap->debugWriteMemory(0x0168, 0x25);
 
+	// LD H, u8
+	// Loads an 8 bit immediate into the register H
+	// Final State: HL = 0xA012
+	gbe_mMap->debugWriteMemory(0x0169, 0x26);
+	gbe_mMap->debugWriteMemory(0x016A, 0xA0);
 
+	// DAA
+	// Adjusts the value of the accumulator to be a valid BCD value
+	// Final State: AF = 0x0010
+	// TODO: Test this. High risk opcode
+	gbe_mMap->debugWriteMemory(0x016B, 0x27);
+
+	// JR Z, i8
+	// Jumps to the address at PC + i8 + 2 if the zero flag is set
+	// Final State: Next instruction is selected as the zero flag is not set
+	// PC = 0x016E
+	gbe_mMap->debugWriteMemory(0x016C, 0x28);
+	gbe_mMap->debugWriteMemory(0x016D, 0x01);
+
+	// NOP
+	// This must be not skipped
+	gbe_mMap->debugWriteMemory(0x016E, 0x00);
+
+	// Setting the zero flag to test JR Z, i8
+	// Load 0xFF in B and INC B
+	gbe_mMap->debugWriteMemory(0x016F, 0x06);
+	gbe_mMap->debugWriteMemory(0x0170, 0xFF);
+	gbe_mMap->debugWriteMemory(0x0171, 0x04);
+
+	// JR Z, i8
+	// Jumps to the address at PC + i8 + 2 if the zero flag is set
+	// Final State: Next instruction is not selected as the zero flag is set
+	// PC = 0x0175
+	gbe_mMap->debugWriteMemory(0x0172, 0x28);
+	gbe_mMap->debugWriteMemory(0x0173, 0x01);
+
+	// NOP
+	// This must be skipped
+	gbe_mMap->debugWriteMemory(0x0174, 0x00);
+
+	// ADD HL, HL
+	// Adds the value of HL to HL
+	// Final State: HL = 0x4024, Flag_N = 0, Flag_H = 0, Flag_C = 0, AF = 0x0010
+	gbe_mMap->debugWriteMemory(0x0175, 0x29);
 
 
 	// Seg fault to end using UNKOWN
