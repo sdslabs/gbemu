@@ -330,7 +330,7 @@ int CPU::LD_DE_u16()
 // Loads the contents of A into the memory address pointed to by DE
 int CPU::LD_DE_A()
 {
-	mMap->writeMemory((*mMap)[reg_DE.dat], reg_AF.hi);
+	mMap->writeMemory(reg_DE.dat, reg_AF.hi);
 	reg_PC.dat += 1;
 	printf("LD (DE), A\n");
 	return 8;
@@ -406,9 +406,8 @@ int CPU::RLA()
 	// Unset subtract flag
 	UNSET_SUBTRACT_FLAG;
 
-	// Set Half Carry flag to 1 if bit 3 is 1
-	// Example: 0000 1000 will become 0001 0000
-	(reg_AF.hi & 0x80) >> 3 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	// Unsset half carry flag
+	UNSET_HALF_CARRY_FLAG;
 
 	// Shift A left by 1
 	reg_AF.hi = (reg_AF.hi << 1) | (reg_AF.hi >> 7);
@@ -574,7 +573,7 @@ int CPU::LD_HL_u16()
 // Loads the contents of A into the memory address pointed to by HL and increments HL
 int CPU::LD_HLp_A()
 {
-	mMap->writeMemory((*mMap)[reg_HL.dat], reg_AF.hi);
+	mMap->writeMemory(reg_HL.dat, reg_AF.hi);
 	reg_HL.dat += 1;
 	reg_PC.dat += 1;
 	printf("LD (HL+), A\n");
@@ -799,8 +798,8 @@ int CPU::LD_SP_u16()
 // Loads the contents of A into the memory address pointed to by HL and decrements HL
 int CPU::LD_HLm_A()
 {
-	mMap->writeMemory((*mMap)[reg_HL.dat], reg_AF.hi);
 	reg_HL.dat -= 1;
+	mMap->writeMemory(reg_HL.dat, reg_AF.hi);
 	reg_PC.dat += 1;
 	printf("LD (HL-), A\n");
 	return 8;

@@ -189,17 +189,17 @@ GBE::GBE()
 
 	// STOP
 	// Stops the CPU until an interrupt occurs
-	gbe_mMap->debugWriteMemory(0x0135, 0x10);
+	gbe_mMap->debugWriteMemory(0x0135, 0x00);
 
 	// STOP does an unnecessary byte read
 	gbe_mMap->debugWriteMemory(0x0136, 0x00);
 
 	// LD DE, u16
 	// Loads an 16 bit immediate into the register DE
-	// Final State: DE = 0x69E0
+	// Final State: DE = 0xFFEC
 	gbe_mMap->debugWriteMemory(0x0137, 0x11);
-	gbe_mMap->debugWriteMemory(0x0138, 0xE0);
-	gbe_mMap->debugWriteMemory(0x0139, 0x69);
+	gbe_mMap->debugWriteMemory(0x0138, 0xEC);
+	gbe_mMap->debugWriteMemory(0x0139, 0xFF);
 
 	// LD (DE), A
 	// Loads the value of the accumulator into the memory address pointed to by DE
