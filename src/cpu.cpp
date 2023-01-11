@@ -3752,6 +3752,13 @@ int CPU::executeNextInstruction()
 	return (this->*method_pointer[opcode])();
 }
 
+int CPU::executePrefixedInstruction()
+{
+	// Get the opcode
+	Byte opcode = (*mMap)[reg_PC.dat];
+	return (this->*prefixed_method_pointer[opcode])();
+}
+
 // RLC B
 // Rotate B left
 int CPU::RLC_B()
