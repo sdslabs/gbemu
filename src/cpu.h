@@ -318,6 +318,265 @@ private:
 		&CPU::RST_38H
 	};
 
+	method_function prefixed_method_pointer[0x100] = {
+		&CPU::RLC_B,
+		&CPU::RLC_C,
+		&CPU::RLC_D,
+		&CPU::RLC_E,
+		&CPU::RLC_H,
+		&CPU::RLC_L,
+		&CPU::RLC_HLp,
+		&CPU::RLC_A,
+		&CPU::RRC_B,
+		&CPU::RRC_C,
+		&CPU::RRC_D,
+		&CPU::RRC_E,
+		&CPU::RRC_H,
+		&CPU::RRC_L,
+		&CPU::RRC_HLp,
+		&CPU::RRC_A,
+		&CPU::RL_B,
+		&CPU::RL_C,
+		&CPU::RL_D,
+		&CPU::RL_E,
+		&CPU::RL_H,
+		&CPU::RL_L,
+		&CPU::RL_HLp,
+		&CPU::RL_A,
+		&CPU::RR_B,
+		&CPU::RR_C,
+		&CPU::RR_D,
+		&CPU::RR_E,
+		&CPU::RR_H,
+		&CPU::RR_L,
+		&CPU::RR_HLp,
+		&CPU::RR_A,
+		&CPU::SLA_B,
+		&CPU::SLA_C,
+		&CPU::SLA_D,
+		&CPU::SLA_E,
+		&CPU::SLA_H,
+		&CPU::SLA_L,
+		&CPU::SLA_HLp,
+		&CPU::SLA_A,
+		&CPU::SRA_B,
+		&CPU::SRA_C,
+		&CPU::SRA_D,
+		&CPU::SRA_E,
+		&CPU::SRA_H,
+		&CPU::SRA_L,
+		&CPU::SRA_HLp,
+		&CPU::SRA_A,
+		&CPU::SWAP_B,
+		&CPU::SWAP_C,
+		&CPU::SWAP_D,
+		&CPU::SWAP_E,
+		&CPU::SWAP_H,
+		&CPU::SWAP_L,
+		&CPU::SWAP_HLp,
+		&CPU::SWAP_A,
+		&CPU::SRL_B,
+		&CPU::SRL_C,
+		&CPU::SRL_D,
+		&CPU::SRL_E,
+		&CPU::SRL_H,
+		&CPU::SRL_L,
+		&CPU::SRL_HLp,
+		&CPU::SRL_A,
+		&CPU::BIT_0_B,
+		&CPU::BIT_0_C,
+		&CPU::BIT_0_D,
+		&CPU::BIT_0_E,
+		&CPU::BIT_0_H,
+		&CPU::BIT_0_L,
+		&CPU::BIT_0_HLp,
+		&CPU::BIT_0_A,
+		&CPU::BIT_1_B,
+		&CPU::BIT_1_C,
+		&CPU::BIT_1_D,
+		&CPU::BIT_1_E,
+		&CPU::BIT_1_H,
+		&CPU::BIT_1_L,
+		&CPU::BIT_1_HLp,
+		&CPU::BIT_1_A,
+		&CPU::BIT_2_B,
+		&CPU::BIT_2_C,
+		&CPU::BIT_2_D,
+		&CPU::BIT_2_E,
+		&CPU::BIT_2_H,
+		&CPU::BIT_2_L,
+		&CPU::BIT_2_HLp,
+		&CPU::BIT_2_A,
+		&CPU::BIT_3_B,
+		&CPU::BIT_3_C,
+		&CPU::BIT_3_D,
+		&CPU::BIT_3_E,
+		&CPU::BIT_3_H,
+		&CPU::BIT_3_L,
+		&CPU::BIT_3_HLp,
+		&CPU::BIT_3_A,
+		&CPU::BIT_4_B,
+		&CPU::BIT_4_C,
+		&CPU::BIT_4_D,
+		&CPU::BIT_4_E,
+		&CPU::BIT_4_H,
+		&CPU::BIT_4_L,
+		&CPU::BIT_4_HLp,
+		&CPU::BIT_4_A,
+		&CPU::BIT_5_B,
+		&CPU::BIT_5_C,
+		&CPU::BIT_5_D,
+		&CPU::BIT_5_E,
+		&CPU::BIT_5_H,
+		&CPU::BIT_5_L,
+		&CPU::BIT_5_HLp,
+		&CPU::BIT_5_A,
+		&CPU::BIT_6_B,
+		&CPU::BIT_6_C,
+		&CPU::BIT_6_D,
+		&CPU::BIT_6_E,
+		&CPU::BIT_6_H,
+		&CPU::BIT_6_L,
+		&CPU::BIT_6_HLp,
+		&CPU::BIT_6_A,
+		&CPU::BIT_7_B,
+		&CPU::BIT_7_C,
+		&CPU::BIT_7_D,
+		&CPU::BIT_7_E,
+		&CPU::BIT_7_H,
+		&CPU::BIT_7_L,
+		&CPU::BIT_7_HLp,
+		&CPU::BIT_7_A,
+		&CPU::RES_0_B,
+		&CPU::RES_0_C,
+		&CPU::RES_0_D,
+		&CPU::RES_0_E,
+		&CPU::RES_0_H,
+		&CPU::RES_0_L,
+		&CPU::RES_0_HLp,
+		&CPU::RES_0_A,
+		&CPU::RES_1_B,
+		&CPU::RES_1_C,
+		&CPU::RES_1_D,
+		&CPU::RES_1_E,
+		&CPU::RES_1_H,
+		&CPU::RES_1_L,
+		&CPU::RES_1_HLp,
+		&CPU::RES_1_A,
+		&CPU::RES_2_B,
+		&CPU::RES_2_C,
+		&CPU::RES_2_D,
+		&CPU::RES_2_E,
+		&CPU::RES_2_H,
+		&CPU::RES_2_L,
+		&CPU::RES_2_HLp,
+		&CPU::RES_2_A,
+		&CPU::RES_3_B,
+		&CPU::RES_3_C,
+		&CPU::RES_3_D,
+		&CPU::RES_3_E,
+		&CPU::RES_3_H,
+		&CPU::RES_3_L,
+		&CPU::RES_3_HLp,
+		&CPU::RES_3_A,
+		&CPU::RES_4_B,
+		&CPU::RES_4_C,
+		&CPU::RES_4_D,
+		&CPU::RES_4_E,
+		&CPU::RES_4_H,
+		&CPU::RES_4_L,
+		&CPU::RES_4_HLp,
+		&CPU::RES_4_A,
+		&CPU::RES_5_B,
+		&CPU::RES_5_C,
+		&CPU::RES_5_D,
+		&CPU::RES_5_E,
+		&CPU::RES_5_H,
+		&CPU::RES_5_L,
+		&CPU::RES_5_HLp,
+		&CPU::RES_5_A,
+		&CPU::RES_6_B,
+		&CPU::RES_6_C,
+		&CPU::RES_6_D,
+		&CPU::RES_6_E,
+		&CPU::RES_6_H,
+		&CPU::RES_6_L,
+		&CPU::RES_6_HLp,
+		&CPU::RES_6_A,
+		&CPU::RES_7_B,
+		&CPU::RES_7_C,
+		&CPU::RES_7_D,
+		&CPU::RES_7_E,
+		&CPU::RES_7_H,
+		&CPU::RES_7_L,
+		&CPU::RES_7_HLp,
+		&CPU::RES_7_A,
+		&CPU::SET_0_B,
+		&CPU::SET_0_C,
+		&CPU::SET_0_D,
+		&CPU::SET_0_E,
+		&CPU::SET_0_H,
+		&CPU::SET_0_L,
+		&CPU::SET_0_HLp,
+		&CPU::SET_0_A,
+		&CPU::SET_1_B,
+		&CPU::SET_1_C,
+		&CPU::SET_1_D,
+		&CPU::SET_1_E,
+		&CPU::SET_1_H,
+		&CPU::SET_1_L,
+		&CPU::SET_1_HLp,
+		&CPU::SET_1_A,
+		&CPU::SET_2_B,
+		&CPU::SET_2_C,
+		&CPU::SET_2_D,
+		&CPU::SET_2_E,
+		&CPU::SET_2_H,
+		&CPU::SET_2_L,
+		&CPU::SET_2_HLp,
+		&CPU::SET_2_A,
+		&CPU::SET_3_B,
+		&CPU::SET_3_C,
+		&CPU::SET_3_D,
+		&CPU::SET_3_E,
+		&CPU::SET_3_H,
+		&CPU::SET_3_L,
+		&CPU::SET_3_HLp,
+		&CPU::SET_3_A,
+		&CPU::SET_4_B,
+		&CPU::SET_4_C,
+		&CPU::SET_4_D,
+		&CPU::SET_4_E,
+		&CPU::SET_4_H,
+		&CPU::SET_4_L,
+		&CPU::SET_4_HLp,
+		&CPU::SET_4_A,
+		&CPU::SET_5_B,
+		&CPU::SET_5_C,
+		&CPU::SET_5_D,
+		&CPU::SET_5_E,
+		&CPU::SET_5_H,
+		&CPU::SET_5_L,
+		&CPU::SET_5_HLp,
+		&CPU::SET_5_A,
+		&CPU::SET_6_B,
+		&CPU::SET_6_C,
+		&CPU::SET_6_D,
+		&CPU::SET_6_E,
+		&CPU::SET_6_H,
+		&CPU::SET_6_L,
+		&CPU::SET_6_HLp,
+		&CPU::SET_6_A,
+		&CPU::SET_7_B,
+		&CPU::SET_7_C,
+		&CPU::SET_7_D,
+		&CPU::SET_7_E,
+		&CPU::SET_7_H,
+		&CPU::SET_7_L,
+		&CPU::SET_7_HLp,
+		&CPU::SET_7_A
+	};
+
 	int NOP();
 	int LD_BC_u16();
 	int LD_BC_A();
@@ -565,6 +824,263 @@ private:
 	int CP_u8();
 	int RST_38H();
 
+	int RLC_B();
+	int RLC_C();
+	int RLC_D();
+	int RLC_E();
+	int RLC_H();
+	int RLC_L();
+	int RLC_HLp();
+	int RLC_A();
+	int RRC_B();
+	int RRC_C();
+	int RRC_D();
+	int RRC_E();
+	int RRC_H();
+	int RRC_L();
+	int RRC_HLp();
+	int RRC_A();
+	int RL_B();
+	int RL_C();
+	int RL_D();
+	int RL_E();
+	int RL_H();
+	int RL_L();
+	int RL_HLp();
+	int RL_A();
+	int RR_B();
+	int RR_C();
+	int RR_D();
+	int RR_E();
+	int RR_H();
+	int RR_L();
+	int RR_HLp();
+	int RR_A();
+	int SLA_B();
+	int SLA_C();
+	int SLA_D();
+	int SLA_E();
+	int SLA_H();
+	int SLA_L();
+	int SLA_HLp();
+	int SLA_A();
+	int SRA_B();
+	int SRA_C();
+	int SRA_D();
+	int SRA_E();
+	int SRA_H();
+	int SRA_L();
+	int SRA_HLp();
+	int SRA_A();
+	int SWAP_B();
+	int SWAP_C();
+	int SWAP_D();
+	int SWAP_E();
+	int SWAP_H();
+	int SWAP_L();
+	int SWAP_HLp();
+	int SWAP_A();
+	int SRL_B();
+	int SRL_C();
+	int SRL_D();
+	int SRL_E();
+	int SRL_H();
+	int SRL_L();
+	int SRL_HLp();
+	int SRL_A();
+	int BIT_0_B();
+	int BIT_0_C();
+	int BIT_0_D();
+	int BIT_0_E();
+	int BIT_0_H();
+	int BIT_0_L();
+	int BIT_0_HLp();
+	int BIT_0_A();
+	int BIT_1_B();
+	int BIT_1_C();
+	int BIT_1_D();
+	int BIT_1_E();
+	int BIT_1_H();
+	int BIT_1_L();
+	int BIT_1_HLp();
+	int BIT_1_A();
+	int BIT_2_B();
+	int BIT_2_C();
+	int BIT_2_D();
+	int BIT_2_E();
+	int BIT_2_H();
+	int BIT_2_L();
+	int BIT_2_HLp();
+	int BIT_2_A();
+	int BIT_3_B();
+	int BIT_3_C();
+	int BIT_3_D();
+	int BIT_3_E();
+	int BIT_3_H();
+	int BIT_3_L();
+	int BIT_3_HLp();
+	int BIT_3_A();
+	int BIT_4_B();
+	int BIT_4_C();
+	int BIT_4_D();
+	int BIT_4_E();
+	int BIT_4_H();
+	int BIT_4_L();
+	int BIT_4_HLp();
+	int BIT_4_A();
+	int BIT_5_B();
+	int BIT_5_C();
+	int BIT_5_D();
+	int BIT_5_E();
+	int BIT_5_H();
+	int BIT_5_L();
+	int BIT_5_HLp();
+	int BIT_5_A();
+	int BIT_6_B();
+	int BIT_6_C();
+	int BIT_6_D();
+	int BIT_6_E();
+	int BIT_6_H();
+	int BIT_6_L();
+	int BIT_6_HLp();
+	int BIT_6_A();
+	int BIT_7_B();
+	int BIT_7_C();
+	int BIT_7_D();
+	int BIT_7_E();
+	int BIT_7_H();
+	int BIT_7_L();
+	int BIT_7_HLp();
+	int BIT_7_A();
+	int RES_0_B();
+	int RES_0_C();
+	int RES_0_D();
+	int RES_0_E();
+	int RES_0_H();
+	int RES_0_L();
+	int RES_0_HLp();
+	int RES_0_A();
+	int RES_1_B();
+	int RES_1_C();
+	int RES_1_D();
+	int RES_1_E();
+	int RES_1_H();
+	int RES_1_L();
+	int RES_1_HLp();
+	int RES_1_A();
+	int RES_2_B();
+	int RES_2_C();
+	int RES_2_D();
+	int RES_2_E();
+	int RES_2_H();
+	int RES_2_L();
+	int RES_2_HLp();
+	int RES_2_A();
+	int RES_3_B();
+	int RES_3_C();
+	int RES_3_D();
+	int RES_3_E();
+	int RES_3_H();
+	int RES_3_L();
+	int RES_3_HLp();
+	int RES_3_A();
+	int RES_4_B();
+	int RES_4_C();
+	int RES_4_D();
+	int RES_4_E();
+	int RES_4_H();
+	int RES_4_L();
+	int RES_4_HLp();
+	int RES_4_A();
+	int RES_5_B();
+	int RES_5_C();
+	int RES_5_D();
+	int RES_5_E();
+	int RES_5_H();
+	int RES_5_L();
+	int RES_5_HLp();
+	int RES_5_A();
+	int RES_6_B();
+	int RES_6_C();
+	int RES_6_D();
+	int RES_6_E();
+	int RES_6_H();
+	int RES_6_L();
+	int RES_6_HLp();
+	int RES_6_A();
+	int RES_7_B();
+	int RES_7_C();
+	int RES_7_D();
+	int RES_7_E();
+	int RES_7_H();
+	int RES_7_L();
+	int RES_7_HLp();
+	int RES_7_A();
+	int SET_0_B();
+	int SET_0_C();
+	int SET_0_D();
+	int SET_0_E();
+	int SET_0_H();
+	int SET_0_L();
+	int SET_0_HLp();
+	int SET_0_A();
+	int SET_1_B();
+	int SET_1_C();
+	int SET_1_D();
+	int SET_1_E();
+	int SET_1_H();
+	int SET_1_L();
+	int SET_1_HLp();
+	int SET_1_A();
+	int SET_2_B();
+	int SET_2_C();
+	int SET_2_D();
+	int SET_2_E();
+	int SET_2_H();
+	int SET_2_L();
+	int SET_2_HLp();
+	int SET_2_A();
+	int SET_3_B();
+	int SET_3_C();
+	int SET_3_D();
+	int SET_3_E();
+	int SET_3_H();
+	int SET_3_L();
+	int SET_3_HLp();
+	int SET_3_A();
+	int SET_4_B();
+	int SET_4_C();
+	int SET_4_D();
+	int SET_4_E();
+	int SET_4_H();
+	int SET_4_L();
+	int SET_4_HLp();
+	int SET_4_A();
+	int SET_5_B();
+	int SET_5_C();
+	int SET_5_D();
+	int SET_5_E();
+	int SET_5_H();
+	int SET_5_L();
+	int SET_5_HLp();
+	int SET_5_A();
+	int SET_6_B();
+	int SET_6_C();
+	int SET_6_D();
+	int SET_6_E();
+	int SET_6_H();
+	int SET_6_L();
+	int SET_6_HLp();
+	int SET_6_A();
+	int SET_7_B();
+	int SET_7_C();
+	int SET_7_D();
+	int SET_7_E();
+	int SET_7_H();
+	int SET_7_L();
+	int SET_7_HLp();
+	int SET_7_A();
+
 public:
 	const int clockSpeed = 4194304; // 4.194304 MHz CPU
 	const int clockSpeedPerFrame = 70224; // 4194304 / 59.73fps
@@ -579,4 +1095,5 @@ public:
 	void set_reg_BC(Word value) { reg_BC.dat = value; }
 
 	int executeNextInstruction();
+	int executePrefixedInstruction();
 };
