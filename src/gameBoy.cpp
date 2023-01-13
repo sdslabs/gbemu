@@ -411,9 +411,21 @@ GBE::GBE()
 	// Final State: HL = 0x4024, Flag_N = 0, Flag_H = 0, Flag_C = 0, AF = 0x0010
 	gbe_mMap->debugWriteMemory(0x0175, 0x29);
 
+	// Loading value in HL to test next opcode
+	gbe_mMap->debugWriteMemory(0x0162, 0x21);
+	gbe_mMap->debugWriteMemory(0x0163, 0x10);
+	gbe_mMap->debugWriteMemory(0x0164, 0xC0);
+
+	// LD A, (HL+)
+	// Loads the value of the memory address pointed to by HL into the accumulator
+	// and then increments HL
+	// Final State: HL = 0xC013, AF = 0x0010, 0X00 at 0XC011
+
 
 	// Seg fault to end using UNKOWN
 	gbe_mMap->debugWriteMemory(0x0146, 0xEB);
+
+	
 
 	update();
 }
@@ -425,10 +437,15 @@ void GBE::update()
 	// GB has 59.73 frames per second
 
 	int cycles = 0;
-	while (cycles < gbe_cpu->clockSpeedPerFrame)
+	while (true)
 	{
 		// Execute the next instruction
 		cycles += gbe_cpu->executeNextInstruction();
+		if ((*gbe_mMap)[0xFF02] == 0x81)
+		{
+			printf("%c", (*gbe_mMap)[0xFF01]);
+			gbe_mMap->writeMemory(0xFF02, 0x00);
+		}
 		// updateTimers()
 		// updateGraphics()
 		// Do Interrupts()

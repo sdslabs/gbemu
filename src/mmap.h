@@ -58,6 +58,10 @@ private:
 	// 1 Byte 0xFFFF
 	Byte* interruptEnableRegister;
 
+	// EI opcode sets IME one opcode later
+	// This bool tells whether to set IME after next opcode
+	bool setIME;
+
 public:
 	// Constructor
 	MemoryMap();
@@ -100,4 +104,7 @@ public:
 	Byte readMemory(Word address);
 
 	Byte operator[](Word address);
+
+	void setIMEFlag() { setIME = true; }
+	void unsetIMEFlag() { setIME = false; }
 };

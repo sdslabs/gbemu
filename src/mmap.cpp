@@ -37,6 +37,9 @@ MemoryMap::MemoryMap()
 
 	// 1 byte Interrupt Enable Register
 	interruptEnableRegister = new Byte;
+
+	// Set IME to false
+	setIME = false;
 }
 
 // Write to memory

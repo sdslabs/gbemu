@@ -3627,6 +3627,7 @@ int CPU::LDH_A_C()
 // TODO: Implement interrupts
 int CPU::DI()
 {
+	mMap->unsetIMEFlag();
 	printf("DI\n");
 	return 4;
 }
@@ -3708,6 +3709,7 @@ int CPU::LD_A_u16()
 // TODO: Implement interrupts
 int CPU::EI()
 {
+	mMap->setIMEFlag();
 	printf("EI\n");
 	return 4;
 }
