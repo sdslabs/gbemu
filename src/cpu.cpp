@@ -645,7 +645,26 @@ int CPU::LD_H_u8()
 // TODO: Implement DAA
 int CPU::DAA()
 {
-	return 0;
+	if (!GET_ZERO_FLAG) {
+		if (GET_CARRY_FLAG || reg_AF.hi > 0x99) {
+			reg_AF.hi += 0x60;
+			SET_CARRY_FLAG;
+		}
+		if (GET_HALF_CARRY_FLAG || (reg_AF.hi & 0x0F) > 0x09) {
+			reg_AF.hi += 0x06;
+		}
+	} else if (GET_CARRY_FLAG && GET_HALF_CARRY_FLAG) {
+		reg_AF.hi += 0x9A;
+	} else if (GET_CARRY_FLAG) {
+		reg_AF.hi += 0xA0;
+	} else if (GET_HALF_CARRY_FLAG) {
+		reg_AF.hi += 0xFA;
+	}
+
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+	UNSET_HALF_CARRY_FLAG;
+
+	return 4;
 }
 
 // JR Z, i8
