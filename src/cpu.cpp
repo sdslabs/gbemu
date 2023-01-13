@@ -642,7 +642,6 @@ int CPU::LD_H_u8()
 
 // DAA
 // Decimal adjust register A
-// TODO: Implement DAA
 int CPU::DAA()
 {
 	if (!GET_ZERO_FLAG) {
@@ -3224,10 +3223,10 @@ int CPU::JP_Z_u16()
 
 // CB prefix
 // Execute CB prefixed opcode.
-// TODO: Implement CB prefixed opcodes.
 int CPU::PREFIX_CB()
 {
 	reg_PC.dat += 1;
+	executePrefixedInstruction();
 	printf("PREFIX CB\n");
 	return 4;
 }
