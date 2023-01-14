@@ -547,8 +547,11 @@ int CPU::RRA()
 
 // JR NZ, i8
 // Add a signed 8 bit immediate value to the program counter if zero flag is 0
+// 3 cycles if taken, 2 cycles if not taken
 int CPU::JR_NZ_i8()
 {
+	printf("JR NZ, i8\n");
+
 	if (!(reg_AF.lo & FLAG_ZERO_z))
 	{
 		reg_PC.dat += (SByte)(*mMap)[reg_PC.dat + 1] + 2;
@@ -668,15 +671,18 @@ int CPU::DAA()
 
 // JR Z, i8
 // Add a signed 8 bit immediate value to the program counter if zero flag is 1
+// 3 cycles if taken, 2 cycles if not taken
 int CPU::JR_Z_r8()
 {
+	printf("JR Z, i8\n");
 	if (reg_AF.lo & FLAG_ZERO_z)
 	{
-		reg_PC.dat += (Byte)(*mMap)[reg_PC.dat + 1];
+		reg_PC.dat += (SByte)(*mMap)[reg_PC.dat + 1] + 2;
+		return 12;
 	}
+	reg_PC.dat += 2;
 
-	printf("JR Z, i8\n");
-	return 12;
+	return 8;
 }
 
 // ADD HL, HL
@@ -791,15 +797,18 @@ int CPU::CPL()
 
 // JR NC, i8
 // Add a signed 8 bit immediate value to the program counter if carry flag is 0
+// 3 cycles if condition is true, 2 otherwise
 int CPU::JR_NC_i8()
 {
+	printf("JR NC, i8\n");
 	if (!(reg_AF.lo & FLAG_CARRY_c))
 	{
-		reg_PC.dat += (Byte)(*mMap)[reg_PC.dat + 1];
+		reg_PC.dat += (SByte)(*mMap)[reg_PC.dat + 1] + 2;
+		return 12;
 	}
+	reg_PC.dat += 2;
 
-	// TODO: Check if this is correct
-	return 12;
+	return 8;
 }
 
 // LD SP, u16
@@ -908,15 +917,18 @@ int CPU::SCF()
 
 // JR C, i8
 // Add a signed 8 bit immediate value to the program counter if carry flag is 1
+// 3 cycles if condition is true, 2 otherwise
 int CPU::JR_C_r8()
 {
+	printf("JR C, i8\n");
 	if (reg_AF.lo & FLAG_CARRY_c)
 	{
-		reg_PC.dat += (Byte)(*mMap)[reg_PC.dat + 1];
+		reg_PC.dat += (SByte)(*mMap)[reg_PC.dat + 1] + 2;
+		return 12;
 	}
+	reg_PC.dat += 2;
 
-	// TODO: Check if this is correct
-	return 12;
+	return 8;
 }
 
 // ADD HL, SP
@@ -1025,7 +1037,7 @@ int CPU::CCF()
 	UNSET_HALF_CARRY_FLAG;
 
 	// Complement carry flag
-	reg_AF.lo& FLAG_CARRY_c ? UNSET_CARRY_FLAG : SET_CARRY_FLAG;
+	reg_AF.lo & FLAG_CARRY_c ? UNSET_CARRY_FLAG : SET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
 	printf("CCF\n");
@@ -3439,11 +3451,11 @@ int CPU::RET_C()
 
 // RETI
 // Return and enable interrupts.
-// TODO: Implement interrupts.
 int CPU::RETI()
 {
 	reg_PC.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
 	reg_SP.dat += 2;
+	mMap->setIMEReg();
 	printf("RETI\n");
 	return 16;
 }
@@ -3562,9 +3574,26 @@ int CPU::PUSH_HL()
 
 //
 int CPU::AND_A_u8() { return 0; }
-int CPU::RST_20H() { return 0; }
+
+// RST 20H
+// Call subroutine at address 0x0020.
+int CPU::RST_20H() {
+	mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 1) >> 8);
+	mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 1) & 0xFF);
+	reg_SP.dat -= 2;
+	reg_PC.dat = 0x0020;
+	printf("RST 20H\n");
+	return 16;
+}
+
 int CPU::ADD_SP_i8() { return 0; }
-int CPU::JP_HL() { return 0; }
+
+// JP (HL)
+// Jump to address contained in HL.
+int CPU::JP_HL() {
+	reg_PC.dat = reg_HL.dat; 
+	return 4; 
+}
 
 // LD (u16), A
 // Load A into (u16)

@@ -105,6 +105,18 @@ public:
 
 	Byte operator[](Word address);
 
+	// The EI opcode sets the IME flag
+	// After execution of opcode after EI
+	// so we need a bool to check if we need to set
+	// IME flag after the opcode in th update loop
+
 	void setIMEFlag() { setIME = true; }
 	void unsetIMEFlag() { setIME = false; }
+
+	// Sets and unsets the IME flag
+	// used by opcodes like RETI which are basically EI + RET
+	// So we need to set IME flag imminently after RETI
+
+	void setIMEReg() { *interruptEnableRegister = 1; }
+	void unsetIMEReg() { *interruptEnableRegister = 0; }
 };
