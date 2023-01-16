@@ -24,6 +24,9 @@ private:
 	// Pointer to the MemoryMap
 	MemoryMap* gbe_mMap;
 
+	// File pointer for Boot ROM
+	FILE* bootROM;
+
 	// Update function of the GBE
 	// Will be called every frame
 	// GB has 59.73 frames per second

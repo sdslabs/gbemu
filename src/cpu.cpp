@@ -35,16 +35,16 @@ CPU::CPU()
 	// We are following the DMG boot ROM
 
 	// Set the Program Counter to 0x0100
-	reg_PC.dat = 0x0100;
+	reg_PC.dat = 0x0000;
 
 	// Set Accumulator to 0x01 and Flags to Z = 1, N = 0, H = 1, C = 1
 	// Assuming header checksum passes
-	reg_AF.dat = 0x01B0;
+	reg_AF.dat = 0x0000;
 
-	reg_BC.dat = 0x0013;
-	reg_DE.dat = 0x00D8;
-	reg_HL.dat = 0x014D;
-	reg_SP.dat = 0xFFFE;
+	reg_BC.dat = 0x0000;
+	reg_DE.dat = 0x0000;
+	reg_HL.dat = 0x0000;
+	reg_SP.dat = 0x0000;
 
 	// Set isLowPower to false
 	isLowPower = false;
@@ -533,12 +533,14 @@ int CPU::RRA()
 	// Unset Half Carry flag
 	UNSET_HALF_CARRY_FLAG;
 
+	bool tempCarry = GET_CARRY_FLAG;
+
 	// Set Carry flag to 1 if bit 0 is 1
 	// Example: 1000 0001 will become 0100 0000
 	(reg_AF.hi & 0x01) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	// Shift A right by 1
-	reg_AF.hi = (reg_AF.hi >> 1) | (reg_AF.hi << 7);
+	reg_AF.hi = (reg_AF.hi >> 1) | (tempCarry << 7);
 
 	reg_PC.dat += 1;
 	printf("RRA\n");
@@ -825,8 +827,8 @@ int CPU::LD_SP_u16()
 // Loads the contents of A into the memory address pointed to by HL and decrements HL
 int CPU::LD_HLm_A()
 {
-	reg_HL.dat -= 1;
 	mMap->writeMemory(reg_HL.dat, reg_AF.hi);
+	reg_HL.dat -= 1;
 	reg_PC.dat += 1;
 	printf("LD (HL-), A\n");
 	return 8;
@@ -1680,8 +1682,10 @@ int CPU::LD_A_A()
 // Adds B to A
 int CPU::ADD_A_B()
 {
+	UNSET_SUBTRACT_FLAG;
+
 	// Set zero flag if result is zero
-	reg_AF.hi + reg_BC.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+	(reg_AF.hi + reg_BC.hi) & 0x01 ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	// Set half carry flag if carry from bit 3
 	((reg_AF.hi & 0x0F) + (reg_BC.hi & 0x0F)) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
@@ -1704,8 +1708,10 @@ int CPU::ADD_A_B()
 // Adds C to A
 int CPU::ADD_A_C()
 {
+	UNSET_SUBTRACT_FLAG;
+
 	// Set zero flag if result is zero
-	reg_AF.hi + reg_BC.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+	(reg_AF.hi + reg_BC.lo) & 0x01 ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	// Set half carry flag if carry from bit 3
 	((reg_AF.hi & 0x0F) + (reg_BC.lo & 0x0F)) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
@@ -1728,8 +1734,10 @@ int CPU::ADD_A_C()
 // Adds D to A
 int CPU::ADD_A_D()
 {
+	UNSET_SUBTRACT_FLAG;
+
 	// Set zero flag if result is zero
-	reg_AF.hi + reg_DE.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+	(reg_AF.hi + reg_DE.hi) & 0x01 ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	// Set half carry flag if carry from bit 3
 	((reg_AF.hi & 0x0F) + (reg_DE.hi & 0x0F)) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
@@ -1752,8 +1760,10 @@ int CPU::ADD_A_D()
 // Adds E to A
 int CPU::ADD_A_E()
 {
+	UNSET_SUBTRACT_FLAG;
+
 	// Set zero flag if result is zero
-	reg_AF.hi + reg_DE.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+	(reg_AF.hi + reg_DE.lo) & 0x01 ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	// Set half carry flag if carry from bit 3
 	((reg_AF.hi & 0x0F) + (reg_DE.lo & 0x0F)) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
@@ -1776,9 +1786,10 @@ int CPU::ADD_A_E()
 // Adds H to A
 int CPU::ADD_A_H()
 {
+	UNSET_SUBTRACT_FLAG;
 
 	// Set zero flag if result is zero
-	reg_AF.hi + reg_HL.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+	(reg_AF.hi + reg_HL.hi) & 0x01 ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	// Set half carry flag if carry from bit 3
 	((reg_AF.hi & 0x0F) + (reg_HL.hi & 0x0F)) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
@@ -1801,8 +1812,10 @@ int CPU::ADD_A_H()
 // Adds L to A
 int CPU::ADD_A_L()
 {
+	UNSET_SUBTRACT_FLAG;
+
 	// Set zero flag if result is zero
-	reg_AF.hi + reg_HL.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+	(reg_AF.hi + reg_HL.lo) & 0x01 ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	// Set half carry flag if carry from bit 3
 	((reg_AF.hi & 0x0F) + (reg_HL.lo & 0x0F)) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
@@ -1825,8 +1838,10 @@ int CPU::ADD_A_L()
 // Adds the value at address HL to A
 int CPU::ADD_A_HLp()
 {
+	UNSET_SUBTRACT_FLAG;
+
 	// Set zero flag if result is zero
-	reg_AF.hi + (*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+	(reg_AF.hi + (*mMap)[reg_HL.dat]) & 0x01 ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	// Set half carry flag if carry from bit 3
 	((reg_AF.hi & 0x0F) + ((*mMap)[reg_HL.dat] & 0x0F)) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
@@ -1849,8 +1864,10 @@ int CPU::ADD_A_HLp()
 // Adds A to A
 int CPU::ADD_A_A()
 {
+	UNSET_SUBTRACT_FLAG;
+
 	// Set zero flag if result is zero
-	reg_AF.hi + reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+	(reg_AF.hi + reg_AF.hi) & 0x01 ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	// Set carry flag if carry from bit 7
 	// Set the carry flag if there is carry from bit 15, otherwise unset it
@@ -3144,9 +3161,8 @@ int CPU::CALL_NZ_u16()
 {
 	if (!GET_ZERO_FLAG)
 	{
-		mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 3) >> 8);
-		mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 3) & 0xFF);
-		reg_SP.dat -= 2;
+		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) >> 8);
+		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) & 0xFF);
 		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
 		printf("CALL NZ, %04X\n", reg_PC.dat);
 		return 24;
@@ -3163,9 +3179,8 @@ int CPU::CALL_NZ_u16()
 // Push BC onto the stack.
 int CPU::PUSH_BC()
 {
-	mMap->writeMemory((*mMap)[reg_SP.dat - 1], reg_BC.hi);
-	mMap->writeMemory((*mMap)[reg_SP.dat - 2], reg_BC.lo);
-	reg_SP.dat -= 2;
+	mMap->writeMemory(--reg_SP.dat, reg_BC.hi);
+	mMap->writeMemory(--reg_SP.dat, reg_BC.lo);
 	reg_PC.dat += 1;
 	printf("PUSH BC\n");
 	return 16;
@@ -3182,7 +3197,7 @@ int CPU::ADD_A_u8()
 	reg_AF.hi + (*mMap)[reg_PC.dat + 1] > 0xFF ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	// Set zero flag if A + u8 == 0
-	reg_AF.hi + (*mMap)[reg_PC.dat + 1] == 0 ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
+	(reg_AF.hi + (*mMap)[reg_PC.dat + 1]) & 0x01 ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
 
 	// Set half carry flag if lower nibble of A + lower nibble of u8 > 0xF
 	(reg_AF.hi & 0x0F) + ((*mMap)[reg_PC.dat + 1] & 0x0F) > 0xF ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
@@ -3197,9 +3212,8 @@ int CPU::ADD_A_u8()
 // Call subroutine at address 0x0000.
 int CPU::RST_00H()
 {
-	mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 1) >> 8);
-	mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 1) & 0xFF);
-	reg_SP.dat -= 2;
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0000;
 	printf("RST 00H\n");
 	return 16;
@@ -3268,9 +3282,8 @@ int CPU::CALL_Z_u16()
 {
 	if (GET_ZERO_FLAG)
 	{
-		mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 3) >> 8);
-		mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 3) & 0xFF);
-		reg_SP.dat -= 2;
+		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) >> 8);
+		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) & 0xFF);
 		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
 		printf("CALL Z, %04X\n", reg_PC.dat);
 		return 24;
@@ -3287,9 +3300,8 @@ int CPU::CALL_Z_u16()
 // Call subroutine at address u16.
 int CPU::CALL_u16()
 {
-	mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 3) >> 8);
-	mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 3) & 0xFF);
-	reg_SP.dat -= 2;
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) >> 8);
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) & 0xFF);
 	reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
 	printf("CALL %04X\n", reg_PC.dat);
 	return 24;
@@ -3321,9 +3333,8 @@ int CPU::ADC_A_u8()
 // Call subroutine at address 0x0008.
 int CPU::RST_08H()
 {
-	mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 1) >> 8);
-	mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 1) & 0xFF);
-	reg_SP.dat -= 2;
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0008;
 	printf("RST 08H\n");
 	return 16;
@@ -3389,9 +3400,8 @@ int CPU::NC_u16()
 {
 	if (!GET_CARRY_FLAG)
 	{
-		mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 3) >> 8);
-		mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 3) & 0xFF);
-		reg_SP.dat -= 2;
+		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) >> 8);
+		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) & 0xFF);
 		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
 		printf("NCALL %04X\n", reg_PC.dat);
 		return 24;
@@ -3408,9 +3418,8 @@ int CPU::NC_u16()
 // Push 16-bit value from DE onto stack.
 int CPU::PUSH_DE()
 {
-	mMap->writeMemory((*mMap)[reg_SP.dat - 1], reg_DE.hi);
-	mMap->writeMemory((*mMap)[reg_SP.dat - 2], reg_DE.lo);
-	reg_SP.dat -= 2;
+	mMap->writeMemory(--reg_SP.dat, reg_DE.hi);
+	mMap->writeMemory(--reg_SP.dat, reg_DE.lo);
 	printf("PUSH DE\n");
 	return 16;
 }
@@ -3441,9 +3450,8 @@ int CPU::SUB_u8()
 // Call subroutine at address 0x0010.
 int CPU::RST_10H()
 {
-	mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 1) >> 8);
-	mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 1) & 0xFF);
-	reg_SP.dat -= 2;
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0010;
 	printf("RST 10H\n");
 	return 16;
@@ -3503,9 +3511,8 @@ int CPU::CALL_C_u16()
 {
 	if (GET_CARRY_FLAG)
 	{
-		mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 3) >> 8);
-		mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 3) & 0xFF);
-		reg_SP.dat -= 2;
+		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) >> 8);
+		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) & 0xFF);
 		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
 		printf("CALL C, %04X\n", reg_PC.dat);
 		return 24;
@@ -3544,9 +3551,8 @@ int CPU::SBC_A_u8()
 // Call subroutine at address 0x0018.
 int CPU::RST_18H()
 {
-	mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 1) >> 8);
-	mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 1) & 0xFF);
-	reg_SP.dat -= 2;
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0018;
 	printf("RST 18H\n");
 	return 16;
@@ -3567,6 +3573,7 @@ int CPU::POP_HL()
 {
 	reg_HL.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
 	reg_SP.dat += 2;
+	reg_PC.dat += 1;
 	printf("POP HL\n");
 	return 12;
 }
@@ -3576,6 +3583,7 @@ int CPU::POP_HL()
 int CPU::LDH_C_A()
 {
 	mMap->writeMemory(0xFF00 + reg_BC.lo, reg_AF.hi);
+	reg_PC.dat += 1;
 	printf("LD (C), A\n");
 	return 8;
 }
@@ -3584,9 +3592,9 @@ int CPU::LDH_C_A()
 // Push HL onto stack.
 int CPU::PUSH_HL()
 {
-	mMap->writeMemory((*mMap)[reg_SP.dat - 1], reg_HL.hi);
-	mMap->writeMemory((*mMap)[reg_SP.dat - 2], reg_HL.lo);
-	reg_SP.dat -= 2;
+	mMap->writeMemory(--reg_SP.dat, reg_HL.hi);
+	mMap->writeMemory(--reg_SP.dat, reg_HL.lo);
+	reg_PC.dat += 1;
 	printf("PUSH HL\n");
 	return 16;
 }
@@ -3607,9 +3615,8 @@ int CPU::AND_A_u8() {
 // RST 20H
 // Call subroutine at address 0x0020.
 int CPU::RST_20H() {
-	mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 1) >> 8);
-	mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 1) & 0xFF);
-	reg_SP.dat -= 2;
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0020;
 	printf("RST 20H\n");
 	return 16;
@@ -3647,7 +3654,7 @@ int CPU::LD_u16_A()
 {
 	// u16 is ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2]
 	// Writing the value of A into the (u16)
-	mMap->debugWriteMemory(((*mMap)[reg_PC.dat + 2] << 8) | (*mMap)[reg_PC.dat + 1], (*mMap)[reg_AF.hi]);
+	mMap->writeMemory((*mMap)[reg_PC.dat + 2] << 8 | (*mMap)[reg_PC.dat + 1], reg_AF.hi);
 	reg_PC.dat += 3;
 	printf("LD (u16), A\n");
 	return 16;
@@ -3678,9 +3685,8 @@ int CPU::XOR_A_u8()
 // Call subroutine at address 0x0028.
 int CPU::RST_28H()
 {
-	mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 1) >> 8);
-	mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 1) & 0xFF);
-	reg_SP.dat -= 2;
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0028;
 	printf("RST 28H\n");
 	return 16;
@@ -3702,6 +3708,7 @@ int CPU::POP_AF()
 {
 	reg_AF.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
 	reg_SP.dat += 2;
+	reg_PC.dat += 1;
 	printf("POP AF\n");
 	return 12;
 }
@@ -3721,6 +3728,7 @@ int CPU::LDH_A_C()
 int CPU::DI()
 {
 	mMap->unsetIMEFlag();
+	reg_PC.dat += 1;
 	printf("DI\n");
 	return 4;
 }
@@ -3729,9 +3737,9 @@ int CPU::DI()
 // Push AF onto stack.
 int CPU::PUSH_AF()
 {
-	mMap->writeMemory((*mMap)[reg_SP.dat - 1], reg_AF.hi);
-	mMap->writeMemory((*mMap)[reg_SP.dat - 2], reg_AF.lo);
-	reg_SP.dat -= 2;
+	mMap->writeMemory(--reg_SP.dat, reg_AF.hi);
+	mMap->writeMemory(--reg_SP.dat, reg_AF.lo);
+	reg_PC.dat += 1;
 	printf("PUSH AF\n");
 	return 16;
 }
@@ -3761,9 +3769,8 @@ int CPU::OR_A_u8()
 // Call subroutine at address 0x0030.
 int CPU::RST_30H()
 {
-	mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 1) >> 8);
-	mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 1) & 0xFF);
-	reg_SP.dat -= 2;
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0030;
 	printf("RST 30H\n");
 	return 16;
@@ -3803,6 +3810,7 @@ int CPU::LD_A_u16()
 int CPU::EI()
 {
 	mMap->setIMEFlag();
+	reg_PC.dat += 1;
 	printf("EI\n");
 	return 4;
 }
@@ -3832,9 +3840,8 @@ int CPU::CP_u8()
 // Call subroutine at address 0x0038.
 int CPU::RST_38H()
 {
-	mMap->writeMemory((*mMap)[reg_SP.dat - 1], (reg_PC.dat + 1) >> 8);
-	mMap->writeMemory((*mMap)[reg_SP.dat - 2], (reg_PC.dat + 1) & 0xFF);
-	reg_SP.dat -= 2;
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0038;
 	printf("RST 38H\n");
 	return 16;
@@ -3973,7 +3980,7 @@ int CPU::RLC_HLp()
 	(*mMap)[reg_HL.dat] >> 7 ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	// Rotate the value at memory address pointed to by HL left by 1
-	(*mMap)[reg_HL.dat] = ((*mMap)[reg_HL.dat] << 1) | ((*mMap)[reg_HL.dat] >> 7);
+	mMap->writeMemory((*mMap)[reg_HL.dat], ((*mMap)[reg_HL.dat] << 1) | ((*mMap)[reg_HL.dat] >> 7));
 
 	reg_PC.dat += 1;
 	printf("RLC (HL)\n");
@@ -4117,7 +4124,7 @@ int CPU::RRC_HLp()
 	(*mMap)[reg_HL.dat] & 1 ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	// Rotate the value at memory address pointed to by HL right by 1
-	(*mMap)[reg_HL.dat] = ((*mMap)[reg_HL.dat] >> 1) | ((*mMap)[reg_HL.dat] << 7);
+	mMap->writeMemory((*mMap)[reg_HL.dat], ((*mMap)[reg_HL.dat] >> 1) | ((*mMap)[reg_HL.dat] << 7));
 
 	reg_PC.dat += 1;
 	printf("RRC (HL)\n");
@@ -4270,12 +4277,12 @@ int CPU::RL_HLp()
 	UNSET_HALF_CARRY_FLAG;
 
 	// Rotate the value at memory address pointed to by HL left by 1
-	(*mMap)[reg_HL.dat] = ((*mMap)[reg_HL.dat] << 1) | ((*mMap)[reg_HL.dat] >> 7);
+	mMap->writeMemory((*mMap)[reg_HL.dat], ((*mMap)[reg_HL.dat] << 1) | ((*mMap)[reg_HL.dat] >> 7));
 
 	//swap the values of 0th bit of the value at memory address pointed to by HL and the carry flag
-	(*mMap)[reg_HL.dat] ^= GET_CARRY_FLAG;
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] ^ GET_CARRY_FLAG);
 	GET_CARRY_FLAG ^ ((*mMap)[reg_HL.dat] & 1) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
-	(*mMap)[reg_HL.dat] ^= GET_CARRY_FLAG;
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] ^ GET_CARRY_FLAG);
 
 	reg_PC.dat += 1;
 	printf("RL (HL)\n");
@@ -4430,12 +4437,12 @@ int CPU::RR_HLp()
 	UNSET_HALF_CARRY_FLAG;
 
 	// Rotate the value at memory address pointed to by HL right by 1
-	(*mMap)[reg_HL.dat] = ((*mMap)[reg_HL.dat] >> 1) | ((*mMap)[reg_HL.dat] << 7);
+	mMap->writeMemory((*mMap)[reg_HL.dat], ((*mMap)[reg_HL.dat] >> 1) | ((*mMap)[reg_HL.dat] << 7));
 
 	//swap the values of 7th bit of the value at memory address pointed to by HL and the carry flag
-	(*mMap)[reg_HL.dat] ^= GET_CARRY_FLAG << 7;
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] ^ GET_CARRY_FLAG << 7);
 	GET_CARRY_FLAG ^ ((*mMap)[reg_HL.dat] >> 7) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
-	(*mMap)[reg_HL.dat] ^= GET_CARRY_FLAG << 7;
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] ^ GET_CARRY_FLAG << 7);
 
 	reg_PC.dat += 1;
 	printf("RR (HL)\n");
@@ -4581,7 +4588,7 @@ int CPU::SLA_HLp()
 	(*mMap)[reg_HL.dat] >> 7 ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	// Shift the value at memory address pointed to by HL left by 1
-	(*mMap)[reg_HL.dat] = ((*mMap)[reg_HL.dat] << 1);
+	mMap->writeMemory((*mMap)[reg_HL.dat], ((*mMap)[reg_HL.dat] << 1));
 
 	reg_PC.dat += 1;
 	printf("SLA (HL)\n");
@@ -4725,7 +4732,7 @@ int CPU::SRA_HLp()
 	(*mMap)[reg_HL.dat] & 1 ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	// Shift the value at memory address pointed to by HL right by 1 while leaving 7th bit unchanged
-	(*mMap)[reg_HL.dat] = ((*mMap)[reg_HL.dat] >> 1) | ((*mMap)[reg_HL.dat] & 0x80);
+	mMap->writeMemory((*mMap)[reg_HL.dat], ((*mMap)[reg_HL.dat] >> 1) | ((*mMap)[reg_HL.dat] & 0x80));
 
 	reg_PC.dat += 1;
 	printf("SRA (HL)\n");
@@ -4801,7 +4808,7 @@ int CPU::SWAP_D()
 
 // SWAP E
 // Swap the upper and lower nibbles of E
-int CPU::SWAP_C()
+int CPU::SWAP_E()
 {
 	UNSET_SUBTRACT_FLAG;
 	UNSET_HALF_CARRY_FLAG;
@@ -4857,7 +4864,7 @@ int CPU::SWAP_HLp()
 	UNSET_CARRY_FLAG;
 
 	// swap the upper and lower nibbles
-	(*mMap)[reg_HL.dat] = ((((*mMap)[reg_HL.dat] & 0x0F) << 4) | (((*mMap)[reg_HL.dat] & 0xF0) >> 4));
+	mMap->writeMemory((*mMap)[reg_HL.dat], ((((*mMap)[reg_HL.dat] & 0x0F) << 4) | (((*mMap)[reg_HL.dat] & 0xF0) >> 4)));
 
 	reg_PC.dat += 1;
 	printf("SWAP (HL)\n");
@@ -5000,7 +5007,7 @@ int CPU::SRL_HLp()
 	(*mMap)[reg_HL.dat] & 1 ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	// Shift the value at memory address pointed to by HL right by 1
-	(*mMap)[reg_HL.dat] = ((*mMap)[reg_HL.dat] >> 1);
+	mMap->writeMemory((*mMap)[reg_HL.dat], ((*mMap)[reg_HL.dat] >> 1));
 
 	reg_PC.dat += 1;
 	printf("SRL (HL)\n");
@@ -6062,7 +6069,7 @@ int CPU::RES_0_L()
 int CPU::RES_0_HLp()
 {
 	// unset the 0th bit
-	(*mMap)[reg_HL.dat] &= 0xFF ^ ( 1 << 0 );
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] & 0xFF ^ ( 1 << 0 ));
 
 	reg_PC.dat += 1;
 	printf("RES 0, (HL)\n");
@@ -6158,7 +6165,7 @@ int CPU::RES_1_L()
 int CPU::RES_1_HLp()
 {
 	// unset the 1st bit
-	(*mMap)[reg_HL.dat] &= 0xFF ^ ( 1 << 1 );
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] & 0xFF ^ ( 1 << 1 ));
 
 	reg_PC.dat += 1;
 	printf("RES 1, (HL)\n");
@@ -6254,7 +6261,7 @@ int CPU::RES_2_L()
 int CPU::RES_2_HLp()
 {
 	// unset the 2nd bit
-	(*mMap)[reg_HL.dat] &= 0xFF ^ ( 1 << 2 );
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] & 0xFF ^ ( 1 << 2 ));
 
 	reg_PC.dat += 1;
 	printf("RES 2, (HL)\n");
@@ -6350,7 +6357,7 @@ int CPU::RES_3_L()
 int CPU::RES_3_HLp()
 {
 	// unset the 3rd bit
-	(*mMap)[reg_HL.dat] &= 0xFF ^ ( 1 << 3 );
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] & 0xFF ^ ( 1 << 3 ));
 
 	reg_PC.dat += 1;
 	printf("RES 3, (HL)\n");
@@ -6446,7 +6453,7 @@ int CPU::RES_4_L()
 int CPU::RES_4_HLp()
 {
 	// unset the 4th bit
-	(*mMap)[reg_HL.dat] &= 0xFF ^ ( 1 << 4 );
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] & 0xFF ^ ( 1 << 4 ));
 
 	reg_PC.dat += 1;
 	printf("RES 4, (HL)\n");
@@ -6542,7 +6549,7 @@ int CPU::RES_5_L()
 int CPU::RES_5_HLp()
 {
 	// unset the 5th bit
-	(*mMap)[reg_HL.dat] &= 0xFF ^ ( 1 << 5 );
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] & 0xFF ^ ( 1 << 5 ));
 
 	reg_PC.dat += 1;
 	printf("RES 5, (HL)\n");
@@ -6638,7 +6645,7 @@ int CPU::RES_6_L()
 int CPU::RES_6_HLp()
 {
 	// unset the 6th bit
-	(*mMap)[reg_HL.dat] &= 0xFF ^ ( 1 << 6 );
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] & 0xFF ^ ( 1 << 6 ));
 
 	reg_PC.dat += 1;
 	printf("RES 6, (HL)\n");
@@ -6734,7 +6741,7 @@ int CPU::RES_7_L()
 int CPU::RES_7_HLp()
 {
 	// unset the 7th bit
-	(*mMap)[reg_HL.dat] &= 0xFF ^ ( 1 << 7 );
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] & 0xFF ^ ( 1 << 7 ));
 
 	reg_PC.dat += 1;
 	printf("RES 7, (HL)\n");
@@ -6830,7 +6837,7 @@ int CPU::SET_0_L()
 int CPU::SET_0_HLp()
 {
 	// set the 0th bit
-	(*mMap)[reg_HL.dat] |= ( 1 << 0 );
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] | ( 1 << 0 ));
 
 	reg_PC.dat += 1;
 	printf("SET 0, (HL)\n");
@@ -6926,7 +6933,7 @@ int CPU::SET_1_L()
 int CPU::SET_1_HLp()
 {
 	// set the 1st bit
-	(*mMap)[reg_HL.dat] |= ( 1 << 1 );
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] | ( 1 << 1 ));
 
 	reg_PC.dat += 1;
 	printf("SET 1, (HL)\n");
@@ -7022,7 +7029,7 @@ int CPU::SET_2_L()
 int CPU::SET_2_HLp()
 {
 	// set the 2nd bit
-	(*mMap)[reg_HL.dat] |= ( 1 << 2 );
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] | ( 1 << 2 ));
 
 	reg_PC.dat += 1;
 	printf("SET 2, (HL)\n");
@@ -7118,7 +7125,7 @@ int CPU::SET_3_L()
 int CPU::SET_3_HLp()
 {
 	// set the 3rd bit
-	(*mMap)[reg_HL.dat] |= ( 1 << 3 );
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] | ( 1 << 3 ));
 
 	reg_PC.dat += 1;
 	printf("SET 3, (HL)\n");
@@ -7214,7 +7221,7 @@ int CPU::SET_4_L()
 int CPU::SET_4_HLp()
 {
 	// set the 4th bit
-	(*mMap)[reg_HL.dat] |= ( 1 << 4 );
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] | ( 1 << 4 ));
 
 	reg_PC.dat += 1;
 	printf("SET 4, (HL)\n");
@@ -7310,7 +7317,7 @@ int CPU::SET_5_L()
 int CPU::SET_5_HLp()
 {
 	// set the 5th bit
-	(*mMap)[reg_HL.dat] |= ( 1 << 5 );
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] | ( 1 << 5 ));
 
 	reg_PC.dat += 1;
 	printf("SET 5, (HL)\n");
@@ -7406,7 +7413,7 @@ int CPU::SET_6_L()
 int CPU::SET_6_HLp()
 {
 	// set the 6th bit
-	(*mMap)[reg_HL.dat] |= ( 1 << 6 );
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] | ( 1 << 6 ));
 
 	reg_PC.dat += 1;
 	printf("SET 6, (HL)\n");
@@ -7502,7 +7509,7 @@ int CPU::SET_7_L()
 int CPU::SET_7_HLp()
 {
 	// set the 7th bit
-	(*mMap)[reg_HL.dat] |= ( 1 << 7 );
+	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] | ( 1 << 7 ));
 
 	reg_PC.dat += 1;
 	printf("SET 7, (HL)\n");
