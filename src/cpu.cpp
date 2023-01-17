@@ -1902,7 +1902,7 @@ int CPU::ADC_A_B()
 	((reg_AF.hi & 0x0F) + (reg_BC.hi & 0x0F) + GET_CARRY_FLAG) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	// Set carry flag if carry from bit 7
-	Byte temp = reg_AF.hi;
+	Byte temp = reg_AF.hi + GET_CARRY_FLAG;
 
 	reg_AF.hi += reg_BC.hi + GET_CARRY_FLAG;
 
@@ -1928,7 +1928,7 @@ int CPU::ADC_A_C()
 	UNSET_SUBTRACT_FLAG;
 
 	// Set carry flag if carry from bit 7
-	Byte temp = reg_AF.hi;
+	Byte temp = reg_AF.hi + GET_CARRY_FLAG;
 
 	reg_AF.hi += reg_BC.lo + GET_CARRY_FLAG;
 
@@ -1954,7 +1954,7 @@ int CPU::ADC_A_D()
 	UNSET_SUBTRACT_FLAG;
 
 	// Set carry flag if carry from bit 7
-	Byte temp = reg_AF.hi;
+	Byte temp = reg_AF.hi + GET_CARRY_FLAG;
 
 	reg_AF.hi += reg_DE.hi + GET_CARRY_FLAG;
 
@@ -1980,7 +1980,7 @@ int CPU::ADC_A_E()
 	UNSET_SUBTRACT_FLAG;
 
 	// Set carry flag if carry from bit 7
-	Byte temp = reg_AF.hi;
+	Byte temp = reg_AF.hi + GET_CARRY_FLAG;
 
 	reg_AF.hi += reg_DE.lo + GET_CARRY_FLAG;
 
@@ -2007,7 +2007,7 @@ int CPU::ADC_A_H()
 
 	// Set carry flag if carry from bit 7
 	// Set the carry flag if there is carry from bit 15, otherwise unset it
-	Byte temp = reg_AF.hi;
+	Byte temp = reg_AF.hi + GET_CARRY_FLAG;
 
 	reg_AF.hi += reg_HL.hi + GET_CARRY_FLAG;
 
@@ -2033,7 +2033,7 @@ int CPU::ADC_A_L()
 	UNSET_SUBTRACT_FLAG;
 
 	// Set carry flag if carry from bit 7
-	Byte temp = reg_AF.hi;
+	Byte temp = reg_AF.hi + GET_CARRY_FLAG;
 
 	reg_AF.hi += reg_HL.lo + GET_CARRY_FLAG;
 
@@ -2058,7 +2058,7 @@ int CPU::ADC_A_HLp()
 	UNSET_SUBTRACT_FLAG;
 
 	// Set carry flag if carry from bit 7
-	Byte temp = reg_AF.hi;
+	Byte temp = reg_AF.hi + GET_CARRY_FLAG;
 
 	reg_AF.hi += (*mMap)[reg_HL.dat] + GET_CARRY_FLAG;
 
@@ -2084,7 +2084,7 @@ int CPU::ADC_A_A()
 	UNSET_SUBTRACT_FLAG;
 
 	// Set carry flag if carry from bit 7
-	Byte temp = reg_AF.hi;
+	Byte temp = reg_AF.hi + GET_CARRY_FLAG;
 
 	reg_AF.hi += reg_AF.hi + GET_CARRY_FLAG;
 
@@ -2962,7 +2962,7 @@ int CPU::CP_A_B()
 int CPU::CP_A_C()
 {
 	// Unset half carry and subtract flags
-	UNSET_SUBTRACT_FLAG;
+	SET_SUBTRACT_FLAG;
 
 	// Set carry flag if A < C
 	reg_AF.hi < reg_BC.lo ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
@@ -2983,7 +2983,7 @@ int CPU::CP_A_C()
 int CPU::CP_A_D()
 {
 	// Unset half carry and subtract flags
-	UNSET_SUBTRACT_FLAG;
+	SET_SUBTRACT_FLAG;
 
 	// Set carry flag if A < D
 	reg_AF.hi < reg_DE.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
@@ -3004,7 +3004,7 @@ int CPU::CP_A_D()
 int CPU::CP_A_E()
 {
 	// Unset half carry and subtract flags
-	UNSET_SUBTRACT_FLAG;
+	SET_SUBTRACT_FLAG;
 
 	// Set carry flag if A < E
 	reg_AF.hi < reg_DE.lo ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
@@ -3025,7 +3025,7 @@ int CPU::CP_A_E()
 int CPU::CP_A_H()
 {
 	// Unset half carry and subtract flags
-	UNSET_SUBTRACT_FLAG;
+	SET_SUBTRACT_FLAG;
 
 	// Set carry flag if A < H
 	reg_AF.hi < reg_HL.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
@@ -3046,7 +3046,7 @@ int CPU::CP_A_H()
 int CPU::CP_A_L()
 {
 	// Unset half carry and subtract flags
-	UNSET_SUBTRACT_FLAG;
+	SET_SUBTRACT_FLAG;
 
 	// Set carry flag if A < L
 	reg_AF.hi < reg_HL.lo ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
@@ -3067,7 +3067,7 @@ int CPU::CP_A_L()
 int CPU::CP_A_HLp()
 {
 	// Unset half carry and subtract flags
-	UNSET_SUBTRACT_FLAG;
+	SET_SUBTRACT_FLAG;
 
 	// Set carry flag if A < value at address HL
 	reg_AF.hi < (*mMap)[reg_HL.dat] ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
@@ -3088,7 +3088,7 @@ int CPU::CP_A_HLp()
 int CPU::CP_A_A()
 {
 	// Unset half carry and subtract flags
-	UNSET_SUBTRACT_FLAG;
+	SET_SUBTRACT_FLAG;
 
 	// Unset carry flag
 	UNSET_CARRY_FLAG;
@@ -3320,7 +3320,7 @@ int CPU::ADC_A_u8()
 	// Unset subtract flag
 	UNSET_SUBTRACT_FLAG;
 
-	Byte temp = reg_AF.hi;
+	Byte temp = reg_AF.hi + GET_CARRY_FLAG;
 
 	// Set zero flag if A + u8 + carry flag == 0
 	(reg_AF.hi + (*mMap)[reg_PC.dat + 1] + GET_CARRY_FLAG) & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
@@ -3639,10 +3639,10 @@ int CPU::ADD_SP_i8() {
 	UNSET_SUBTRACT_FLAG;
 
 	// Set half carry flag if overflowed 3rd bit
-	(reg_SP.dat & 0x0F + (SByte)(*mMap)[reg_PC.dat + 1] & 0x0F) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	((reg_SP.dat & 0x0F) + ((SByte)(*mMap)[reg_PC.dat + 1] & 0x0F)) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	// Set carry flag if overflowed 7th bit
-	(reg_SP.dat & 0xFF + (SByte)(*mMap)[reg_PC.dat + 1] & 0xFF) & 0x100 ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+	((reg_SP.dat & 0xFF) + ((SByte)(*mMap)[reg_PC.dat + 1] & 0xFF)) & 0x100 ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_SP.dat += (SByte)(*mMap)[reg_PC.dat + 1];
 
@@ -3768,7 +3768,7 @@ int CPU::OR_A_u8()
 	reg_AF.hi |= (*mMap)[reg_PC.dat + 1];
 
 	// Set zero flag if A == u8
-	reg_AF.hi ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 2;
 	//printf("OR A, %02X\n", (*mMap)[reg_PC.dat + 1]);
@@ -3790,7 +3790,16 @@ int CPU::RST_30H()
 // Load SP + i8 into HL
 int CPU::LD_HL_SP_i8()
 {
-	reg_HL.dat = reg_SP.dat + (Byte)(*mMap)[reg_PC.dat + 1];
+	UNSET_ZERO_FLAG;
+	UNSET_SUBTRACT_FLAG;
+
+	// Set half carry flag if overflowed 3rd bit
+	((reg_SP.dat & 0x0F) + ((SByte)(*mMap)[reg_PC.dat + 1] & 0x0F)) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+
+	// Set carry flag if overflowed 7th bit
+	((reg_SP.dat & 0xFF) + ((SByte)(*mMap)[reg_PC.dat + 1] & 0xFF)) & 0x100 ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	reg_HL.dat = reg_SP.dat + (SByte)(*mMap)[reg_PC.dat + 1];
 	reg_PC.dat += 2;
 	return 12;
 }
@@ -3861,6 +3870,11 @@ int CPU::executeNextInstruction()
 {
 	if (reg_PC.dat >= 0x100)
 		dumpState();
+
+	if (reg_PC.dat == 0xCB35)
+	{
+		fclose(outfile);
+	}
 
 	// Get the opcode
 	Byte opcode = (*mMap)[reg_PC.dat];
