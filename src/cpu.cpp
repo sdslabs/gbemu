@@ -411,8 +411,12 @@ int CPU::RLA()
 	// Unsset half carry flag
 	UNSET_HALF_CARRY_FLAG;
 
+	bool tempCarry = GET_CARRY_FLAG ;
+
+	reg_AF.hi >> 7 ? SET_CARRY_FLAG : UNSET_CARRY_FLAG ;
+
 	// Shift A left by 1
-	reg_AF.hi = (reg_AF.hi << 1) | (reg_AF.hi >> 7);
+	reg_AF.hi = (reg_AF.hi << 1) | ( tempCarry );
 
 	reg_PC.dat += 1;
 	//printf("RLA\n");
@@ -1901,13 +1905,16 @@ int CPU::ADC_A_B()
 	// Set half carry flag if carry from bit 3
 	((reg_AF.hi & 0x0F) + (reg_BC.hi & 0x0F) + GET_CARRY_FLAG) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
+	// Unset subtract flag
+	UNSET_SUBTRACT_FLAG;
+
 	// Set carry flag if carry from bit 7
-	Byte temp = reg_AF.hi + GET_CARRY_FLAG;
+	Word temp = reg_AF.hi + GET_CARRY_FLAG + reg_BC.hi;
 
 	reg_AF.hi += reg_BC.hi + GET_CARRY_FLAG;
 
 	// Set carry flag if overflow from a byte temp
-	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+	temp > 0xFF ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("ADC A, B\n");
@@ -1928,12 +1935,12 @@ int CPU::ADC_A_C()
 	UNSET_SUBTRACT_FLAG;
 
 	// Set carry flag if carry from bit 7
-	Byte temp = reg_AF.hi + GET_CARRY_FLAG;
+	Word temp = reg_AF.hi + GET_CARRY_FLAG + reg_BC.lo;
 
 	reg_AF.hi += reg_BC.lo + GET_CARRY_FLAG;
 
 	// Set carry flag if overflow from a byte temp
-	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+	temp > 0xFF ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("ADC A, D\n");
@@ -1954,12 +1961,12 @@ int CPU::ADC_A_D()
 	UNSET_SUBTRACT_FLAG;
 
 	// Set carry flag if carry from bit 7
-	Byte temp = reg_AF.hi + GET_CARRY_FLAG;
+	Word temp = reg_AF.hi + GET_CARRY_FLAG + reg_DE.hi;
 
 	reg_AF.hi += reg_DE.hi + GET_CARRY_FLAG;
 
 	// Set carry flag if overflow from a byte temp
-	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+	temp > 0xFF ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("ADC A, D\n");
@@ -1980,12 +1987,12 @@ int CPU::ADC_A_E()
 	UNSET_SUBTRACT_FLAG;
 
 	// Set carry flag if carry from bit 7
-	Byte temp = reg_AF.hi + GET_CARRY_FLAG;
+	Word temp = reg_AF.hi + GET_CARRY_FLAG + reg_DE.lo;
 
 	reg_AF.hi += reg_DE.lo + GET_CARRY_FLAG;
 
 	// Set carry flag if overflow from a byte temp
-	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+	temp > 0xFF ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("ADC A, E\n");
@@ -2007,12 +2014,12 @@ int CPU::ADC_A_H()
 
 	// Set carry flag if carry from bit 7
 	// Set the carry flag if there is carry from bit 15, otherwise unset it
-	Byte temp = reg_AF.hi + GET_CARRY_FLAG;
+	Word temp = reg_AF.hi + GET_CARRY_FLAG + reg_HL.hi;
 
 	reg_AF.hi += reg_HL.hi + GET_CARRY_FLAG;
 
 	// Set carry flag if overflow from a byte temp
-	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+	temp > 0xFF ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("ADC A, H\n");
@@ -2033,12 +2040,12 @@ int CPU::ADC_A_L()
 	UNSET_SUBTRACT_FLAG;
 
 	// Set carry flag if carry from bit 7
-	Byte temp = reg_AF.hi + GET_CARRY_FLAG;
+	Word temp = reg_AF.hi + GET_CARRY_FLAG + reg_HL.lo;
 
 	reg_AF.hi += reg_HL.lo + GET_CARRY_FLAG;
 
 	// Set carry flag if overflow from a byte temp
-	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+	temp > 0xFF ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("ADC A, L\n");
@@ -2058,12 +2065,12 @@ int CPU::ADC_A_HLp()
 	UNSET_SUBTRACT_FLAG;
 
 	// Set carry flag if carry from bit 7
-	Byte temp = reg_AF.hi + GET_CARRY_FLAG;
+	Word temp = reg_AF.hi + GET_CARRY_FLAG + (*mMap)[reg_HL.dat];
 
 	reg_AF.hi += (*mMap)[reg_HL.dat] + GET_CARRY_FLAG;
 
 	// Set carry flag if overflow from a byte temp
-	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+	temp > 0xFF ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("ADC A, (HL)\n");
@@ -2084,12 +2091,12 @@ int CPU::ADC_A_A()
 	UNSET_SUBTRACT_FLAG;
 
 	// Set carry flag if carry from bit 7
-	Byte temp = reg_AF.hi + GET_CARRY_FLAG;
+	Word temp = reg_AF.hi + GET_CARRY_FLAG + reg_AF.hi;
 
 	reg_AF.hi += reg_AF.hi + GET_CARRY_FLAG;
 
 	// Set carry flag if overflow from a byte temp
-	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+	temp > 0xFF ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("ADC A, A\n");
@@ -2286,6 +2293,8 @@ int CPU::SUB_A_A()
 // Subtracts B + carry flag from A
 int CPU::SBC_A_B()
 {
+	bool tempCarry = GET_CARRY_FLAG;
+
 	// Set half carry flag if borrow from bit 4
 	(reg_AF.hi & 0x0F) < (reg_BC.hi & 0x0F) + GET_CARRY_FLAG ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
@@ -2295,7 +2304,7 @@ int CPU::SBC_A_B()
 	// Set subtract flag
 	SET_SUBTRACT_FLAG;
 
-	reg_AF.hi -= (reg_BC.hi + GET_CARRY_FLAG);
+	reg_AF.hi -= (reg_BC.hi + tempCarry);
 
 	// Set zero flag if result is zero
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
@@ -2309,6 +2318,8 @@ int CPU::SBC_A_B()
 // Subtracts C + carry flag from A
 int CPU::SBC_A_C()
 {
+	bool tempCarry = GET_CARRY_FLAG;
+
 	// Set half carry flag if borrow from bit 4
 	(reg_AF.hi & 0x0F) < (reg_BC.lo & 0x0F) + GET_CARRY_FLAG ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
@@ -2318,7 +2329,7 @@ int CPU::SBC_A_C()
 	// Set subtract flag
 	SET_SUBTRACT_FLAG;
 
-	reg_AF.hi -= (reg_BC.lo + GET_CARRY_FLAG);
+	reg_AF.hi -= (reg_BC.lo + tempCarry);
 
 	// Set zero flag if result is zero
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
@@ -2332,6 +2343,8 @@ int CPU::SBC_A_C()
 // Subtracts D + carry flag from A
 int CPU::SBC_A_D()
 {
+	bool tempCarry = GET_CARRY_FLAG;
+
 	// Set half carry flag if borrow from bit 4
 	(reg_AF.hi & 0x0F) < (reg_DE.hi & 0x0F) + GET_CARRY_FLAG ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
@@ -2341,7 +2354,7 @@ int CPU::SBC_A_D()
 	// Set subtract flag
 	SET_SUBTRACT_FLAG;
 
-	reg_AF.hi -= (reg_DE.hi + GET_CARRY_FLAG);
+	reg_AF.hi -= (reg_DE.hi + tempCarry);
 
 	// Set zero flag if result is zero
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
@@ -2355,6 +2368,8 @@ int CPU::SBC_A_D()
 // Subtracts E + carry flag from A
 int CPU::SBC_A_E()
 {
+	bool tempCarry = GET_CARRY_FLAG;
+
 	// Set half carry flag if borrow from bit 4
 	(reg_AF.hi & 0x0F) < (reg_DE.lo & 0x0F) + GET_CARRY_FLAG ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
@@ -2364,7 +2379,7 @@ int CPU::SBC_A_E()
 	// Set subtract flag
 	SET_SUBTRACT_FLAG;
 
-	reg_AF.hi -= (reg_DE.lo + GET_CARRY_FLAG);
+	reg_AF.hi -= (reg_DE.lo + tempCarry);
 
 	// Set zero flag if result is zero
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
@@ -2378,6 +2393,8 @@ int CPU::SBC_A_E()
 // Subtracts H + carry flag from A
 int CPU::SBC_A_H()
 {
+	bool tempCarry = GET_CARRY_FLAG;
+
 	// Set half carry flag if borrow from bit 4
 	(reg_AF.hi & 0x0F) < (reg_HL.hi & 0x0F) + GET_CARRY_FLAG ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
@@ -2387,7 +2404,7 @@ int CPU::SBC_A_H()
 	// Set subtract flag
 	SET_SUBTRACT_FLAG;
 
-	reg_AF.hi -= (reg_HL.hi + GET_CARRY_FLAG);
+	reg_AF.hi -= (reg_HL.hi + tempCarry);
 
 	// Set zero flag if result is zero
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
@@ -2401,6 +2418,8 @@ int CPU::SBC_A_H()
 // Subtracts L + carry flag from A
 int CPU::SBC_A_L()
 {
+	bool tempCarry = GET_CARRY_FLAG;
+
 	// Set half carry flag if borrow from bit 4
 	(reg_AF.hi & 0x0F) < (reg_HL.lo & 0x0F) + GET_CARRY_FLAG ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
@@ -2410,7 +2429,7 @@ int CPU::SBC_A_L()
 	// Set subtract flag
 	SET_SUBTRACT_FLAG;
 
-	reg_AF.hi -= (reg_HL.lo + GET_CARRY_FLAG);
+	reg_AF.hi -= (reg_HL.lo + tempCarry);
 
 	// Set zero flag if result is zero
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
@@ -2424,6 +2443,8 @@ int CPU::SBC_A_L()
 // Subtracts value at address HL + carry flag from A
 int CPU::SBC_A_HLp()
 {
+	bool tempCarry = GET_CARRY_FLAG;
+
 	// Set half carry flag if borrow from bit 4
 	(reg_AF.hi & 0x0F) < ((*mMap)[reg_HL.dat] & 0x0F) + GET_CARRY_FLAG ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
@@ -2433,7 +2454,7 @@ int CPU::SBC_A_HLp()
 	// Set subtract flag
 	SET_SUBTRACT_FLAG;
 
-	reg_AF.hi -= ((*mMap)[reg_HL.dat] + GET_CARRY_FLAG);
+	reg_AF.hi -= ((*mMap)[reg_HL.dat] + tempCarry);
 
 	// Set zero flag if result is zero
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
@@ -2447,6 +2468,8 @@ int CPU::SBC_A_HLp()
 // Subtracts A + carry flag from A
 int CPU::SBC_A_A()
 {
+	bool tempCarry = GET_CARRY_FLAG;
+
 	// Set half carry flag if borrow from bit 4
 	(reg_AF.hi & 0x0F) < (reg_AF.hi & 0x0F) + GET_CARRY_FLAG ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
@@ -2456,7 +2479,7 @@ int CPU::SBC_A_A()
 	// Set subtract flag
 	SET_SUBTRACT_FLAG;
 
-	reg_AF.hi -= (reg_AF.hi + GET_CARRY_FLAG);
+	reg_AF.hi -= (reg_AF.hi + tempCarry);
 
 	// Set zero flag if result is zero
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
@@ -3905,6 +3928,8 @@ int CPU::RLC_B()
 	// Rotate B left by 1
 	reg_BC.hi = (reg_BC.hi << 1) | (reg_BC.hi >> 7);
 
+	reg_BC.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("RLC B\n");
 	return 4;
@@ -3922,6 +3947,8 @@ int CPU::RLC_C()
 
 	// Rotate C left by 1
 	reg_BC.lo = (reg_BC.lo << 1) | (reg_BC.lo >> 7);
+
+	reg_BC.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("RLC C\n");
@@ -3941,6 +3968,8 @@ int CPU::RLC_D()
 	// Rotate D left by 1
 	reg_DE.hi = (reg_DE.hi << 1) | (reg_DE.hi >> 7);
 
+	reg_DE.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("RLC D\n");
 	return 4;
@@ -3958,6 +3987,8 @@ int CPU::RLC_E()
 
 	// Rotate E left by 1
 	reg_DE.lo = (reg_DE.lo << 1) | (reg_DE.lo >> 7);
+
+	reg_DE.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("RLC E\n");
@@ -3977,6 +4008,8 @@ int CPU::RLC_H()
 	// Rotate H left by 1
 	reg_HL.hi = (reg_HL.hi << 1) | (reg_HL.hi >> 7);
 
+	reg_HL.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("RLC H\n");
 	return 4;
@@ -3994,6 +4027,8 @@ int CPU::RLC_L()
 
 	// Rotate L left by 1
 	reg_HL.lo = (reg_HL.lo << 1) | (reg_HL.lo >> 7);
+
+	reg_HL.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("RLC L\n");
@@ -4013,6 +4048,8 @@ int CPU::RLC_HLp()
 	// Rotate the value at memory address pointed to by HL left by 1
 	mMap->writeMemory((*mMap)[reg_HL.dat], ((*mMap)[reg_HL.dat] << 1) | ((*mMap)[reg_HL.dat] >> 7));
 
+	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("RLC (HL)\n");
 	return 4;
@@ -4030,6 +4067,8 @@ int CPU::RLC_A()
 
 	// Rotate A left by 1
 	reg_AF.hi = (reg_AF.hi << 1) | (reg_AF.hi >> 7);
+
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("RLC A\n");
@@ -4049,6 +4088,8 @@ int CPU::RRC_B()
 	// Rotate B right by 1
 	reg_BC.hi = (reg_BC.hi >> 1) | (reg_BC.hi << 7);
 
+	reg_BC.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("RRC B\n");
 	return 4;
@@ -4066,6 +4107,8 @@ int CPU::RRC_C()
 
 	// Rotate C right by 1
 	reg_BC.lo = (reg_BC.lo >> 1) | (reg_BC.lo << 7);
+
+	reg_BC.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("RRC C\n");
@@ -4085,6 +4128,8 @@ int CPU::RRC_D()
 	// Rotate D right by 1
 	reg_DE.hi = (reg_DE.hi >> 1) | (reg_DE.hi << 7);
 
+	reg_DE.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("RRC D\n");
 	return 4;
@@ -4102,6 +4147,8 @@ int CPU::RRC_E()
 
 	// Rotate E right by 1
 	reg_DE.lo = (reg_DE.lo >> 1) | (reg_DE.lo << 7);
+
+	reg_DE.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("RRC E\n");
@@ -4121,6 +4168,8 @@ int CPU::RRC_H()
 	// Rotate H right by 1
 	reg_HL.hi = (reg_HL.hi >> 1) | (reg_HL.hi << 7);
 
+	reg_HL.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("RRC H\n");
 	return 4;
@@ -4138,6 +4187,8 @@ int CPU::RRC_L()
 
 	// Rotate L right by 1
 	reg_HL.lo = (reg_HL.lo >> 1) | (reg_HL.lo << 7);
+
+	reg_HL.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("RRC L\n");
@@ -4157,6 +4208,8 @@ int CPU::RRC_HLp()
 	// Rotate the value at memory address pointed to by HL right by 1
 	mMap->writeMemory((*mMap)[reg_HL.dat], ((*mMap)[reg_HL.dat] >> 1) | ((*mMap)[reg_HL.dat] << 7));
 
+	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("RRC (HL)\n");
 	return 4;
@@ -4174,6 +4227,8 @@ int CPU::RRC_A()
 
 	// Rotate A right by 1
 	reg_AF.hi = (reg_AF.hi >> 1) | (reg_AF.hi << 7);
+
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("RRC A\n");
@@ -4195,6 +4250,8 @@ int CPU::RL_B()
 	GET_CARRY_FLAG ^ (reg_BC.hi & 1) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 	reg_BC.hi ^= GET_CARRY_FLAG;
 
+	reg_BC.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("RL B\n");
 	return 4;
@@ -4214,6 +4271,8 @@ int CPU::RL_C()
 	reg_BC.lo ^= GET_CARRY_FLAG;
 	GET_CARRY_FLAG ^ (reg_BC.lo & 1) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 	reg_BC.lo ^= GET_CARRY_FLAG;
+
+	reg_BC.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("RL C\n");
@@ -4235,6 +4294,8 @@ int CPU::RL_D()
 	GET_CARRY_FLAG ^ (reg_DE.hi & 1) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 	reg_DE.hi ^= GET_CARRY_FLAG;
 
+	reg_DE.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("RL D\n");
 	return 4;
@@ -4254,6 +4315,8 @@ int CPU::RL_E()
 	reg_DE.lo ^= GET_CARRY_FLAG;
 	GET_CARRY_FLAG ^ (reg_DE.lo & 1) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 	reg_DE.lo ^= GET_CARRY_FLAG;
+
+	reg_DE.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("RL E\n");
@@ -4275,6 +4338,8 @@ int CPU::RL_H()
 	GET_CARRY_FLAG ^ (reg_HL.hi & 1) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 	reg_HL.hi ^= GET_CARRY_FLAG;
 
+	reg_HL.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("RL H\n");
 	return 4;
@@ -4294,6 +4359,8 @@ int CPU::RL_L()
 	reg_HL.lo ^= GET_CARRY_FLAG;
 	GET_CARRY_FLAG ^ (reg_HL.lo & 1) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 	reg_HL.lo ^= GET_CARRY_FLAG;
+
+	reg_HL.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("RL L\n");
@@ -4315,6 +4382,8 @@ int CPU::RL_HLp()
 	GET_CARRY_FLAG ^ ((*mMap)[reg_HL.dat] & 1) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 	mMap->writeMemory((*mMap)[reg_HL.dat], (*mMap)[reg_HL.dat] ^ GET_CARRY_FLAG);
 
+	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("RL (HL)\n");
 	return 4;
@@ -4334,6 +4403,8 @@ int CPU::RL_A()
 	reg_AF.hi ^= GET_CARRY_FLAG;
 	GET_CARRY_FLAG ^ (reg_AF.hi & 1) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 	reg_AF.hi ^= GET_CARRY_FLAG;
+
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("RL A\n");
@@ -4529,6 +4600,8 @@ int CPU::SLA_B()
 	// Shift B left by 1
 	reg_BC.hi = (reg_BC.hi << 1);
 
+	reg_BC.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("SLA B\n");
 	return 4;
@@ -4546,6 +4619,8 @@ int CPU::SLA_C()
 
 	// Shift C left by 1
 	reg_BC.lo = (reg_BC.lo << 1);
+
+	reg_BC.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("SLA C\n");
@@ -4565,6 +4640,8 @@ int CPU::SLA_D()
 	// Shift D left by 1
 	reg_DE.hi = (reg_DE.hi << 1);
 
+	reg_DE.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("SLA D\n");
 	return 4;
@@ -4582,6 +4659,8 @@ int CPU::SLA_E()
 
 	// Shift E left by 1
 	reg_DE.lo = (reg_DE.lo << 1);
+
+	reg_DE.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("SLA E\n");
@@ -4601,6 +4680,8 @@ int CPU::SLA_H()
 	// Shift H left by 1
 	reg_HL.hi = (reg_HL.hi << 1);
 
+	reg_HL.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("SLA H\n");
 	return 4;
@@ -4618,6 +4699,8 @@ int CPU::SLA_L()
 
 	// Shift L left by 1
 	reg_HL.lo = (reg_HL.lo << 1);
+
+	reg_HL.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("SLA L\n");
@@ -4637,6 +4720,8 @@ int CPU::SLA_HLp()
 	// Shift the value at memory address pointed to by HL left by 1
 	mMap->writeMemory((*mMap)[reg_HL.dat], ((*mMap)[reg_HL.dat] << 1));
 
+	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("SLA (HL)\n");
 	return 4;
@@ -4654,6 +4739,8 @@ int CPU::SLA_A()
 
 	// Shift A left by 1
 	reg_AF.hi = (reg_AF.hi << 1);
+
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("SLA A\n");
@@ -4673,6 +4760,8 @@ int CPU::SRA_B()
 	// Shift B right by 1 while leaving 7th bit unchanged
 	reg_BC.hi = (reg_BC.hi >> 1) | (reg_BC.hi & 0x80);
 
+	reg_BC.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("SRA B\n");
 	return 4;
@@ -4690,6 +4779,8 @@ int CPU::SRA_C()
 
 	// Shift C right by 1 while leaving 7th bit unchanged
 	reg_BC.lo = (reg_BC.lo >> 1) | (reg_BC.lo & 0x80);
+
+	reg_BC.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("SRA C\n");
@@ -4709,6 +4800,8 @@ int CPU::SRA_D()
 	// Shift D right by 1 while leaving 7th bit unchanged
 	reg_DE.hi = (reg_DE.hi >> 1) | (reg_DE.hi & 0x80);
 
+	reg_DE.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("SRA D\n");
 	return 4;
@@ -4726,6 +4819,8 @@ int CPU::SRA_E()
 
 	// Shift E right by 1 while leaving 7th bit unchanged
 	reg_DE.lo = (reg_DE.lo >> 1) | (reg_DE.lo & 0x80);
+
+	reg_DE.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("SRA E\n");
@@ -4745,6 +4840,8 @@ int CPU::SRA_H()
 	// Shift H right by 1 while leaving 7th bit unchanged
 	reg_HL.hi = (reg_HL.hi >> 1) | (reg_HL.hi & 0x80);
 
+	reg_HL.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("SRA H\n");
 	return 4;
@@ -4762,6 +4859,8 @@ int CPU::SRA_L()
 
 	// Shift L right by 1 while leaving 7th bit unchanged
 	reg_HL.lo = (reg_HL.lo >> 1) | (reg_HL.lo & 0x80);
+
+	reg_HL.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("SRA L\n");
@@ -4781,6 +4880,8 @@ int CPU::SRA_HLp()
 	// Shift the value at memory address pointed to by HL right by 1 while leaving 7th bit unchanged
 	mMap->writeMemory((*mMap)[reg_HL.dat], ((*mMap)[reg_HL.dat] >> 1) | ((*mMap)[reg_HL.dat] & 0x80));
 
+	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("SRA (HL)\n");
 	return 4;
@@ -4799,6 +4900,8 @@ int CPU::SRA_A()
 	// Shift A right by 1 while leaving 7th bit unchanged
 	reg_AF.hi = (reg_AF.hi >> 1) | (reg_AF.hi & 0x80);
 
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("SRA A\n");
 	return 4;
@@ -4816,6 +4919,8 @@ int CPU::SWAP_B()
 	// swap the upper and lower nibbles
 	reg_BC.hi = (((reg_BC.hi & 0x0F) << 4) | ((reg_BC.hi & 0xF0) >> 4));
 
+	reg_BC.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("SWAP B\n");
 	return 4;
@@ -4831,6 +4936,8 @@ int CPU::SWAP_C()
 
 	// swap the upper and lower nibbles
 	reg_BC.lo = (((reg_BC.lo & 0x0F) << 4) | ((reg_BC.lo & 0xF0) >> 4));
+
+	reg_BC.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("SWAP C\n");
@@ -4848,6 +4955,8 @@ int CPU::SWAP_D()
 	// swap the upper and lower nibbles
 	reg_DE.hi = (((reg_DE.hi & 0x0F) << 4) | ((reg_DE.hi & 0xF0) >> 4));
 
+	reg_DE.hi? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("SWAP D\n");
 	return 4;
@@ -4863,6 +4972,8 @@ int CPU::SWAP_E()
 
 	// swap the upper and lower nibbles
 	reg_DE.lo = (((reg_DE.lo & 0x0F) << 4) | ((reg_DE.lo & 0xF0) >> 4));
+
+	reg_DE.lo? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("SWAP E\n");
@@ -4880,6 +4991,8 @@ int CPU::SWAP_H()
 	// swap the upper and lower nibbles
 	reg_HL.hi = (((reg_HL.hi & 0x0F) << 4) | ((reg_HL.hi & 0xF0) >> 4));
 
+	reg_HL.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("SWAP H\n");
 	return 4;
@@ -4895,6 +5008,8 @@ int CPU::SWAP_L()
 
 	// swap the upper and lower nibbles
 	reg_HL.lo = (((reg_HL.lo & 0x0F) << 4) | ((reg_HL.lo & 0xF0) >> 4));
+
+	reg_HL.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("SWAP L\n");
@@ -4913,6 +5028,8 @@ int CPU::SWAP_HLp()
 	// swap the upper and lower nibbles
 	mMap->writeMemory((*mMap)[reg_HL.dat], ((((*mMap)[reg_HL.dat] & 0x0F) << 4) | (((*mMap)[reg_HL.dat] & 0xF0) >> 4)));
 
+	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	//printf("SWAP (HL)\n");
 	return 4;
@@ -4928,6 +5045,8 @@ int CPU::SWAP_A()
 
 	// swap the upper and lower nibbles
 	reg_AF.hi = (((reg_AF.hi & 0x0F) << 4) | ((reg_AF.hi & 0xF0) >> 4));
+
+	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
 	//printf("SWAP A\n");
