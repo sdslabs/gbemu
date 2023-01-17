@@ -3320,7 +3320,7 @@ int CPU::ADC_A_u8()
 	// Unset subtract flag
 	UNSET_SUBTRACT_FLAG;
 
-	Byte temp = reg_AF.hi + GET_CARRY_FLAG;
+	Word temp = (Word)reg_AF.hi + GET_CARRY_FLAG + (*mMap)[reg_PC.dat + 1];
 
 	// Set zero flag if A + u8 + carry flag == 0
 	(reg_AF.hi + (*mMap)[reg_PC.dat + 1] + GET_CARRY_FLAG) & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
@@ -3328,10 +3328,10 @@ int CPU::ADC_A_u8()
 	// Set half carry flag if lower nibble of A + lower nibble of u8 + carry flag > 0xF
 	(reg_AF.hi & 0x0F) + ((*mMap)[reg_PC.dat + 1] & 0x0F) + GET_CARRY_FLAG > 0xF ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
-	reg_AF.hi += (*mMap)[reg_PC.dat + 1] + GET_CARRY_FLAG;
 
-	reg_AF.hi < temp ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+	0xFF < temp ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
+	reg_AF.hi = temp;
 	reg_PC.dat += 2;
 	//printf("ADC A, %02X\n", (*mMap)[reg_PC.dat + 1]);
 	return 8;
@@ -3542,16 +3542,20 @@ int CPU::SBC_A_u8()
 	// Set subtract flag
 	SET_SUBTRACT_FLAG;
 
-	// Set carry flag if A < u8 + carry flag
-	reg_AF.hi < ((*mMap)[reg_PC.dat + 1] + GET_CARRY_FLAG) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+	Byte temp = reg_AF.hi;
 
-	// Set zero flag if A == u8 + carry flag
-	reg_AF.hi == ((*mMap)[reg_PC.dat + 1] + GET_CARRY_FLAG) ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
 
 	// Set half carry flag if lower nibble of A < lower nibble of u8 + carry flag
-	(reg_AF.hi & 0x0F) < (((*mMap)[reg_PC.dat + 1] + GET_CARRY_FLAG) & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
+	(reg_AF.hi & 0x0F) < ((*mMap)[reg_PC.dat + 1] & 0x0F ) + GET_CARRY_FLAG ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	reg_AF.hi -= ((*mMap)[reg_PC.dat + 1] + GET_CARRY_FLAG);
+
+	// Set carry flag if A < u8 + carry flag
+	temp < ((*mMap)[reg_PC.dat + 1] + GET_CARRY_FLAG) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
+
+	// Set zero flag if A == u8 + carry flag
+	reg_AF.hi == 0 ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
+
 	reg_PC.dat += 2;
 	//printf("SBC A, %02X\n", (*mMap)[reg_PC.dat + 1]);
 	return 8;
