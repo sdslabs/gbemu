@@ -18,7 +18,7 @@ GBE::GBE()
 		printf("boot rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/cpu_instrs/individual/10-bit ops.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../tests/cpu_instrs/individual/01-special.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Load the Boot ROM

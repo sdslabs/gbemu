@@ -651,7 +651,7 @@ int CPU::LD_H_u8()
 // Decimal adjust register A
 int CPU::DAA()
 {
-	if (!GET_ZERO_FLAG) {
+	if (!GET_SUBTRACT_FLAG) {
 		if (GET_CARRY_FLAG || reg_AF.hi > 0x99) {
 			reg_AF.hi += 0x60;
 			SET_CARRY_FLAG;
@@ -3859,14 +3859,14 @@ int CPU::RST_38H()
 
 int CPU::executeNextInstruction()
 {
-	if (reg_PC.dat >= 0x100)
+	/*if (reg_PC.dat >= 0x100)
 		dumpState();
 
-	if (reg_PC.dat == 0xCC5F)
+	if (reg_PC.dat == 0x)
 	{
 		fclose(outfile);
 		printf("\nover");
-	}
+	}*/
 
 	// Get the opcode
 	Byte opcode = (*mMap)[reg_PC.dat];
