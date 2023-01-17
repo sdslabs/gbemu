@@ -668,6 +668,10 @@ int CPU::DAA()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 	UNSET_HALF_CARRY_FLAG;
 
+	printf("DAA\n");
+
+	reg_PC.dat += 1;
+
 	return 4;
 }
 
@@ -3708,7 +3712,7 @@ int CPU::LDH_A_a8()
 // Pop 16-bit value from stack into AF.
 int CPU::POP_AF()
 {
-	reg_AF.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
+	reg_AF.dat = (*mMap)[reg_SP.dat] & 0xF0 | ((*mMap)[reg_SP.dat + 1] << 8);
 	reg_SP.dat += 2;
 	reg_PC.dat += 1;
 	printf("POP AF\n");
@@ -3851,6 +3855,9 @@ int CPU::RST_38H()
 
 int CPU::executeNextInstruction()
 {
+	if (reg_PC.dat >= 0x100)
+		dumpState();
+
 	// Get the opcode
 	Byte opcode = (*mMap)[reg_PC.dat];
 	return (this->*method_pointer[opcode])();
@@ -7528,4 +7535,11 @@ int CPU::SET_7_A()
 	reg_PC.dat += 1;
 	printf("SET 7, A\n");
 	return 4;
+}
+
+void CPU::dumpState()
+{
+	FILE* outfile = fopen("logfile.txt", "a");
+	fprintf(outfile, "A:%02x F:%02x B:%02x C:%02x D:%02x E:%02x H:%02x L:%02x SP:%04x PC:%04x PCMEM:%02x,%02x,%02x,%02x\n", reg_AF.hi, reg_AF.lo, reg_BC.hi, reg_BC.lo, reg_DE.hi, reg_DE.lo, reg_HL.hi, reg_HL.lo, reg_SP.dat, reg_PC.dat, (*mMap)[reg_PC.dat], (*mMap)[reg_PC.dat + 1], (*mMap)[reg_PC.dat + 2], (*mMap)[reg_PC.dat + 3]);
+	fclose(outfile);
 }
