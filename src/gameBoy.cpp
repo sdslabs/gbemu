@@ -16,7 +16,21 @@ GBE::GBE()
 	// Open the Boot ROM
 	if ((bootROM = fopen("../src/dmg_boot.gb", "rb")) == NULL)
 		printf("boot rom file not opened");
+
+	// Open the Game ROM
+	if ((gameROM = fopen("../tests/cpu_instrs/individual/06-ld r,r.gb", "rb")) == NULL)
+		printf("game rom file not opened");
+
+	// Load the Boot ROM
+	// Into the first 0x100 bytes
 	fread(gbe_mMap->getRomBank0(), 1, 256, bootROM);
+
+	// Load Game ROM in Bank 0
+	// After offsetting for Boot ROM first
+	fseek(gameROM, 0x100, SEEK_SET);
+
+	fread(gbe_mMap->getRomBank0() + 0x100, 1, 16128, gameROM);
+	fread(gbe_mMap->getRomBank1(), 1, 16384, gameROM);
 
 	// STUB: Fooling the emulator
 	// Into thinking the frame is ready

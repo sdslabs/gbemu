@@ -3365,6 +3365,7 @@ int CPU::POP_DE()
 {
 	reg_DE.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
 	reg_SP.dat += 2;
+	reg_PC.dat += 1;
 	printf("POP DE\n");
 	return 12;
 }
@@ -3420,6 +3421,7 @@ int CPU::PUSH_DE()
 {
 	mMap->writeMemory(--reg_SP.dat, reg_DE.hi);
 	mMap->writeMemory(--reg_SP.dat, reg_DE.lo);
+	reg_PC.dat += 1;
 	printf("PUSH DE\n");
 	return 16;
 }
