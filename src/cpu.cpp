@@ -50,6 +50,8 @@ CPU::CPU()
 	isLowPower = false;
 
 	outfile = fopen("logfile.txt", "a");
+
+	state = false;
 }
 
 // NOP just adds 4 cycles
@@ -3283,7 +3285,7 @@ int CPU::JP_Z_u16()
 {
 	if (GET_ZERO_FLAG)
 	{
-		reg_PC.dat = (*mMap)[reg_PC.dat + 2] | ((*mMap)[reg_PC.dat + 1] << 8);
+		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
 		//printf("JP Z, %04X\n", reg_PC.dat);
 		return 16;
 	}
@@ -3407,7 +3409,7 @@ int CPU::JP_NC_u16()
 {
 	if (!GET_CARRY_FLAG)
 	{
-		reg_PC.dat = (*mMap)[reg_PC.dat + 2] | ((*mMap)[reg_PC.dat + 1] << 8);
+		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
 		//printf("JP NC, %04X\n", reg_PC.dat);
 		return 16;
 	}
@@ -3526,7 +3528,7 @@ int CPU::JP_C_u16()
 {
 	if (GET_CARRY_FLAG)
 	{
-		reg_PC.dat = (*mMap)[reg_PC.dat + 2] | ((*mMap)[reg_PC.dat + 1] << 8);
+		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
 		//printf("JP C, %04X\n", reg_PC.dat);
 		return 16;
 	}
@@ -3895,8 +3897,11 @@ int CPU::RST_38H()
 
 int CPU::executeNextInstruction()
 {
-	if (reg_PC.dat >= 0x100)
+	if (reg_PC.dat >= 0x100 || state)
+	{
+		state = true;
 		dumpState();
+	}
 
 	if (reg_PC.dat == 0xCB35)
 	{

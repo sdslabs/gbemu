@@ -24,6 +24,7 @@ class CPU
 {
 
 private:
+	bool state = false;
 	// Accumulator and Flags
 	Register reg_AF;
 
