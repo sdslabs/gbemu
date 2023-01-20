@@ -42,6 +42,16 @@ private:
 	// Low PowerMode Bool
 	bool isLowPower;
 
+	// IME Flag to enable interrupts on next opcode
+	// The EI opcode sets the IME flag
+	// After execution of opcode after EI
+	// so we need a bool to check if we need to set
+	// IME flag after the opcode in th update loop
+	bool IMEFlag;
+
+	// IME Register to enable or disable interrupts
+	bool IMEReg;
+
 	// Flags
 	// Pulled from https://gbdev.io/pandocs/CPU_Registers_and_Flags.html
 	// Naming convention is: FLAG_<name>_<bit>
