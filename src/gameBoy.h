@@ -35,6 +35,14 @@ private:
 	// GB has 59.73 frames per second
 	void update();
 
+	// cycle counter of the gameboy
+	// used by CPU, PPU, APU so declared here
+	static int s_Cycles;
+
+	// Copy the boot ROM to first 256 bytes of gameROM
+	// execute it and then remove it
+	void executeBootROM();
+
 public:
 	// Constructor
 	// Initializes the CPU

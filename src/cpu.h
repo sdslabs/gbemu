@@ -1097,9 +1097,16 @@ public:
 	// set the memory map
 	void setMemory(MemoryMap* memory) { mMap = memory; }
 
+	// set the Accumulator
 	void set_reg_A(Byte value) { reg_AF.hi = value; }
 
+	// set the BC register
 	void set_reg_BC(Word value) { reg_BC.dat = value; }
+
+	// get the Program Counter
+	Word get_reg_PC() { return reg_PC.dat; }
+
+	Word get_reg_HL() { return reg_HL.dat; }
 
 	int executeNextInstruction();
 	int executePrefixedInstruction();

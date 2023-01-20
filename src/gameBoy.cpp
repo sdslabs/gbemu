@@ -2,6 +2,8 @@
 #include "cpu.h"
 #include "gameBoy.h"
 
+int GBE::s_Cycles;
+
 GBE::GBE()
 {
 	// Initialize the CPU
@@ -18,7 +20,7 @@ GBE::GBE()
 		printf("boot rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/cpu_instrs/individual/08-misc instrs.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../tests/cpu_instrs/individual/11-op a,(hl).gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Load the Boot ROM
@@ -31,6 +33,8 @@ GBE::GBE()
 
 	fread(gbe_mMap->getRomBank0() + 0x100, 1, 16128, gameROM);
 	fread(gbe_mMap->getRomBank1(), 1, 16384, gameROM);
+
+	s_Cycles = 0;
 
 	// STUB: Fooling the emulator
 	// Into thinking the frame is ready
@@ -93,8 +97,9 @@ GBE::GBE()
 	gbe_mMap->debugWriteMemory(0x133, 0x3E);
 
 	// Using the Tetris header to pass the checksum test
+	// Unnecessary if loading a valid rom
 
-	gbe_mMap->debugWriteMemory(0x134, 0x54);
+	/*gbe_mMap->debugWriteMemory(0x134, 0x54);
 	gbe_mMap->debugWriteMemory(0x135, 0x45);
 	gbe_mMap->debugWriteMemory(0x136, 0x54);
 	gbe_mMap->debugWriteMemory(0x137, 0x52);
@@ -119,7 +124,7 @@ GBE::GBE()
 	gbe_mMap->debugWriteMemory(0x14A, 0x00);
 	gbe_mMap->debugWriteMemory(0x14B, 0x01);
 	gbe_mMap->debugWriteMemory(0x14C, 0x01);
-	gbe_mMap->debugWriteMemory(0x14D, 0x0A);
+	gbe_mMap->debugWriteMemory(0x14D, 0x0A);*/
 
 	// I have commented my tests for now as the Nintendo logo now sits there.
 	// We can test using blargg's test rom then.
@@ -536,7 +541,7 @@ GBE::GBE()
 	//// Seg fault to end using UNKOWN
 	//gbe_mMap->debugWriteMemory(0x0146, 0xEB);
 
-	
+	executeBootROM();
 
 	update();
 }
@@ -546,12 +551,10 @@ void GBE::update()
 	// Update function of the GBE
 	// Will be called every frame
 	// GB has 59.73 frames per second
-
-	int cycles = 0;
 	while (true)
 	{
 		// Execute the next instruction
-		cycles += gbe_cpu->executeNextInstruction();
+		s_Cycles += gbe_cpu->executeNextInstruction();
 		if ((*gbe_mMap)[0xFF02] == 0x81)
 		{
 			printf("%c", (*gbe_mMap)[0xFF01]);
@@ -562,4 +565,16 @@ void GBE::update()
 		// Do Interrupts()
 	}
 	// renderGraphics()
+}
+
+void GBE::executeBootROM()
+{
+	while(gbe_mMap->readMemory(0xFF50) == 0x00)
+	{
+		s_Cycles += gbe_cpu->executeNextInstruction();
+	}
+
+	// Overwrite the boot ROM with first 256 bytes of game ROM
+	fseek(gameROM, 0x00, SEEK_SET);
+	fread(gbe_mMap->getRomBank0(), 1, 256, gameROM);
 }
