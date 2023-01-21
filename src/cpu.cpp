@@ -459,7 +459,7 @@ int CPU::RLA()
 	// Unsset half carry flag
 	UNSET_HALF_CARRY_FLAG;
 
-	bool tempCarry = GET_CARRY_FLAG;
+	Byte tempCarry = GET_CARRY_FLAG;
 
 	reg_AF.hi >> 7 ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
@@ -3928,10 +3928,10 @@ int CPU::SUB_u8()
 	(reg_AF.hi & 0x0F) < ((*mMap)[reg_PC.dat + 1] & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	reg_AF.hi -= (*mMap)[reg_PC.dat + 1];
-	reg_PC.dat += 2;
 #ifdef DEBUG
-	printf("SUB %02X\n");
+	printf("SUB %02X\n", (*mMap)[reg_PC.dat + 1]);
 #endif
+	reg_PC.dat += 2;
 	return 8;
 }
 
