@@ -79,6 +79,11 @@ private:
 	// Specifies frequency at which to update TIMA and enable timer
 	Byte* reg_TAC;
 
+	// Interrupt Flag
+	// Stays in the I/O Ports at 0xFF0F
+	// Signals which interrupt must take place
+	Byte* reg_IF;
+
 public:
 	// Constructor
 	MemoryMap();
