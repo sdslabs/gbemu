@@ -589,7 +589,7 @@ private:
 		&CPU::SET_7_HLp,
 		&CPU::SET_7_A
 	};
-  
+
 	int NOP();
 	int LD_BC_u16();
 	int LD_BC_A();
