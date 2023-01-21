@@ -47,8 +47,17 @@ MemoryMap::MemoryMap()
 	// 1 byte Interrupt Enable Register
 	interruptEnableRegister = new Byte;
 
-	// Set IME to false
-	setIME = false;
+	// DIV at 0xFF04
+	reg_DIV = ioPorts + 0x04;
+
+	// TIMA at 0xFF05
+	reg_TIMA = ioPorts + 0x05;
+
+	// TMA at 0xFF06
+	reg_TMA = ioPorts + 0x06;
+
+	// TAC at 0xFF07
+	reg_TAC = ioPorts + 0x07;
 }
 
 // Write to memory
