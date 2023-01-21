@@ -58,6 +58,9 @@ MemoryMap::MemoryMap()
 
 	// TAC at 0xFF07
 	reg_TAC = ioPorts + 0x07;
+
+	// IF at 0xFF0F
+	reg_IF = ioPorts + 0x0F;
 }
 
 // Write to memory
