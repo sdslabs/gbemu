@@ -79,8 +79,6 @@ private:
 	// Specifies frequency at which to update TIMA and enable timer
 	Byte* reg_TAC;
 
-
-
 public:
 	// Constructor
 	MemoryMap();
