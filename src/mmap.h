@@ -58,6 +58,27 @@ private:
 	// 1 Byte 0xFFFF
 	Byte* interruptEnableRegister;
 
+	// The divider register
+	// stays in the I/O Ports at 0xFF04
+	Byte* reg_DIV;
+
+	// The timer counter
+	// stays in the I/O Ports at 0xFF05
+	// Increments at the frequency specified at 0xFF07
+	// Raises an interrupt when overflown and resets to value at 0xFF06
+	Byte* reg_TIMA;
+
+	// The timer modulo
+	// stays in the I/O Ports at 0xFF06
+	// Resets TIMA to its value when TIMA overflows
+	// More info at https://gbdev.io/pandocs/Timer_and_Divider_Registers.html
+	Byte* reg_TMA;
+
+	// The timer control
+	// stays in I/O Ports at 0xFF07
+	// Specifies frequency at which to update TIMA and enable timer
+	Byte* reg_TAC;
+
 public:
 	// Constructor
 	MemoryMap();

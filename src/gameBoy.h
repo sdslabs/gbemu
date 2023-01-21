@@ -8,18 +8,6 @@
 class GBE
 {
 private:
-	// Work RAM
-	// Pulled from https://gbdev.io/pandocs/Specifications.html
-	// Would later just be a pointer to the relevant ROM's WRAM bank
-
-	Byte workRam[0x2000];
-
-	// Visual RAM
-	// Pulled from https://gbdev.io/pandocs/Specifications.html
-	// Would later just be a pointer to the relevant ROM's VRAM bank
-
-	Byte visualRam[0x2000];
-
 	// The GameBoy screen
 	// 160x144 screen resolution withing a 256x224 border
 	// The original GameBoy supported 4 colors
@@ -36,10 +24,24 @@ private:
 	// Pointer to the MemoryMap
 	MemoryMap* gbe_mMap;
 
+	// File pointer for Boot ROM
+	FILE* bootROM;
+
+	// File pointer for game ROM
+	FILE* gameROM;
+
 	// Update function of the GBE
 	// Will be called every frame
 	// GB has 59.73 frames per second
 	void update();
+
+	// cycle counter of the gameboy
+	// used by CPU, PPU, APU so declared here
+	static int s_Cycles;
+
+	// Copy the boot ROM to first 256 bytes of gameROM
+	// execute it and then remove it
+	void executeBootROM();
 
 public:
 	// Constructor
