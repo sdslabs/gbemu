@@ -24,7 +24,6 @@ class CPU
 {
 
 private:
-	bool state = false;
 	// Accumulator and Flags
 	Register reg_AF;
 
@@ -46,8 +45,11 @@ private:
 	// The EI opcode sets the IME flag
 	// After execution of opcode after EI
 	// so we need a bool to check if we need to set
-	// IME flag after the opcode in th update loop
-	bool IMEFlag;
+	// IME flag after the opcode in the update loop
+	// If IMEFlag is -1, we disable interrupts;
+	// If it is 0, we wait for next opcode to execute
+	// If it is 1, we enable interrupts
+	int IMEFlag;
 
 	// IME Register to enable or disable interrupts
 	bool IMEReg;

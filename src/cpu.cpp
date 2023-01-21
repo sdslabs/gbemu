@@ -49,9 +49,13 @@ CPU::CPU()
 	// Set isLowPower to false
 	isLowPower = false;
 
+	// The debug logging file
 	outfile = fopen("logfile.txt", "w");
 
-	state = false;
+	// TODO: check the initial state of IME
+	IMEFlag = -1;
+
+	IMEReg = false;
 }
 
 // NOP just adds 4 cycles
@@ -3525,7 +3529,13 @@ int CPU::RETI()
 {
 	reg_PC.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
 	reg_SP.dat += 2;
-	mMap->setIMEReg();
+
+	// Instantly enable interrupts
+	// as RETI is basically EI then RET
+	// So 1 opcode delay of EI is taken care of
+	IMEFlag = 1;
+	IMEReg = true;
+
 	// printf("RETI\n");
 	return 16;
 }
@@ -3777,7 +3787,9 @@ int CPU::LDH_A_C()
 // TODO: Implement interrupts
 int CPU::DI()
 {
-	mMap->unsetIMEFlag();
+	// Set IMEFlag to -1 and immediately set IMEReg to false
+	IMEFlag = -1;
+	IMEReg = false;
 	reg_PC.dat += 1;
 	// printf("DI\n");
 	return 4;
@@ -3868,7 +3880,8 @@ int CPU::LD_A_u16()
 // TODO: Implement interrupts
 int CPU::EI()
 {
-	mMap->setIMEFlag();
+	// Check the comments on the definition of IMEFlag and IMEReg
+	IMEFlag = 0;
 	reg_PC.dat += 1;
 	// printf("EI\n");
 	return 4;
@@ -3908,12 +3921,15 @@ int CPU::RST_38H()
 
 int CPU::executeNextInstruction()
 {
-	if (reg_PC.dat >= 0x100 || state)
+	// Check if boot execution is complete
+	// If yes, we can do logging in debug log outfile
+	if (mMap->readMemory(0xFF50) == 0x01)
 	{
-		state = true;
 		dumpState();
 	}
 
+	// Turn off logging
+	// If reached infinite loop
 	if (reg_PC.dat == 0xCC62)
 	{
 		fclose(outfile);
