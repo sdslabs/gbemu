@@ -1,7 +1,10 @@
 #include "types.h"
 #include "cpu.h"
 #include <stdio.h>
-#include "common.h"
+#define debugPrint(...)
+#ifdef DEBUG
+#define debugPrint(...) printf(__VA_ARGS__)
+#endif
 
 // Setters of Flags
 // Flags are stored in the higher 4 bits of the F register

@@ -11,7 +11,6 @@ set(SOURCES
         gameBoy.h
         mmap.h
         types.h
-        common.h
         )
 
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
