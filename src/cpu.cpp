@@ -1,6 +1,7 @@
 #include "types.h"
 #include "cpu.h"
 #include <stdio.h>
+#include "common.h"
 
 // Setters of Flags
 // Flags are stored in the higher 4 bits of the F register
@@ -59,9 +60,7 @@ CPU::CPU()
 int CPU::NOP()
 {
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("NOP\n");
-#endif
+	debugPrint("NOP\n");
 	return 4;
 }
 
@@ -75,9 +74,7 @@ int CPU::LD_BC_u16()
 	// Due to endianness, the first byte is the least significant byte
 	reg_BC.dat = ((*mMap)[reg_PC.dat + 2] << 8) | (*mMap)[reg_PC.dat + 1];
 	reg_PC.dat += 3;
-#ifdef DEBUG
-	printf("LD BC, u16\n");
-#endif
+	debugPrint("LD BC, u16\n");
 	return 12;
 }
 
@@ -91,9 +88,7 @@ int CPU::LD_BC_A()
 	// Increment the program counter
 	reg_PC.dat += 1;
 
-#ifdef DEBUG
-	printf("LD (BC), A\n");
-#endif
+	debugPrint("LD (BC), A\n");
 	return 8;
 }
 
@@ -103,9 +98,7 @@ int CPU::INC_BC()
 {
 	reg_BC.dat += 1;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("INC BC\n");
-#endif
+	debugPrint("INC BC\n");
 	return 8;
 }
 
@@ -126,9 +119,7 @@ int CPU::INC_B()
 	UNSET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("INC B\n");
-#endif
+	debugPrint("INC B\n");
 	return 4;
 }
 
@@ -148,9 +139,7 @@ int CPU::DEC_B()
 	SET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("DEC B\n");
-#endif
+	debugPrint("DEC B\n");
 	return 4;
 }
 
@@ -160,9 +149,7 @@ int CPU::LD_B_u8()
 {
 	reg_BC.hi = (*mMap)[reg_PC.dat + 1];
 	reg_PC.dat += 2;
-#ifdef DEBUG
-	printf("LD B, u8\n");
-#endif
+	debugPrint("LD B, u8\n");
 	return 8;
 }
 
@@ -181,9 +168,7 @@ int CPU::RLCA()
 	reg_AF.hi = (reg_AF.hi << 1) | (reg_AF.hi >> 7);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RLCA\n");
-#endif
+	debugPrint("RLCA\n");
 	return 4;
 }
 
@@ -204,9 +189,7 @@ int CPU::LD_u16_SP()
 	// Increment the program counter
 	reg_PC.dat += 3;
 
-#ifdef DEBUG
-	printf("LD (u16), SP\n");
-#endif
+	debugPrint("LD (u16), SP\n");
 	return 20;
 }
 
@@ -230,9 +213,7 @@ int CPU::ADD_HL_BC()
 	UNSET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADD HL, BC\n");
-#endif
+	debugPrint("ADD HL, BC\n");
 	return 8;
 }
 
@@ -242,9 +223,7 @@ int CPU::LD_A_BC()
 {
 	reg_AF.hi = (*mMap)[reg_BC.dat];
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD A, (BC)\n");
-#endif
+	debugPrint("LD A, (BC)\n");
 	return 8;
 }
 
@@ -254,9 +233,7 @@ int CPU::DEC_BC()
 {
 	reg_BC.dat -= 1;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("DEC BC\n");
-#endif
+	debugPrint("DEC BC\n");
 	return 8;
 }
 
@@ -276,9 +253,7 @@ int CPU::INC_C()
 	UNSET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("INC C\n");
-#endif
+	debugPrint("INC C\n");
 	return 4;
 }
 
@@ -298,9 +273,7 @@ int CPU::DEC_C()
 	SET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("DEC C\n");
-#endif
+	debugPrint("DEC C\n");
 	return 4;
 }
 
@@ -310,9 +283,7 @@ int CPU::LD_C_u8()
 {
 	reg_BC.lo = (*mMap)[reg_PC.dat + 1];
 	reg_PC.dat += 2;
-#ifdef DEBUG
-	printf("LD C, u8\n");
-#endif
+	debugPrint("LD C, u8\n");
 	return 8;
 }
 
@@ -336,9 +307,7 @@ int CPU::RRCA()
 	reg_AF.hi = (reg_AF.hi >> 1) | (reg_AF.hi << 7);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RRCA\n");
-#endif
+	debugPrint("RRCA\n");
 	return 4;
 }
 
@@ -348,9 +317,7 @@ int CPU::STOP()
 {
 	isLowPower = true;
 	reg_PC.dat += 2;
-#ifdef DEBUG
-	printf("STOP\n");
-#endif
+	debugPrint("STOP\n");
 	return 0;
 }
 
@@ -360,9 +327,7 @@ int CPU::LD_DE_u16()
 {
 	reg_DE.dat = ((*mMap)[reg_PC.dat + 2] << 8) | (*mMap)[reg_PC.dat + 1];
 	reg_PC.dat += 3;
-#ifdef DEBUG
-	printf("LD DE, u16\n");
-#endif
+	debugPrint("LD DE, u16\n");
 	return 12;
 }
 
@@ -372,9 +337,7 @@ int CPU::LD_DE_A()
 {
 	mMap->writeMemory(reg_DE.dat, reg_AF.hi);
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD (DE), A\n");
-#endif
+	debugPrint("LD (DE), A\n");
 	return 8;
 }
 
@@ -384,9 +347,7 @@ int CPU::INC_DE()
 {
 	reg_DE.dat += 1;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("INC DE\n");
-#endif
+	debugPrint("INC DE\n");
 	return 8;
 }
 
@@ -406,9 +367,7 @@ int CPU::INC_D()
 	UNSET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("INC D\n");
-#endif
+	debugPrint("INC D\n");
 	return 4;
 }
 
@@ -428,9 +387,7 @@ int CPU::DEC_D()
 	SET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("DEC D\n");
-#endif
+	debugPrint("DEC D\n");
 	return 4;
 }
 
@@ -440,9 +397,7 @@ int CPU::LD_D_u8()
 {
 	reg_DE.hi = (*mMap)[reg_PC.dat + 1];
 	reg_PC.dat += 2;
-#ifdef DEBUG
-	printf("LD D, u8\n");
-#endif
+	debugPrint("LD D, u8\n");
 	return 8;
 }
 
@@ -467,9 +422,7 @@ int CPU::RLA()
 	reg_AF.hi = (reg_AF.hi << 1) | (tempCarry);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RLA\n");
-#endif
+	debugPrint("RLA\n");
 	return 4;
 }
 
@@ -478,9 +431,7 @@ int CPU::RLA()
 int CPU::JR_i8()
 {
 	reg_PC.dat += (SByte)(*mMap)[reg_PC.dat + 1] + 2;
-#ifdef DEBUG
-	printf("JR i8\n");
-#endif
+	debugPrint("JR i8\n");
 	return 12;
 }
 
@@ -504,9 +455,7 @@ int CPU::ADD_HL_DE()
 	UNSET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADD HL, DE\n");
-#endif
+	debugPrint("ADD HL, DE\n");
 	return 8;
 }
 
@@ -516,9 +465,7 @@ int CPU::LD_A_DE()
 {
 	reg_AF.hi = (*mMap)[reg_DE.dat];
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD A, (DE)\n");
-#endif
+	debugPrint("LD A, (DE)\n");
 	return 8;
 }
 
@@ -528,9 +475,7 @@ int CPU::DEC_DE()
 {
 	reg_DE.dat -= 1;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("DEC DE\n");
-#endif
+	debugPrint("DEC DE\n");
 	return 8;
 }
 
@@ -550,9 +495,7 @@ int CPU::INC_E()
 	UNSET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("INC E\n");
-#endif
+	debugPrint("INC E\n");
 	return 4;
 }
 
@@ -572,9 +515,7 @@ int CPU::DEC_E()
 	SET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("DEC E\n");
-#endif
+	debugPrint("DEC E\n");
 	return 4;
 }
 
@@ -584,9 +525,7 @@ int CPU::LD_E_u8()
 {
 	reg_DE.lo = (*mMap)[reg_PC.dat + 1];
 	reg_PC.dat += 2;
-#ifdef DEBUG
-	printf("LD E, u8\n");
-#endif
+	debugPrint("LD E, u8\n");
 	return 8;
 }
 
@@ -613,9 +552,7 @@ int CPU::RRA()
 	reg_AF.hi = (reg_AF.hi >> 1) | (tempCarry << 7);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RRA\n");
-#endif
+	debugPrint("RRA\n");
 	return 4;
 }
 
@@ -624,9 +561,7 @@ int CPU::RRA()
 // 3 cycles if taken, 2 cycles if not taken
 int CPU::JR_NZ_i8()
 {
-#ifdef DEBUG
-	printf("JR NZ, i8\n");
-#endif
+	debugPrint("JR NZ, i8\n");
 
 	if (!(reg_AF.lo & FLAG_ZERO_z))
 	{
@@ -644,9 +579,7 @@ int CPU::LD_HL_u16()
 {
 	reg_HL.dat = ((*mMap)[reg_PC.dat + 2] << 8) | (*mMap)[reg_PC.dat + 1];
 	reg_PC.dat += 3;
-#ifdef DEBUG
-	printf("LD HL, u16\n");
-#endif
+	debugPrint("LD HL, u16\n");
 	return 12;
 }
 
@@ -657,9 +590,7 @@ int CPU::LD_HLp_A()
 	mMap->writeMemory(reg_HL.dat, reg_AF.hi);
 	reg_HL.dat += 1;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD (HL+), A\n");
-#endif
+	debugPrint("LD (HL+), A\n");
 	return 8;
 }
 
@@ -669,9 +600,7 @@ int CPU::INC_HL()
 {
 	reg_HL.dat += 1;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("INC HL\n");
-#endif
+	debugPrint("INC HL\n");
 	return 8;
 }
 
@@ -691,9 +620,7 @@ int CPU::INC_H()
 	UNSET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("INC H\n");
-#endif
+	debugPrint("INC H\n");
 	return 4;
 }
 
@@ -713,9 +640,7 @@ int CPU::DEC_H()
 	SET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("DEC H\n");
-#endif
+	debugPrint("DEC H\n");
 	return 4;
 }
 
@@ -725,9 +650,7 @@ int CPU::LD_H_u8()
 {
 	reg_HL.hi = (*mMap)[reg_PC.dat + 1];
 	reg_PC.dat += 2;
-#ifdef DEBUG
-	printf("LD H, u8\n");
-#endif
+	debugPrint("LD H, u8\n");
 	return 8;
 }
 
@@ -763,9 +686,7 @@ int CPU::DAA()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 	UNSET_HALF_CARRY_FLAG;
 
-#ifdef DEBUG
-	printf("DAA\n");
-#endif
+	debugPrint("DAA\n");
 
 	reg_PC.dat += 1;
 
@@ -777,9 +698,7 @@ int CPU::DAA()
 // 3 cycles if taken, 2 cycles if not taken
 int CPU::JR_Z_r8()
 {
-#ifdef DEBUG
-	printf("JR Z, i8\n");
-#endif
+	debugPrint("JR Z, i8\n");
 	if (reg_AF.lo & FLAG_ZERO_z)
 	{
 		reg_PC.dat += (SByte)(*mMap)[reg_PC.dat + 1] + 2;
@@ -808,9 +727,7 @@ int CPU::ADD_HL_HL()
 
 	reg_HL.dat += reg_HL.dat;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADD HL, HL\n");
-#endif
+	debugPrint("ADD HL, HL\n");
 	return 8;
 }
 
@@ -821,9 +738,7 @@ int CPU::LD_A_HLp()
 	reg_AF.hi = (*mMap)[reg_HL.dat];
 	reg_HL.dat += 1;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD A, (HL+)\n");
-#endif
+	debugPrint("LD A, (HL+)\n");
 	return 8;
 }
 
@@ -833,9 +748,7 @@ int CPU::DEC_HL()
 {
 	reg_HL.dat -= 1;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("DEC HL\n");
-#endif
+	debugPrint("DEC HL\n");
 	return 8;
 }
 
@@ -855,9 +768,7 @@ int CPU::INC_L()
 	UNSET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("INC L\n");
-#endif
+	debugPrint("INC L\n");
 	return 4;
 }
 
@@ -877,9 +788,7 @@ int CPU::DEC_L()
 	SET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("DEC L\n");
-#endif
+	debugPrint("DEC L\n");
 	return 4;
 }
 
@@ -889,9 +798,7 @@ int CPU::LD_L_u8()
 {
 	reg_HL.lo = (*mMap)[reg_PC.dat + 1];
 	reg_PC.dat += 2;
-#ifdef DEBUG
-	printf("LD L, u8\n");
-#endif
+	debugPrint("LD L, u8\n");
 	return 8;
 }
 
@@ -908,9 +815,7 @@ int CPU::CPL()
 	SET_HALF_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("CPL\n");
-#endif
+	debugPrint("CPL\n");
 	return 4;
 }
 
@@ -919,9 +824,7 @@ int CPU::CPL()
 // 3 cycles if condition is true, 2 otherwise
 int CPU::JR_NC_i8()
 {
-#ifdef DEBUG
-	printf("JR NC, i8\n");
-#endif
+	debugPrint("JR NC, i8\n");
 	if (!(reg_AF.lo & FLAG_CARRY_c))
 	{
 		reg_PC.dat += (SByte)(*mMap)[reg_PC.dat + 1] + 2;
@@ -938,9 +841,7 @@ int CPU::LD_SP_u16()
 {
 	reg_SP.dat = ((*mMap)[reg_PC.dat + 2] << 8) | (*mMap)[reg_PC.dat + 1];
 	reg_PC.dat += 3;
-#ifdef DEBUG
-	printf("LD SP, u16\n");
-#endif
+	debugPrint("LD SP, u16\n");
 	return 12;
 }
 
@@ -951,9 +852,7 @@ int CPU::LD_HLm_A()
 	mMap->writeMemory(reg_HL.dat, reg_AF.hi);
 	reg_HL.dat -= 1;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD (HL-), A\n");
-#endif
+	debugPrint("LD (HL-), A\n");
 	return 8;
 }
 
@@ -963,9 +862,7 @@ int CPU::INC_SP()
 {
 	reg_SP.dat += 1;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("INC SP\n");
-#endif
+	debugPrint("INC SP\n");
 	return 8;
 }
 
@@ -987,9 +884,7 @@ int CPU::INC_HLp()
 
 	mMap->writeMemory(reg_HL.dat, temp);
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("INC (HL)\n");
-#endif
+	debugPrint("INC (HL)\n");
 	return 12;
 }
 
@@ -1012,9 +907,7 @@ int CPU::DEC_HLp()
 
 	mMap->writeMemory(reg_HL.dat, temp);
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("DEC (HL)\n");
-#endif
+	debugPrint("DEC (HL)\n");
 	return 12;
 }
 
@@ -1024,9 +917,7 @@ int CPU::LD_HLp_u8()
 {
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_PC.dat + 1]);
 	reg_PC.dat += 2;
-#ifdef DEBUG
-	printf("LD (HL), u8\n");
-#endif
+	debugPrint("LD (HL), u8\n");
 	return 12;
 }
 
@@ -1044,9 +935,7 @@ int CPU::SCF()
 	SET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SCF\n");
-#endif
+	debugPrint("SCF\n");
 	return 4;
 }
 
@@ -1055,9 +944,7 @@ int CPU::SCF()
 // 3 cycles if condition is true, 2 otherwise
 int CPU::JR_C_r8()
 {
-#ifdef DEBUG
-	printf("JR C, i8\n");
-#endif
+	debugPrint("JR C, i8\n");
 	if (reg_AF.lo & FLAG_CARRY_c)
 	{
 		reg_PC.dat += (SByte)(*mMap)[reg_PC.dat + 1] + 2;
@@ -1088,9 +975,7 @@ int CPU::ADD_HL_SP()
 	UNSET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADD HL, SP\n");
-#endif
+	debugPrint("ADD HL, SP\n");
 	return 8;
 }
 
@@ -1101,9 +986,7 @@ int CPU::LD_A_HLm()
 	reg_AF.hi = (*mMap)[reg_HL.dat];
 	reg_HL.dat -= 1;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD A, (HL-)\n");
-#endif
+	debugPrint("LD A, (HL-)\n");
 	return 8;
 }
 
@@ -1113,9 +996,7 @@ int CPU::DEC_SP()
 {
 	reg_SP.dat -= 1;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("DEC SP\n");
-#endif
+	debugPrint("DEC SP\n");
 	return 8;
 }
 
@@ -1135,9 +1016,7 @@ int CPU::INC_A()
 	UNSET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("INC A\n");
-#endif
+	debugPrint("INC A\n");
 	return 4;
 }
 
@@ -1157,9 +1036,7 @@ int CPU::DEC_A()
 	SET_SUBTRACT_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("DEC A\n");
-#endif
+	debugPrint("DEC A\n");
 	return 4;
 }
 
@@ -1169,9 +1046,7 @@ int CPU::LD_A_u8()
 {
 	reg_AF.hi = (*mMap)[reg_PC.dat + 1];
 	reg_PC.dat += 2;
-#ifdef DEBUG
-	printf("LD A, u8\n");
-#endif
+	debugPrint("LD A, u8\n");
 	return 8;
 }
 
@@ -1189,9 +1064,7 @@ int CPU::CCF()
 	reg_AF.lo& FLAG_CARRY_c ? UNSET_CARRY_FLAG : SET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("CCF\n");
-#endif
+	debugPrint("CCF\n");
 	return 4;
 }
 
@@ -1200,9 +1073,7 @@ int CPU::CCF()
 int CPU::LD_B_B()
 {
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD B, B\n");
-#endif
+	debugPrint("LD B, B\n");
 	return 4;
 }
 
@@ -1212,9 +1083,7 @@ int CPU::LD_B_C()
 {
 	reg_BC.hi = reg_BC.lo;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD B, C\n");
-#endif
+	debugPrint("LD B, C\n");
 	return 4;
 }
 
@@ -1224,9 +1093,7 @@ int CPU::LD_B_D()
 {
 	reg_BC.hi = reg_DE.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD B, D\n");
-#endif
+	debugPrint("LD B, D\n");
 	return 4;
 }
 
@@ -1236,9 +1103,7 @@ int CPU::LD_B_E()
 {
 	reg_BC.hi = reg_DE.lo;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD B, E\n");
-#endif
+	debugPrint("LD B, E\n");
 	return 4;
 }
 
@@ -1248,9 +1113,7 @@ int CPU::LD_B_H()
 {
 	reg_BC.hi = reg_HL.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD B, H\n");
-#endif
+	debugPrint("LD B, H\n");
 	return 4;
 }
 
@@ -1260,9 +1123,7 @@ int CPU::LD_B_L()
 {
 	reg_BC.hi = reg_HL.lo;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD B, L\n");
-#endif
+	debugPrint("LD B, L\n");
 	return 4;
 }
 
@@ -1272,9 +1133,7 @@ int CPU::LD_B_HLp()
 {
 	reg_BC.hi = (*mMap)[reg_HL.dat];
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD B, (HL)\n");
-#endif
+	debugPrint("LD B, (HL)\n");
 	return 8;
 }
 
@@ -1284,9 +1143,7 @@ int CPU::LD_B_A()
 {
 	reg_BC.hi = reg_AF.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD B, A\n");
-#endif
+	debugPrint("LD B, A\n");
 	return 4;
 }
 
@@ -1296,9 +1153,7 @@ int CPU::LD_C_B()
 {
 	reg_BC.lo = reg_BC.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD C, B\n");
-#endif
+	debugPrint("LD C, B\n");
 	return 4;
 }
 
@@ -1308,9 +1163,7 @@ int CPU::LD_C_C()
 {
 	reg_BC.lo = reg_BC.lo;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD C, C\n");
-#endif
+	debugPrint("LD C, C\n");
 	return 4;
 }
 
@@ -1320,9 +1173,7 @@ int CPU::LD_C_D()
 {
 	reg_BC.lo = reg_DE.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD C, D\n");
-#endif
+	debugPrint("LD C, D\n");
 	return 4;
 }
 
@@ -1332,9 +1183,7 @@ int CPU::LD_C_E()
 {
 	reg_BC.lo = reg_DE.lo;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD C, E\n");
-#endif
+	debugPrint("LD C, E\n");
 	return 4;
 }
 
@@ -1344,9 +1193,7 @@ int CPU::LD_C_H()
 {
 	reg_BC.lo = reg_HL.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD C, H\n");
-#endif
+	debugPrint("LD C, H\n");
 	return 4;
 }
 
@@ -1356,9 +1203,7 @@ int CPU::LD_C_L()
 {
 	reg_BC.lo = reg_HL.lo;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD C, L\n");
-#endif
+	debugPrint("LD C, L\n");
 	return 4;
 }
 
@@ -1368,9 +1213,7 @@ int CPU::LD_C_HLp()
 {
 	reg_BC.lo = (*mMap)[reg_HL.dat];
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD C, (HL)\n");
-#endif
+	debugPrint("LD C, (HL)\n");
 	return 8;
 }
 
@@ -1380,9 +1223,7 @@ int CPU::LD_C_A()
 {
 	reg_BC.lo = reg_AF.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD C, A\n");
-#endif
+	debugPrint("LD C, A\n");
 	return 4;
 }
 
@@ -1392,9 +1233,7 @@ int CPU::LD_D_B()
 {
 	reg_DE.hi = reg_BC.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD D, B\n");
-#endif
+	debugPrint("LD D, B\n");
 	return 4;
 }
 
@@ -1404,9 +1243,7 @@ int CPU::LD_D_C()
 {
 	reg_DE.hi = reg_BC.lo;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD D, C\n");
-#endif
+	debugPrint("LD D, C\n");
 	return 4;
 }
 
@@ -1415,9 +1252,7 @@ int CPU::LD_D_C()
 int CPU::LD_D_D()
 {
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD D, D\n");
-#endif
+	debugPrint("LD D, D\n");
 	return 4;
 }
 
@@ -1427,9 +1262,7 @@ int CPU::LD_D_E()
 {
 	reg_DE.hi = reg_DE.lo;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD D, E\n");
-#endif
+	debugPrint("LD D, E\n");
 	return 4;
 }
 
@@ -1439,9 +1272,7 @@ int CPU::LD_D_H()
 {
 	reg_DE.hi = reg_HL.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD D, H\n");
-#endif
+	debugPrint("LD D, H\n");
 	return 4;
 }
 
@@ -1451,9 +1282,7 @@ int CPU::LD_D_L()
 {
 	reg_DE.hi = reg_HL.lo;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD D, L\n");
-#endif
+	debugPrint("LD D, L\n");
 	return 4;
 }
 
@@ -1463,9 +1292,7 @@ int CPU::LD_D_HLp()
 {
 	reg_DE.hi = (*mMap)[reg_HL.dat];
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD D, (HL)\n");
-#endif
+	debugPrint("LD D, (HL)\n");
 	return 8;
 }
 
@@ -1475,9 +1302,7 @@ int CPU::LD_D_A()
 {
 	reg_DE.hi = reg_AF.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD D, A\n");
-#endif
+	debugPrint("LD D, A\n");
 	return 4;
 }
 
@@ -1487,9 +1312,7 @@ int CPU::LD_E_B()
 {
 	reg_DE.lo = reg_BC.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD E, B\n");
-#endif
+	debugPrint("LD E, B\n");
 	return 4;
 }
 
@@ -1499,9 +1322,7 @@ int CPU::LD_E_C()
 {
 	reg_DE.lo = reg_BC.lo;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD E, C\n");
-#endif
+	debugPrint("LD E, C\n");
 	return 4;
 }
 
@@ -1511,9 +1332,7 @@ int CPU::LD_E_D()
 {
 	reg_DE.lo = reg_DE.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD E, D\n");
-#endif
+	debugPrint("LD E, D\n");
 	return 4;
 }
 
@@ -1522,9 +1341,7 @@ int CPU::LD_E_D()
 int CPU::LD_E_E()
 {
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD E, E\n");
-#endif
+	debugPrint("LD E, E\n");
 	return 4;
 }
 
@@ -1534,9 +1351,7 @@ int CPU::LD_E_H()
 {
 	reg_DE.lo = reg_HL.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD E, H\n");
-#endif
+	debugPrint("LD E, H\n");
 	return 4;
 }
 
@@ -1546,9 +1361,7 @@ int CPU::LD_E_L()
 {
 	reg_DE.lo = reg_HL.lo;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD E, L\n");
-#endif
+	debugPrint("LD E, L\n");
 	return 4;
 }
 
@@ -1558,9 +1371,7 @@ int CPU::LD_E_HLp()
 {
 	reg_DE.lo = (*mMap)[reg_HL.dat];
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD E, (HL)\n");
-#endif
+	debugPrint("LD E, (HL)\n");
 	return 8;
 }
 
@@ -1570,9 +1381,7 @@ int CPU::LD_E_A()
 {
 	reg_DE.lo = reg_AF.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD E, A\n");
-#endif
+	debugPrint("LD E, A\n");
 	return 4;
 }
 
@@ -1582,9 +1391,7 @@ int CPU::LD_H_B()
 {
 	reg_HL.hi = reg_BC.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD H, B\n");
-#endif
+	debugPrint("LD H, B\n");
 	return 4;
 }
 
@@ -1594,9 +1401,7 @@ int CPU::LD_H_C()
 {
 	reg_HL.hi = reg_BC.lo;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD H, C\n");
-#endif
+	debugPrint("LD H, C\n");
 	return 4;
 }
 
@@ -1606,9 +1411,7 @@ int CPU::LD_H_D()
 {
 	reg_HL.hi = reg_DE.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD H, D\n");
-#endif
+	debugPrint("LD H, D\n");
 	return 4;
 }
 
@@ -1618,9 +1421,7 @@ int CPU::LD_H_E()
 {
 	reg_HL.hi = reg_DE.lo;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD H, E\n");
-#endif
+	debugPrint("LD H, E\n");
 	return 4;
 }
 
@@ -1629,9 +1430,7 @@ int CPU::LD_H_E()
 int CPU::LD_H_H()
 {
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD H, H\n");
-#endif
+	debugPrint("LD H, H\n");
 	return 4;
 }
 
@@ -1641,9 +1440,7 @@ int CPU::LD_H_L()
 {
 	reg_HL.hi = reg_HL.lo;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD H, L\n");
-#endif
+	debugPrint("LD H, L\n");
 	return 4;
 }
 
@@ -1653,9 +1450,7 @@ int CPU::LD_H_HLp()
 {
 	reg_HL.hi = (*mMap)[reg_HL.dat];
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD H, (HL)\n");
-#endif
+	debugPrint("LD H, (HL)\n");
 	return 8;
 }
 
@@ -1665,9 +1460,7 @@ int CPU::LD_H_A()
 {
 	reg_HL.hi = reg_AF.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD H, A\n");
-#endif
+	debugPrint("LD H, A\n");
 	return 4;
 }
 
@@ -1677,9 +1470,7 @@ int CPU::LD_L_B()
 {
 	reg_HL.lo = reg_BC.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD L, B\n");
-#endif
+	debugPrint("LD L, B\n");
 	return 4;
 }
 
@@ -1689,9 +1480,7 @@ int CPU::LD_L_C()
 {
 	reg_HL.lo = reg_BC.lo;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD L, C\n");
-#endif
+	debugPrint("LD L, C\n");
 	return 4;
 }
 
@@ -1701,9 +1490,7 @@ int CPU::LD_L_D()
 {
 	reg_HL.lo = reg_DE.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD L, D\n");
-#endif
+	debugPrint("LD L, D\n");
 	return 4;
 }
 
@@ -1713,9 +1500,7 @@ int CPU::LD_L_E()
 {
 	reg_HL.lo = reg_DE.lo;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD L, E\n");
-#endif
+	debugPrint("LD L, E\n");
 	return 4;
 }
 
@@ -1725,9 +1510,7 @@ int CPU::LD_L_H()
 {
 	reg_HL.lo = reg_HL.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD L, H\n");
-#endif
+	debugPrint("LD L, H\n");
 	return 4;
 }
 
@@ -1736,9 +1519,7 @@ int CPU::LD_L_H()
 int CPU::LD_L_L()
 {
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD L, L\n");
-#endif
+	debugPrint("LD L, L\n");
 	return 4;
 }
 
@@ -1748,9 +1529,7 @@ int CPU::LD_L_HLp()
 {
 	reg_HL.lo = (*mMap)[reg_HL.dat];
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD L, (HL)\n");
-#endif
+	debugPrint("LD L, (HL)\n");
 	return 8;
 }
 
@@ -1760,9 +1539,7 @@ int CPU::LD_L_A()
 {
 	reg_HL.lo = reg_AF.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD L, A\n");
-#endif
+	debugPrint("LD L, A\n");
 	return 4;
 }
 
@@ -1772,9 +1549,7 @@ int CPU::LD_HLp_B()
 {
 	mMap->writeMemory(reg_HL.dat, reg_BC.hi);
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD (HL), B\n");
-#endif
+	debugPrint("LD (HL), B\n");
 	return 8;
 }
 
@@ -1784,9 +1559,7 @@ int CPU::LD_HLp_C()
 {
 	mMap->writeMemory(reg_HL.dat, reg_BC.lo);
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD (HL), C\n");
-#endif
+	debugPrint("LD (HL), C\n");
 	return 8;
 }
 
@@ -1796,9 +1569,7 @@ int CPU::LD_HLp_D()
 {
 	mMap->writeMemory(reg_HL.dat, reg_DE.hi);
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD (HL), D\n");
-#endif
+	debugPrint("LD (HL), D\n");
 	return 8;
 }
 
@@ -1808,9 +1579,7 @@ int CPU::LD_HLp_E()
 {
 	mMap->writeMemory(reg_HL.dat, reg_DE.lo);
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD (HL), E\n");
-#endif
+	debugPrint("LD (HL), E\n");
 	return 8;
 }
 
@@ -1820,9 +1589,7 @@ int CPU::LD_HLp_H()
 {
 	mMap->writeMemory(reg_HL.dat, reg_HL.hi);
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD (HL), H\n");
-#endif
+	debugPrint("LD (HL), H\n");
 	return 8;
 }
 
@@ -1832,9 +1599,7 @@ int CPU::LD_HLp_L()
 {
 	mMap->writeMemory(reg_HL.dat, reg_HL.lo);
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD (HL), L\n");
-#endif
+	debugPrint("LD (HL), L\n");
 	return 8;
 }
 
@@ -1852,9 +1617,7 @@ int CPU::LD_HLA()
 {
 	mMap->writeMemory(reg_HL.dat, reg_AF.hi);
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD (HL), A\n");
-#endif
+	debugPrint("LD (HL), A\n");
 	return 8;
 }
 
@@ -1864,9 +1627,7 @@ int CPU::LD_A_B()
 {
 	reg_AF.hi = reg_BC.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD A, B\n");
-#endif
+	debugPrint("LD A, B\n");
 	return 4;
 }
 
@@ -1876,9 +1637,7 @@ int CPU::LD_A_C()
 {
 	reg_AF.hi = reg_BC.lo;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD A, C\n");
-#endif
+	debugPrint("LD A, C\n");
 	return 4;
 }
 
@@ -1888,9 +1647,7 @@ int CPU::LD_A_D()
 {
 	reg_AF.hi = reg_DE.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD A, D\n");
-#endif
+	debugPrint("LD A, D\n");
 	return 4;
 }
 
@@ -1900,9 +1657,7 @@ int CPU::LD_A_E()
 {
 	reg_AF.hi = reg_DE.lo;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD A, E\n");
-#endif
+	debugPrint("LD A, E\n");
 	return 4;
 }
 
@@ -1912,9 +1667,7 @@ int CPU::LD_A_H()
 {
 	reg_AF.hi = reg_HL.hi;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD A, H\n");
-#endif
+	debugPrint("LD A, H\n");
 	return 4;
 }
 
@@ -1924,9 +1677,7 @@ int CPU::LD_A_L()
 {
 	reg_AF.hi = reg_HL.lo;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD A, L\n");
-#endif
+	debugPrint("LD A, L\n");
 	return 4;
 }
 
@@ -1936,9 +1687,7 @@ int CPU::LD_A_HL()
 {
 	reg_AF.hi = (*mMap)[reg_HL.dat];
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD A, (HL)\n");
-#endif
+	debugPrint("LD A, (HL)\n");
 	return 8;
 }
 
@@ -1947,9 +1696,7 @@ int CPU::LD_A_HL()
 int CPU::LD_A_A()
 {
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD A, A\n");
-#endif
+	debugPrint("LD A, A\n");
 	return 4;
 }
 
@@ -1975,9 +1722,7 @@ int CPU::ADD_A_B()
 	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADD A, B\n");
-#endif
+	debugPrint("ADD A, B\n");
 	return 4;
 }
 
@@ -2003,9 +1748,7 @@ int CPU::ADD_A_C()
 	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADD A, C\n");
-#endif
+	debugPrint("ADD A, C\n");
 	return 4;
 }
 
@@ -2031,9 +1774,7 @@ int CPU::ADD_A_D()
 	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADD A, D\n");
-#endif
+	debugPrint("ADD A, D\n");
 	return 4;
 }
 
@@ -2059,9 +1800,7 @@ int CPU::ADD_A_E()
 	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADD A, E\n");
-#endif
+	debugPrint("ADD A, E\n");
 	return 4;
 }
 
@@ -2087,9 +1826,7 @@ int CPU::ADD_A_H()
 	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADD A, H\n");
-#endif
+	debugPrint("ADD A, H\n");
 	return 4;
 }
 
@@ -2115,9 +1852,7 @@ int CPU::ADD_A_L()
 	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADD A, L\n");
-#endif
+	debugPrint("ADD A, L\n");
 	return 4;
 }
 
@@ -2143,9 +1878,7 @@ int CPU::ADD_A_HLp()
 	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADD A, (HL)\n");
-#endif
+	debugPrint("ADD A, (HL)\n");
 	return 8;
 }
 
@@ -2170,9 +1903,7 @@ int CPU::ADD_A_A()
 	temp > reg_AF.hi ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADD A, A\n");
-#endif
+	debugPrint("ADD A, A\n");
 	return 4;
 }
 
@@ -2198,9 +1929,7 @@ int CPU::ADC_A_B()
 	temp > 0xFF ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADC A, B\n");
-#endif
+	debugPrint("ADC A, B\n");
 	return 4;
 }
 
@@ -2226,9 +1955,7 @@ int CPU::ADC_A_C()
 	temp > 0xFF ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADC A, D\n");
-#endif
+	debugPrint("ADC A, D\n");
 	return 4;
 }
 
@@ -2254,9 +1981,7 @@ int CPU::ADC_A_D()
 	temp > 0xFF ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADC A, D\n");
-#endif
+	debugPrint("ADC A, D\n");
 	return 4;
 }
 
@@ -2282,9 +2007,7 @@ int CPU::ADC_A_E()
 	temp > 0xFF ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADC A, E\n");
-#endif
+	debugPrint("ADC A, E\n");
 	return 4;
 }
 
@@ -2311,9 +2034,7 @@ int CPU::ADC_A_H()
 	temp > 0xFF ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADC A, H\n");
-#endif
+	debugPrint("ADC A, H\n");
 	return 4;
 }
 
@@ -2339,9 +2060,7 @@ int CPU::ADC_A_L()
 	temp > 0xFF ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADC A, L\n");
-#endif
+	debugPrint("ADC A, L\n");
 	return 4;
 }
 
@@ -2366,9 +2085,7 @@ int CPU::ADC_A_HLp()
 	temp > 0xFF ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADC A, (HL)\n");
-#endif
+	debugPrint("ADC A, (HL)\n");
 	return 8;
 }
 
@@ -2394,9 +2111,7 @@ int CPU::ADC_A_A()
 	temp > 0xFF ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("ADC A, A\n");
-#endif
+	debugPrint("ADC A, A\n");
 	return 4;
 }
 
@@ -2422,9 +2137,7 @@ int CPU::SUB_A_B()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SUB A, B\n");
-#endif
+	debugPrint("SUB A, B\n");
 	return 4;
 }
 
@@ -2447,9 +2160,7 @@ int CPU::SUB_A_C()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SUB A, C\n");
-#endif
+	debugPrint("SUB A, C\n");
 	return 4;
 }
 
@@ -2472,9 +2183,7 @@ int CPU::SUB_A_D()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SUB A, D\n");
-#endif
+	debugPrint("SUB A, D\n");
 	return 4;
 }
 
@@ -2497,9 +2206,7 @@ int CPU::SUB_A_E()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SUB A, E\n");
-#endif
+	debugPrint("SUB A, E\n");
 	return 4;
 }
 
@@ -2522,9 +2229,7 @@ int CPU::SUB_A_H()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SUB A, H\n");
-#endif
+	debugPrint("SUB A, H\n");
 	return 4;
 }
 
@@ -2547,9 +2252,7 @@ int CPU::SUB_A_L()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SUB A, L\n");
-#endif
+	debugPrint("SUB A, L\n");
 	return 4;
 }
 
@@ -2572,9 +2275,7 @@ int CPU::SUB_A_HLp()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SUB A, (HL)\n");
-#endif
+	debugPrint("SUB A, (HL)\n");
 	return 8;
 }
 
@@ -2596,9 +2297,7 @@ int CPU::SUB_A_A()
 	reg_AF.hi = 0;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SUB A, A\n");
-#endif
+	debugPrint("SUB A, A\n");
 	return 4;
 }
 
@@ -2623,9 +2322,7 @@ int CPU::SBC_A_B()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SBC A, B\n");
-#endif
+	debugPrint("SBC A, B\n");
 	return 4;
 }
 
@@ -2650,9 +2347,7 @@ int CPU::SBC_A_C()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SBC A, C\n");
-#endif
+	debugPrint("SBC A, C\n");
 	return 4;
 }
 
@@ -2677,9 +2372,7 @@ int CPU::SBC_A_D()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SBC A, D\n");
-#endif
+	debugPrint("SBC A, D\n");
 	return 4;
 }
 
@@ -2704,9 +2397,7 @@ int CPU::SBC_A_E()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SBC A, E\n");
-#endif
+	debugPrint("SBC A, E\n");
 	return 4;
 }
 
@@ -2731,9 +2422,7 @@ int CPU::SBC_A_H()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SBC A, H\n");
-#endif
+	debugPrint("SBC A, H\n");
 	return 4;
 }
 
@@ -2758,9 +2447,7 @@ int CPU::SBC_A_L()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SBC A, L\n");
-#endif
+	debugPrint("SBC A, L\n");
 	return 4;
 }
 
@@ -2785,9 +2472,7 @@ int CPU::SBC_A_HLp()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SBC A, (HL)\n");
-#endif
+	debugPrint("SBC A, (HL)\n");
 	return 8;
 }
 
@@ -2812,9 +2497,7 @@ int CPU::SBC_A_A()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SBC A, A\n");
-#endif
+	debugPrint("SBC A, A\n");
 	return 4;
 }
 
@@ -2835,9 +2518,7 @@ int CPU::AND_A_B()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("AND A, B\n");
-#endif
+	debugPrint("AND A, B\n");
 	return 4;
 }
 
@@ -2858,9 +2539,7 @@ int CPU::AND_A_C()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("AND A, C\n");
-#endif
+	debugPrint("AND A, C\n");
 	return 4;
 }
 
@@ -2881,9 +2560,7 @@ int CPU::AND_A_D()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("AND A, D\n");
-#endif
+	debugPrint("AND A, D\n");
 	return 4;
 }
 
@@ -2904,9 +2581,7 @@ int CPU::AND_A_E()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("AND A, E\n");
-#endif
+	debugPrint("AND A, E\n");
 	return 4;
 }
 
@@ -2927,9 +2602,7 @@ int CPU::AND_A_H()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("AND A, H\n");
-#endif
+	debugPrint("AND A, H\n");
 	return 4;
 }
 
@@ -2950,9 +2623,7 @@ int CPU::AND_A_L()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("AND A, L\n");
-#endif
+	debugPrint("AND A, L\n");
 	return 4;
 }
 
@@ -2973,9 +2644,7 @@ int CPU::AND_A_HLp()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("AND A, (HL)\n");
-#endif
+	debugPrint("AND A, (HL)\n");
 	return 8;
 }
 
@@ -2996,9 +2665,7 @@ int CPU::AND_A_A()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("AND A, A\n");
-#endif
+	debugPrint("AND A, A\n");
 	return 4;
 }
 
@@ -3017,9 +2684,7 @@ int CPU::XOR_A_B()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("XOR A, B\n");
-#endif
+	debugPrint("XOR A, B\n");
 	return 4;
 }
 
@@ -3038,9 +2703,7 @@ int CPU::XOR_A_C()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("XOR A, C\n");
-#endif
+	debugPrint("XOR A, C\n");
 	return 4;
 }
 
@@ -3059,9 +2722,7 @@ int CPU::XOR_A_D()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("XOR A, D\n");
-#endif
+	debugPrint("XOR A, D\n");
 	return 4;
 }
 
@@ -3080,9 +2741,7 @@ int CPU::XOR_A_E()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("XOR A, E\n");
-#endif
+	debugPrint("XOR A, E\n");
 	return 4;
 }
 
@@ -3101,9 +2760,7 @@ int CPU::XOR_A_H()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("XOR A, H\n");
-#endif
+	debugPrint("XOR A, H\n");
 	return 4;
 }
 
@@ -3122,9 +2779,7 @@ int CPU::XOR_A_L()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("XOR A, L\n");
-#endif
+	debugPrint("XOR A, L\n");
 	return 4;
 }
 
@@ -3143,9 +2798,7 @@ int CPU::XOR_A_HLp()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("XOR A, (HL)\n");
-#endif
+	debugPrint("XOR A, (HL)\n");
 	return 8;
 }
 
@@ -3164,9 +2817,7 @@ int CPU::XOR_A_A()
 	SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("XOR A, A\n");
-#endif
+	debugPrint("XOR A, A\n");
 	return 4;
 }
 
@@ -3185,9 +2836,7 @@ int CPU::OR_A_B()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("OR A, B\n");
-#endif
+	debugPrint("OR A, B\n");
 	return 4;
 }
 
@@ -3206,9 +2855,7 @@ int CPU::OR_A_C()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("OR A, C\n");
-#endif
+	debugPrint("OR A, C\n");
 	return 4;
 }
 
@@ -3227,9 +2874,7 @@ int CPU::OR_A_D()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("OR A, D\n");
-#endif
+	debugPrint("OR A, D\n");
 	return 4;
 }
 
@@ -3248,9 +2893,7 @@ int CPU::OR_A_E()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("OR A, E\n");
-#endif
+	debugPrint("OR A, E\n");
 	return 4;
 }
 
@@ -3269,9 +2912,7 @@ int CPU::OR_A_H()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("OR A, H\n");
-#endif
+	debugPrint("OR A, H\n");
 	return 4;
 }
 
@@ -3290,9 +2931,7 @@ int CPU::OR_A_L()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("OR A, L\n");
-#endif
+	debugPrint("OR A, L\n");
 	return 4;
 }
 
@@ -3311,9 +2950,7 @@ int CPU::OR_A_HLp()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("OR A, (HL)\n");
-#endif
+	debugPrint("OR A, (HL)\n");
 	return 8;
 }
 
@@ -3330,9 +2967,7 @@ int CPU::OR_A_A()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("OR A, A\n");
-#endif
+	debugPrint("OR A, A\n");
 	return 4;
 }
 
@@ -3353,9 +2988,7 @@ int CPU::CP_A_B()
 	(reg_AF.hi & 0x0F) < (reg_BC.hi & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("CP A, B\n");
-#endif
+	debugPrint("CP A, B\n");
 	return 4;
 }
 
@@ -3376,9 +3009,7 @@ int CPU::CP_A_C()
 	(reg_AF.hi & 0x0F) < (reg_BC.lo & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("CP A, C\n");
-#endif
+	debugPrint("CP A, C\n");
 	return 4;
 }
 
@@ -3399,9 +3030,7 @@ int CPU::CP_A_D()
 	(reg_AF.hi & 0x0F) < (reg_DE.hi & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("CP A, D\n");
-#endif
+	debugPrint("CP A, D\n");
 	return 4;
 }
 
@@ -3422,9 +3051,7 @@ int CPU::CP_A_E()
 	(reg_AF.hi & 0x0F) < (reg_DE.lo & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("CP A, E\n");
-#endif
+	debugPrint("CP A, E\n");
 	return 4;
 }
 
@@ -3445,9 +3072,7 @@ int CPU::CP_A_H()
 	(reg_AF.hi & 0x0F) < (reg_HL.hi & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("CP A, H\n");
-#endif
+	debugPrint("CP A, H\n");
 	return 4;
 }
 
@@ -3468,9 +3093,7 @@ int CPU::CP_A_L()
 	(reg_AF.hi & 0x0F) < (reg_HL.lo & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("CP A, L\n");
-#endif
+	debugPrint("CP A, L\n");
 	return 4;
 }
 
@@ -3491,9 +3114,7 @@ int CPU::CP_A_HLp()
 	(reg_AF.hi & 0x0F) < ((*mMap)[reg_HL.dat] & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("CP A, (HL)\n");
-#endif
+	debugPrint("CP A, (HL)\n");
 	return 8;
 }
 
@@ -3514,9 +3135,7 @@ int CPU::CP_A_A()
 	UNSET_HALF_CARRY_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("CP A, A\n");
-#endif
+	debugPrint("CP A, A\n");
 	return 4;
 }
 
@@ -3528,17 +3147,13 @@ int CPU::RET_NZ()
 	{
 		reg_PC.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
 		reg_SP.dat += 2;
-#ifdef DEBUG
-		printf("RET NZ\n");
-#endif
+		debugPrint("RET NZ\n");
 		return 20;
 	}
 	else
 	{
 		reg_PC.dat += 1;
-#ifdef DEBUG
-		printf("RET NZ\n");
-#endif
+		debugPrint("RET NZ\n");
 		return 8;
 	}
 }
@@ -3550,9 +3165,7 @@ int CPU::POP_BC()
 	reg_BC.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
 	reg_SP.dat += 2;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("POP BC\n");
-#endif
+	debugPrint("POP BC\n");
 	return 12;
 }
 
@@ -3563,17 +3176,13 @@ int CPU::JP_NZ_u16()
 	if (!GET_ZERO_FLAG)
 	{
 		reg_PC.dat = ((*mMap)[reg_PC.dat + 2] << 8) | ((*mMap)[reg_PC.dat + 1]);
-#ifdef DEBUG
-		printf("JP NZ, %04X\n", reg_PC.dat);
-#endif
+		debugPrint("JP NZ, %04X\n", reg_PC.dat);
 		return 16;
 	}
 	else
 	{
 		reg_PC.dat += 3;
-#ifdef DEBUG
-		printf("JP NZ, %04X\n", reg_PC.dat);
-#endif
+		debugPrint("JP NZ, %04X\n", reg_PC.dat);
 		return 12;
 	}
 }
@@ -3583,9 +3192,7 @@ int CPU::JP_NZ_u16()
 int CPU::JP_u16()
 {
 	reg_PC.dat = ((*mMap)[reg_PC.dat + 2] << 8) | (*mMap)[reg_PC.dat + 1];
-#ifdef DEBUG
-	printf("JP %04X\n", reg_PC.dat);
-#endif
+	debugPrint("JP %04X\n", reg_PC.dat);
 	return 16;
 }
 
@@ -3598,17 +3205,13 @@ int CPU::CALL_NZ_u16()
 		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) >> 8);
 		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) & 0xFF);
 		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
-#ifdef DEBUG
-		printf("CALL NZ, %04X\n", reg_PC.dat);
-#endif
+		debugPrint("CALL NZ, %04X\n", reg_PC.dat);
 		return 24;
 	}
 	else
 	{
 		reg_PC.dat += 3;
-#ifdef DEBUG
-		printf("CALL NZ, %04X\n", reg_PC.dat);
-#endif
+		debugPrint("CALL NZ, %04X\n", reg_PC.dat);
 		return 12;
 	}
 }
@@ -3620,9 +3223,7 @@ int CPU::PUSH_BC()
 	mMap->writeMemory(--reg_SP.dat, reg_BC.hi);
 	mMap->writeMemory(--reg_SP.dat, reg_BC.lo);
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("PUSH BC\n");
-#endif
+	debugPrint("PUSH BC\n");
 	return 16;
 }
 
@@ -3644,9 +3245,7 @@ int CPU::ADD_A_u8()
 
 	reg_AF.hi += (*mMap)[reg_PC.dat + 1];
 	reg_PC.dat += 2;
-#ifdef DEBUG
-	printf("ADD A, %02X\n", (*mMap)[reg_PC.dat + 1]);
-#endif
+	debugPrint("ADD A, %02X\n", (*mMap)[reg_PC.dat + 1]);
 	return 8;
 }
 
@@ -3657,9 +3256,7 @@ int CPU::RST_00H()
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0000;
-#ifdef DEBUG
-	printf("RST 00H\n");
-#endif
+	debugPrint("RST 00H\n");
 	return 16;
 }
 
@@ -3671,17 +3268,13 @@ int CPU::RET_Z()
 	{
 		reg_PC.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
 		reg_SP.dat += 2;
-#ifdef DEBUG
-		printf("RET Z\n");
-#endif
+		debugPrint("RET Z\n");
 		return 20;
 	}
 	else
 	{
 		reg_PC.dat += 1;
-#ifdef DEBUG
-		printf("RET Z\n");
-#endif
+		debugPrint("RET Z\n");
 		return 8;
 	}
 }
@@ -3692,9 +3285,7 @@ int CPU::RET()
 {
 	reg_PC.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
 	reg_SP.dat += 2;
-#ifdef DEBUG
-	printf("RET\n");
-#endif
+	debugPrint("RET\n");
 	return 16;
 }
 
@@ -3705,17 +3296,13 @@ int CPU::JP_Z_u16()
 	if (GET_ZERO_FLAG)
 	{
 		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
-#ifdef DEBUG
-		printf("JP Z, %04X\n", reg_PC.dat);
-#endif
+		debugPrint("JP Z, %04X\n", reg_PC.dat);
 		return 16;
 	}
 	else
 	{
 		reg_PC.dat += 3;
-#ifdef DEBUG
-		printf("JP Z, %04X\n", reg_PC.dat);
-#endif
+		debugPrint("JP Z, %04X\n", reg_PC.dat);
 		return 12;
 	}
 }
@@ -3726,9 +3313,7 @@ int CPU::PREFIX_CB()
 {
 	reg_PC.dat += 1;
 	executePrefixedInstruction();
-#ifdef DEBUG
-	printf("PREFIX CB\n");
-#endif
+	debugPrint("PREFIX CB\n");
 	return 4;
 }
 
@@ -3741,17 +3326,13 @@ int CPU::CALL_Z_u16()
 		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) >> 8);
 		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) & 0xFF);
 		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
-#ifdef DEBUG
-		printf("CALL Z, %04X\n", reg_PC.dat);
-#endif
+		debugPrint("CALL Z, %04X\n", reg_PC.dat);
 		return 24;
 	}
 	else
 	{
 		reg_PC.dat += 3;
-#ifdef DEBUG
-		printf("CALL Z, %04X\n", reg_PC.dat);
-#endif
+		debugPrint("CALL Z, %04X\n", reg_PC.dat);
 		return 12;
 	}
 }
@@ -3763,9 +3344,7 @@ int CPU::CALL_u16()
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) & 0xFF);
 	reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
-#ifdef DEBUG
-	printf("CALL %04X\n", reg_PC.dat);
-#endif
+	debugPrint("CALL %04X\n", reg_PC.dat);
 	return 24;
 }
 
@@ -3788,9 +3367,7 @@ int CPU::ADC_A_u8()
 
 	reg_AF.hi = temp;
 	reg_PC.dat += 2;
-#ifdef DEBUG
-	printf("ADC A, %02X\n", (*mMap)[reg_PC.dat + 1]);
-#endif
+	debugPrint("ADC A, %02X\n", (*mMap)[reg_PC.dat + 1]);
 	return 8;
 }
 
@@ -3801,9 +3378,7 @@ int CPU::RST_08H()
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0008;
-#ifdef DEBUG
-	printf("RST 08H\n");
-#endif
+	debugPrint("RST 08H\n");
 	return 16;
 }
 
@@ -3815,17 +3390,13 @@ int CPU::RET_NC()
 	{
 		reg_PC.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
 		reg_SP.dat += 2;
-#ifdef DEBUG
-		printf("RET NC\n");
-#endif
+		debugPrint("RET NC\n");
 		return 20;
 	}
 	else
 	{
 		reg_PC.dat += 1;
-#ifdef DEBUG
-		printf("RET NC\n");
-#endif
+		debugPrint("RET NC\n");
 		return 8;
 	}
 }
@@ -3837,9 +3408,7 @@ int CPU::POP_DE()
 	reg_DE.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
 	reg_SP.dat += 2;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("POP DE\n");
-#endif
+	debugPrint("POP DE\n");
 	return 12;
 }
 
@@ -3850,17 +3419,13 @@ int CPU::JP_NC_u16()
 	if (!GET_CARRY_FLAG)
 	{
 		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
-#ifdef DEBUG
-		printf("JP NC, %04X\n", reg_PC.dat);
-#endif
+		debugPrint("JP NC, %04X\n", reg_PC.dat);
 		return 16;
 	}
 	else
 	{
 		reg_PC.dat += 3;
-#ifdef DEBUG
-		printf("JP NC, %04X\n", reg_PC.dat);
-#endif
+		debugPrint("JP NC, %04X\n", reg_PC.dat);
 		return 12;
 	}
 }
@@ -3868,9 +3433,7 @@ int CPU::JP_NC_u16()
 int CPU::UNKNOWN()
 {
 	const char* s = NULL;
-#ifdef DEBUG
-	printf("%c\n", s[0]);
-#endif
+	debugPrint("%c\n", s[0]);
 	return 0;
 }
 
@@ -3883,17 +3446,13 @@ int CPU::NC_u16()
 		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) >> 8);
 		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) & 0xFF);
 		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
-#ifdef DEBUG
-		printf("NCALL %04X\n", reg_PC.dat);
-#endif
+		debugPrint("NCALL %04X\n", reg_PC.dat);
 		return 24;
 	}
 	else
 	{
 		reg_PC.dat += 3;
-#ifdef DEBUG
-		printf("NCALL %04X\n", reg_PC.dat);
-#endif
+		debugPrint("NCALL %04X\n", reg_PC.dat);
 		return 12;
 	}
 }
@@ -3905,9 +3464,7 @@ int CPU::PUSH_DE()
 	mMap->writeMemory(--reg_SP.dat, reg_DE.hi);
 	mMap->writeMemory(--reg_SP.dat, reg_DE.lo);
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("PUSH DE\n");
-#endif
+	debugPrint("PUSH DE\n");
 	return 16;
 }
 
@@ -3928,10 +3485,9 @@ int CPU::SUB_u8()
 	(reg_AF.hi & 0x0F) < ((*mMap)[reg_PC.dat + 1] & 0x0F) ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	reg_AF.hi -= (*mMap)[reg_PC.dat + 1];
-#ifdef DEBUG
-	printf("SUB %02X\n", (*mMap)[reg_PC.dat + 1]);
-#endif
+
 	reg_PC.dat += 2;
+	debugPrint("SUB %02X\n");
 	return 8;
 }
 
@@ -3942,9 +3498,7 @@ int CPU::RST_10H()
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0010;
-#ifdef DEBUG
-	printf("RST 10H\n");
-#endif
+	debugPrint("RST 10H\n");
 	return 16;
 }
 
@@ -3956,17 +3510,13 @@ int CPU::RET_C()
 	{
 		reg_PC.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
 		reg_SP.dat += 2;
-#ifdef DEBUG
-		printf("RET C\n");
-#endif
+		debugPrint("RET C\n");
 		return 20;
 	}
 	else
 	{
 		reg_PC.dat += 1;
-#ifdef DEBUG
-		printf("RET C\n");
-#endif
+		debugPrint("RET C\n");
 		return 8;
 	}
 }
@@ -3983,9 +3533,7 @@ int CPU::RETI()
 	IMEFlag = 1;
 	IMEReg = true;
 
-#ifdef DEBUG
-	printf("RETI\n");
-#endif
+	debugPrint("RETI\n");
 	return 16;
 }
 
@@ -3996,17 +3544,13 @@ int CPU::JP_C_u16()
 	if (GET_CARRY_FLAG)
 	{
 		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
-#ifdef DEBUG
-		printf("JP C, %04X\n", reg_PC.dat);
-#endif
+		debugPrint("JP C, %04X\n", reg_PC.dat);
 		return 16;
 	}
 	else
 	{
 		reg_PC.dat += 3;
-#ifdef DEBUG
-		printf("JP C, %04X\n", reg_PC.dat);
-#endif
+		debugPrint("JP C, %04X\n", reg_PC.dat);
 		return 12;
 	}
 }
@@ -4020,17 +3564,13 @@ int CPU::CALL_C_u16()
 		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) >> 8);
 		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) & 0xFF);
 		reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
-#ifdef DEBUG
-		printf("CALL C, %04X\n", reg_PC.dat);
-#endif
+		debugPrint("CALL C, %04X\n", reg_PC.dat);
 		return 24;
 	}
 	else
 	{
 		reg_PC.dat += 3;
-#ifdef DEBUG
-		printf("CALL C, %04X\n", reg_PC.dat);
-#endif
+		debugPrint("CALL C, %04X\n", reg_PC.dat);
 		return 12;
 	}
 }
@@ -4056,9 +3596,7 @@ int CPU::SBC_A_u8()
 	reg_AF.hi == 0 ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
 
 	reg_PC.dat += 2;
-#ifdef DEBUG
-	printf("SBC A, %02X\n", (*mMap)[reg_PC.dat + 1]);
-#endif
+	debugPrint("SBC A, %02X\n", (*mMap)[reg_PC.dat + 1]);
 	return 8;
 }
 
@@ -4069,9 +3607,7 @@ int CPU::RST_18H()
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0018;
-#ifdef DEBUG
-	printf("RST 18H\n");
-#endif
+	debugPrint("RST 18H\n");
 	return 16;
 }
 // LD (FF00+u8),A
@@ -4080,9 +3616,7 @@ int CPU::LDH_a8_A()
 {
 	mMap->writeMemory(0xFF00 + (*mMap)[reg_PC.dat + 1], reg_AF.hi);
 	reg_PC.dat += 2;
-#ifdef DEBUG
-	printf("LDH (%02X), A\n", (*mMap)[reg_PC.dat + 1]);
-#endif
+	debugPrint("LDH (%02X), A\n", (*mMap)[reg_PC.dat + 1]);
 	return 12;
 }
 
@@ -4093,9 +3627,7 @@ int CPU::POP_HL()
 	reg_HL.dat = (*mMap)[reg_SP.dat] | ((*mMap)[reg_SP.dat + 1] << 8);
 	reg_SP.dat += 2;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("POP HL\n");
-#endif
+	debugPrint("POP HL\n");
 	return 12;
 }
 
@@ -4105,9 +3637,7 @@ int CPU::LDH_C_A()
 {
 	mMap->writeMemory(0xFF00 + reg_BC.lo, reg_AF.hi);
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("LD (C), A\n");
-#endif
+	debugPrint("LD (C), A\n");
 	return 8;
 }
 
@@ -4118,9 +3648,7 @@ int CPU::PUSH_HL()
 	mMap->writeMemory(--reg_SP.dat, reg_HL.hi);
 	mMap->writeMemory(--reg_SP.dat, reg_HL.lo);
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("PUSH HL\n");
-#endif
+	debugPrint("PUSH HL\n");
 	return 16;
 }
 
@@ -4145,9 +3673,7 @@ int CPU::RST_20H()
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0020;
-#ifdef DEBUG
-	printf("RST 20H\n");
-#endif
+	debugPrint("RST 20H\n");
 	return 16;
 }
 
@@ -4167,9 +3693,7 @@ int CPU::ADD_SP_i8()
 	reg_SP.dat += (SByte)(*mMap)[reg_PC.dat + 1];
 
 	reg_PC.dat += 2;
-#ifdef DEBUG
-	printf("ADD SP, i8\n");
-#endif
+	debugPrint("ADD SP, i8\n");
 	return 16;
 }
 
@@ -4189,9 +3713,7 @@ int CPU::LD_u16_A()
 	// Writing the value of A into the (u16)
 	mMap->writeMemory((*mMap)[reg_PC.dat + 2] << 8 | (*mMap)[reg_PC.dat + 1], reg_AF.hi);
 	reg_PC.dat += 3;
-#ifdef DEBUG
-	printf("LD (u16), A\n");
-#endif
+	debugPrint("LD (u16), A\n");
 	return 16;
 }
 
@@ -4212,9 +3734,7 @@ int CPU::XOR_A_u8()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 2;
-#ifdef DEBUG
-	printf("XOR A, %02X\n", (*mMap)[reg_PC.dat + 1]);
-#endif
+	debugPrint("XOR A, %02X\n", (*mMap)[reg_PC.dat + 1]);
 	return 8;
 }
 
@@ -4225,9 +3745,7 @@ int CPU::RST_28H()
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0028;
-#ifdef DEBUG
-	printf("RST 28H\n");
-#endif
+	debugPrint("RST 28H\n");
 	return 16;
 }
 
@@ -4237,9 +3755,7 @@ int CPU::LDH_A_a8()
 {
 	reg_AF.hi = (*mMap)[0xFF00 + (*mMap)[reg_PC.dat + 1]];
 	reg_PC.dat += 2;
-#ifdef DEBUG
-	printf("LD A, (FF00+%02X)\n", (*mMap)[reg_PC.dat + 1]);
-#endif
+	debugPrint("LD A, (FF00+%02X)\n", (*mMap)[reg_PC.dat + 1]);
 	return 12;
 }
 
@@ -4250,9 +3766,7 @@ int CPU::POP_AF()
 	reg_AF.dat = (*mMap)[reg_SP.dat] & 0xF0 | ((*mMap)[reg_SP.dat + 1] << 8);
 	reg_SP.dat += 2;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("POP AF\n");
-#endif
+	debugPrint("POP AF\n");
 	return 12;
 }
 
@@ -4274,9 +3788,7 @@ int CPU::DI()
 	IMEFlag = -1;
 	IMEReg = false;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("DI\n");
-#endif
+	debugPrint("DI\n");
 	return 4;
 }
 
@@ -4287,9 +3799,7 @@ int CPU::PUSH_AF()
 	mMap->writeMemory(--reg_SP.dat, reg_AF.hi);
 	mMap->writeMemory(--reg_SP.dat, reg_AF.lo);
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("PUSH AF\n");
-#endif
+	debugPrint("PUSH AF\n");
 	return 16;
 }
 
@@ -4310,9 +3820,7 @@ int CPU::OR_A_u8()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 2;
-#ifdef DEBUG
-	printf("OR A, %02X\n", (*mMap)[reg_PC.dat + 1]);
-#endif
+	debugPrint("OR A, %02X\n", (*mMap)[reg_PC.dat + 1]);
 	return 8;
 }
 
@@ -4323,9 +3831,7 @@ int CPU::RST_30H()
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0030;
-#ifdef DEBUG
-	printf("RST 30H\n");
-#endif
+	debugPrint("RST 30H\n");
 	return 16;
 }
 
@@ -4362,9 +3868,7 @@ int CPU::LD_A_u16()
 {
 	reg_AF.hi = (*mMap)[((*mMap)[reg_PC.dat + 2] << 8) | (*mMap)[reg_PC.dat + 1]];
 	reg_PC.dat += 3;
-#ifdef DEBUG
-	printf("LD A, (HL)\n");
-#endif
+	debugPrint("LD A, (HL)\n");
 	return 16;
 }
 
@@ -4376,9 +3880,7 @@ int CPU::EI()
 	// Check the comments on the definition of IMEFlag and IMEReg
 	IMEFlag = 0;
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("EI\n");
-#endif
+	debugPrint("EI\n");
 	return 4;
 }
 
@@ -4399,9 +3901,7 @@ int CPU::CP_u8()
 	reg_AF.hi == (*mMap)[reg_PC.dat + 1] ? SET_ZERO_FLAG : UNSET_ZERO_FLAG;
 
 	reg_PC.dat += 2;
-#ifdef DEBUG
-	printf("CP A, %02X\n", (*mMap)[reg_PC.dat + 1]);
-#endif
+	debugPrint("CP A, %02X\n", (*mMap)[reg_PC.dat + 1]);
 	return 8;
 }
 
@@ -4412,9 +3912,7 @@ int CPU::RST_38H()
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0038;
-#ifdef DEBUG
-	printf("RST 38H\n");
-#endif
+	debugPrint("RST 38H\n");
 	return 16;
 }
 
@@ -4462,9 +3960,7 @@ int CPU::RLC_B()
 	reg_BC.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RLC B\n");
-#endif
+	debugPrint("RLC B\n");
 	return 4;
 }
 
@@ -4484,9 +3980,7 @@ int CPU::RLC_C()
 	reg_BC.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RLC C\n");
-#endif
+	debugPrint("RLC C\n");
 	return 4;
 }
 
@@ -4506,9 +4000,7 @@ int CPU::RLC_D()
 	reg_DE.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RLC D\n");
-#endif
+	debugPrint("RLC D\n");
 	return 4;
 }
 
@@ -4528,9 +4020,7 @@ int CPU::RLC_E()
 	reg_DE.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RLC E\n");
-#endif
+	debugPrint("RLC E\n");
 	return 4;
 }
 
@@ -4550,9 +4040,7 @@ int CPU::RLC_H()
 	reg_HL.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RLC H\n");
-#endif
+	debugPrint("RLC H\n");
 	return 4;
 }
 
@@ -4572,9 +4060,7 @@ int CPU::RLC_L()
 	reg_HL.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RLC L\n");
-#endif
+	debugPrint("RLC L\n");
 	return 4;
 }
 
@@ -4594,9 +4080,7 @@ int CPU::RLC_HLp()
 	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RLC (HL)\n");
-#endif
+	debugPrint("RLC (HL)\n");
 	return 4;
 }
 
@@ -4616,9 +4100,7 @@ int CPU::RLC_A()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RLC A\n");
-#endif
+	debugPrint("RLC A\n");
 	return 4;
 }
 
@@ -4638,9 +4120,7 @@ int CPU::RRC_B()
 	reg_BC.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RRC B\n");
-#endif
+	debugPrint("RRC B\n");
 	return 4;
 }
 
@@ -4660,9 +4140,7 @@ int CPU::RRC_C()
 	reg_BC.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RRC C\n");
-#endif
+	debugPrint("RRC C\n");
 	return 4;
 }
 
@@ -4682,9 +4160,7 @@ int CPU::RRC_D()
 	reg_DE.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RRC D\n");
-#endif
+	debugPrint("RRC D\n");
 	return 4;
 }
 
@@ -4704,9 +4180,7 @@ int CPU::RRC_E()
 	reg_DE.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RRC E\n");
-#endif
+	debugPrint("RRC E\n");
 	return 4;
 }
 
@@ -4726,9 +4200,7 @@ int CPU::RRC_H()
 	reg_HL.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RRC H\n");
-#endif
+	debugPrint("RRC H\n");
 	return 4;
 }
 
@@ -4748,9 +4220,7 @@ int CPU::RRC_L()
 	reg_HL.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RRC L\n");
-#endif
+	debugPrint("RRC L\n");
 	return 4;
 }
 
@@ -4770,9 +4240,7 @@ int CPU::RRC_HLp()
 	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RRC (HL)\n");
-#endif
+	debugPrint("RRC (HL)\n");
 	return 4;
 }
 
@@ -4792,9 +4260,7 @@ int CPU::RRC_A()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RRC A\n");
-#endif
+	debugPrint("RRC A\n");
 	return 4;
 }
 
@@ -4816,9 +4282,7 @@ int CPU::RL_B()
 	reg_BC.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RL B\n");
-#endif
+	debugPrint("RL B\n");
 	return 4;
 }
 
@@ -4840,9 +4304,7 @@ int CPU::RL_C()
 	reg_BC.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RL C\n");
-#endif
+	debugPrint("RL C\n");
 	return 4;
 }
 
@@ -4864,9 +4326,7 @@ int CPU::RL_D()
 	reg_DE.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RL D\n");
-#endif
+	debugPrint("RL D\n");
 	return 4;
 }
 
@@ -4888,9 +4348,7 @@ int CPU::RL_E()
 	reg_DE.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RL E\n");
-#endif
+	debugPrint("RL E\n");
 	return 4;
 }
 
@@ -4912,9 +4370,7 @@ int CPU::RL_H()
 	reg_HL.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RL H\n");
-#endif
+	debugPrint("RL H\n");
 	return 4;
 }
 
@@ -4936,9 +4392,7 @@ int CPU::RL_L()
 	reg_HL.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RL L\n");
-#endif
+	debugPrint("RL L\n");
 	return 4;
 }
 
@@ -4960,9 +4414,7 @@ int CPU::RL_HLp()
 	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RL (HL)\n");
-#endif
+	debugPrint("RL (HL)\n");
 	return 4;
 }
 
@@ -4984,9 +4436,7 @@ int CPU::RL_A()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RL A\n");
-#endif
+	debugPrint("RL A\n");
 	return 4;
 }
 
@@ -5008,9 +4458,7 @@ int CPU::RR_B()
 	reg_BC.hi & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RR B\n");
-#endif
+	debugPrint("RR B\n");
 	return 4;
 }
 
@@ -5032,9 +4480,7 @@ int CPU::RR_C()
 	reg_BC.lo & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RR C\n");
-#endif
+	debugPrint("RR C\n");
 	return 4;
 }
 
@@ -5056,9 +4502,7 @@ int CPU::RR_D()
 	reg_DE.hi & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RR D\n");
-#endif
+	debugPrint("RR D\n");
 	return 4;
 }
 
@@ -5080,9 +4524,7 @@ int CPU::RR_E()
 	reg_DE.lo & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RR E\n");
-#endif
+	debugPrint("RR E\n");
 	return 4;
 }
 
@@ -5104,9 +4546,7 @@ int CPU::RR_H()
 	reg_HL.hi & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RR H\n");
-#endif
+	debugPrint("RR H\n");
 	return 4;
 }
 
@@ -5128,9 +4568,7 @@ int CPU::RR_L()
 	reg_HL.lo & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RR L\n");
-#endif
+	debugPrint("RR L\n");
 	return 4;
 }
 
@@ -5152,9 +4590,7 @@ int CPU::RR_HLp()
 	(*mMap)[reg_HL.dat] & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RR (HL)\n");
-#endif
+	debugPrint("RR (HL)\n");
 	return 4;
 }
 
@@ -5176,9 +4612,7 @@ int CPU::RR_A()
 	reg_AF.hi & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RR A\n");
-#endif
+	debugPrint("RR A\n");
 	return 4;
 }
 
@@ -5198,9 +4632,7 @@ int CPU::SLA_B()
 	reg_BC.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SLA B\n");
-#endif
+	debugPrint("SLA B\n");
 	return 4;
 }
 
@@ -5220,9 +4652,7 @@ int CPU::SLA_C()
 	reg_BC.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SLA C\n");
-#endif
+	debugPrint("SLA C\n");
 	return 4;
 }
 
@@ -5242,9 +4672,7 @@ int CPU::SLA_D()
 	reg_DE.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SLA D\n");
-#endif
+	debugPrint("SLA D\n");
 	return 4;
 }
 
@@ -5264,9 +4692,7 @@ int CPU::SLA_E()
 	reg_DE.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SLA E\n");
-#endif
+	debugPrint("SLA E\n");
 	return 4;
 }
 
@@ -5286,9 +4712,7 @@ int CPU::SLA_H()
 	reg_HL.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SLA H\n");
-#endif
+	debugPrint("SLA H\n");
 	return 4;
 }
 
@@ -5308,9 +4732,7 @@ int CPU::SLA_L()
 	reg_HL.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SLA L\n");
-#endif
+	debugPrint("SLA L\n");
 	return 4;
 }
 
@@ -5330,9 +4752,7 @@ int CPU::SLA_HLp()
 	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SLA (HL)\n");
-#endif
+	debugPrint("SLA (HL)\n");
 	return 4;
 }
 
@@ -5352,9 +4772,7 @@ int CPU::SLA_A()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SLA A\n");
-#endif
+	debugPrint("SLA A\n");
 	return 4;
 }
 
@@ -5374,9 +4792,7 @@ int CPU::SRA_B()
 	reg_BC.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SRA B\n");
-#endif
+	debugPrint("SRA B\n");
 	return 4;
 }
 
@@ -5396,9 +4812,7 @@ int CPU::SRA_C()
 	reg_BC.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SRA C\n");
-#endif
+	debugPrint("SRA C\n");
 	return 4;
 }
 
@@ -5418,9 +4832,7 @@ int CPU::SRA_D()
 	reg_DE.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SRA D\n");
-#endif
+	debugPrint("SRA D\n");
 	return 4;
 }
 
@@ -5440,9 +4852,7 @@ int CPU::SRA_E()
 	reg_DE.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SRA E\n");
-#endif
+	debugPrint("SRA E\n");
 	return 4;
 }
 
@@ -5462,9 +4872,7 @@ int CPU::SRA_H()
 	reg_HL.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SRA H\n");
-#endif
+	debugPrint("SRA H\n");
 	return 4;
 }
 
@@ -5484,9 +4892,7 @@ int CPU::SRA_L()
 	reg_HL.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SRA L\n");
-#endif
+	debugPrint("SRA L\n");
 	return 4;
 }
 
@@ -5506,9 +4912,7 @@ int CPU::SRA_HLp()
 	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SRA (HL)\n");
-#endif
+	debugPrint("SRA (HL)\n");
 	return 4;
 }
 
@@ -5528,9 +4932,7 @@ int CPU::SRA_A()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SRA A\n");
-#endif
+	debugPrint("SRA A\n");
 	return 4;
 }
 
@@ -5548,9 +4950,7 @@ int CPU::SWAP_B()
 	reg_BC.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SWAP B\n");
-#endif
+	debugPrint("SWAP B\n");
 	return 4;
 }
 
@@ -5568,9 +4968,7 @@ int CPU::SWAP_C()
 	reg_BC.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SWAP C\n");
-#endif
+	debugPrint("SWAP C\n");
 	return 4;
 }
 
@@ -5588,9 +4986,7 @@ int CPU::SWAP_D()
 	reg_DE.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SWAP D\n");
-#endif
+	debugPrint("SWAP D\n");
 	return 4;
 }
 
@@ -5608,9 +5004,7 @@ int CPU::SWAP_E()
 	reg_DE.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SWAP E\n");
-#endif
+	debugPrint("SWAP E\n");
 	return 4;
 }
 
@@ -5628,9 +5022,7 @@ int CPU::SWAP_H()
 	reg_HL.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SWAP H\n");
-#endif
+	debugPrint("SWAP H\n");
 	return 4;
 }
 
@@ -5648,9 +5040,7 @@ int CPU::SWAP_L()
 	reg_HL.lo ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SWAP L\n");
-#endif
+	debugPrint("SWAP L\n");
 	return 4;
 }
 
@@ -5668,9 +5058,7 @@ int CPU::SWAP_HLp()
 	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SWAP (HL)\n");
-#endif
+	debugPrint("SWAP (HL)\n");
 	return 4;
 }
 
@@ -5688,9 +5076,7 @@ int CPU::SWAP_A()
 	reg_AF.hi ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SWAP A\n");
-#endif
+	debugPrint("SWAP A\n");
 	return 4;
 }
 
@@ -5710,9 +5096,7 @@ int CPU::SRL_B()
 	reg_BC.hi & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SRL B\n");
-#endif
+	debugPrint("SRL B\n");
 	return 4;
 }
 
@@ -5732,9 +5116,7 @@ int CPU::SRL_C()
 	reg_BC.lo & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SRL C\n");
-#endif
+	debugPrint("SRL C\n");
 	return 4;
 }
 
@@ -5754,9 +5136,7 @@ int CPU::SRL_D()
 	reg_DE.hi & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SRL D\n");
-#endif
+	debugPrint("SRL D\n");
 	return 4;
 }
 
@@ -5776,9 +5156,7 @@ int CPU::SRL_E()
 	reg_DE.lo & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SRL E\n");
-#endif
+	debugPrint("SRL E\n");
 	return 4;
 }
 
@@ -5798,9 +5176,7 @@ int CPU::SRL_H()
 	reg_HL.hi & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SRL H\n");
-#endif
+	debugPrint("SRL H\n");
 	return 4;
 }
 
@@ -5820,9 +5196,7 @@ int CPU::SRL_L()
 	reg_HL.lo & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SRL L\n");
-#endif
+	debugPrint("SRL L\n");
 	return 4;
 }
 
@@ -5842,9 +5216,7 @@ int CPU::SRL_HLp()
 	(*mMap)[reg_HL.dat] & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SRL (HL)\n");
-#endif
+	debugPrint("SRL (HL)\n");
 	return 4;
 }
 
@@ -5864,9 +5236,7 @@ int CPU::SRL_A()
 	reg_AF.hi & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SRL A\n");
-#endif
+	debugPrint("SRL A\n");
 	return 4;
 }
 
@@ -5881,9 +5251,7 @@ int CPU::BIT_0_B()
 	(reg_BC.hi & (1 << 0)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 0, B\n");
-#endif
+	debugPrint("BIT 0, B\n");
 	return 4;
 }
 
@@ -5898,9 +5266,7 @@ int CPU::BIT_0_C()
 	(reg_BC.lo & (1 << 0)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 0, C\n");
-#endif
+	debugPrint("BIT 0, C\n");
 	return 4;
 }
 
@@ -5915,9 +5281,7 @@ int CPU::BIT_0_D()
 	(reg_DE.hi & (1 << 0)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 0, D\n");
-#endif
+	debugPrint("BIT 0, D\n");
 	return 4;
 }
 
@@ -5932,9 +5296,7 @@ int CPU::BIT_0_E()
 	(reg_DE.lo & (1 << 0)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 0, E\n");
-#endif
+	debugPrint("BIT 0, E\n");
 	return 4;
 }
 
@@ -5949,9 +5311,7 @@ int CPU::BIT_0_H()
 	(reg_HL.hi & (1 << 0)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 0, H\n");
-#endif
+	debugPrint("BIT 0, H\n");
 	return 4;
 }
 
@@ -5966,9 +5326,7 @@ int CPU::BIT_0_L()
 	(reg_HL.lo & (1 << 0)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 0, L\n");
-#endif
+	debugPrint("BIT 0, L\n");
 	return 4;
 }
 
@@ -5983,9 +5341,7 @@ int CPU::BIT_0_HLp()
 	((*mMap)[reg_HL.dat] & (1 << 0)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 0, (HL)\n");
-#endif
+	debugPrint("BIT 0, (HL)\n");
 	return 4;
 }
 
@@ -6000,9 +5356,7 @@ int CPU::BIT_0_A()
 	(reg_AF.hi & (1 << 0)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 0, A\n");
-#endif
+	debugPrint("BIT 0, A\n");
 	return 4;
 }
 
@@ -6017,9 +5371,7 @@ int CPU::BIT_1_B()
 	(reg_BC.hi & (1 << 1)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 1, B\n");
-#endif
+	debugPrint("BIT 1, B\n");
 	return 4;
 }
 
@@ -6034,9 +5386,7 @@ int CPU::BIT_1_C()
 	(reg_BC.lo & (1 << 1)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 1, C\n");
-#endif
+	debugPrint("BIT 1, C\n");
 	return 4;
 }
 
@@ -6051,9 +5401,7 @@ int CPU::BIT_1_D()
 	(reg_DE.hi & (1 << 1)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 1, D\n");
-#endif
+	debugPrint("BIT 1, D\n");
 	return 4;
 }
 
@@ -6068,9 +5416,7 @@ int CPU::BIT_1_E()
 	(reg_DE.lo & (1 << 1)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 1, E\n");
-#endif
+	debugPrint("BIT 1, E\n");
 	return 4;
 }
 
@@ -6085,9 +5431,7 @@ int CPU::BIT_1_H()
 	(reg_HL.hi & (1 << 1)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 1, H\n");
-#endif
+	debugPrint("BIT 1, H\n");
 	return 4;
 }
 
@@ -6102,9 +5446,7 @@ int CPU::BIT_1_L()
 	(reg_HL.lo & (1 << 1)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 1, L\n");
-#endif
+	debugPrint("BIT 1, L\n");
 	return 4;
 }
 
@@ -6119,9 +5461,7 @@ int CPU::BIT_1_HLp()
 	((*mMap)[reg_HL.dat] & (1 << 1)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 1, (HL)\n");
-#endif
+	debugPrint("BIT 1, (HL)\n");
 	return 4;
 }
 
@@ -6136,9 +5476,7 @@ int CPU::BIT_1_A()
 	(reg_AF.hi & (1 << 1)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 1, A\n");
-#endif
+	debugPrint("BIT 1, A\n");
 	return 4;
 }
 
@@ -6153,9 +5491,7 @@ int CPU::BIT_2_B()
 	(reg_BC.hi & (1 << 2)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 2, B\n");
-#endif
+	debugPrint("BIT 2, B\n");
 	return 4;
 }
 
@@ -6170,9 +5506,7 @@ int CPU::BIT_2_C()
 	(reg_BC.lo & (1 << 2)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 2, C\n");
-#endif
+	debugPrint("BIT 2, C\n");
 	return 4;
 }
 
@@ -6187,9 +5521,7 @@ int CPU::BIT_2_D()
 	(reg_DE.hi & (1 << 2)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 2, D\n");
-#endif
+	debugPrint("BIT 2, D\n");
 	return 4;
 }
 
@@ -6204,9 +5536,7 @@ int CPU::BIT_2_E()
 	(reg_DE.lo & (1 << 2)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 2, E\n");
-#endif
+	debugPrint("BIT 2, E\n");
 	return 4;
 }
 
@@ -6221,9 +5551,7 @@ int CPU::BIT_2_H()
 	(reg_HL.hi & (1 << 2)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 2, H\n");
-#endif
+	debugPrint("BIT 2, H\n");
 	return 4;
 }
 
@@ -6238,9 +5566,7 @@ int CPU::BIT_2_L()
 	(reg_HL.lo & (1 << 2)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 2, L\n");
-#endif
+	debugPrint("BIT 2, L\n");
 	return 4;
 }
 
@@ -6255,9 +5581,7 @@ int CPU::BIT_2_HLp()
 	((*mMap)[reg_HL.dat] & (1 << 2)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 2, (HL)\n");
-#endif
+	debugPrint("BIT 2, (HL)\n");
 	return 4;
 }
 
@@ -6272,9 +5596,7 @@ int CPU::BIT_2_A()
 	(reg_AF.hi & (1 << 2)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 2, A\n");
-#endif
+	debugPrint("BIT 2, A\n");
 	return 4;
 }
 
@@ -6289,9 +5611,7 @@ int CPU::BIT_3_B()
 	(reg_BC.hi & (1 << 3)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 3, B\n");
-#endif
+	debugPrint("BIT 3, B\n");
 	return 4;
 }
 
@@ -6306,9 +5626,7 @@ int CPU::BIT_3_C()
 	(reg_BC.lo & (1 << 3)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 3, C\n");
-#endif
+	debugPrint("BIT 3, C\n");
 	return 4;
 }
 
@@ -6323,9 +5641,7 @@ int CPU::BIT_3_D()
 	(reg_DE.hi & (1 << 3)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 3, D\n");
-#endif
+	debugPrint("BIT 3, D\n");
 	return 4;
 }
 
@@ -6340,9 +5656,7 @@ int CPU::BIT_3_E()
 	(reg_DE.lo & (1 << 3)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 3, E\n");
-#endif
+	debugPrint("BIT 3, E\n");
 	return 4;
 }
 
@@ -6357,9 +5671,7 @@ int CPU::BIT_3_H()
 	(reg_HL.hi & (1 << 3)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 3, H\n");
-#endif
+	debugPrint("BIT 3, H\n");
 	return 4;
 }
 
@@ -6374,9 +5686,7 @@ int CPU::BIT_3_L()
 	(reg_HL.lo & (1 << 3)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 3, L\n");
-#endif
+	debugPrint("BIT 3, L\n");
 	return 4;
 }
 
@@ -6391,9 +5701,7 @@ int CPU::BIT_3_HLp()
 	((*mMap)[reg_HL.dat] & (1 << 3)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 3, (HL)\n");
-#endif
+	debugPrint("BIT 3, (HL)\n");
 	return 4;
 }
 
@@ -6408,9 +5716,7 @@ int CPU::BIT_3_A()
 	(reg_AF.hi & (1 << 3)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 3, A\n");
-#endif
+	debugPrint("BIT 3, A\n");
 	return 4;
 }
 
@@ -6425,9 +5731,7 @@ int CPU::BIT_4_B()
 	(reg_BC.hi & (1 << 4)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 4, B\n");
-#endif
+	debugPrint("BIT 4, B\n");
 	return 4;
 }
 
@@ -6442,9 +5746,7 @@ int CPU::BIT_4_C()
 	(reg_BC.lo & (1 << 4)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 4, C\n");
-#endif
+	debugPrint("BIT 4, C\n");
 	return 4;
 }
 
@@ -6459,9 +5761,7 @@ int CPU::BIT_4_D()
 	(reg_DE.hi & (1 << 4)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 4, D\n");
-#endif
+	debugPrint("BIT 4, D\n");
 	return 4;
 }
 
@@ -6476,9 +5776,7 @@ int CPU::BIT_4_E()
 	(reg_DE.lo & (1 << 4)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 4, E\n");
-#endif
+	debugPrint("BIT 4, E\n");
 	return 4;
 }
 
@@ -6493,9 +5791,7 @@ int CPU::BIT_4_H()
 	(reg_HL.hi & (1 << 4)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 4, H\n");
-#endif
+	debugPrint("BIT 4, H\n");
 	return 4;
 }
 
@@ -6510,9 +5806,7 @@ int CPU::BIT_4_L()
 	(reg_HL.lo & (1 << 4)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 4, L\n");
-#endif
+	debugPrint("BIT 4, L\n");
 	return 4;
 }
 
@@ -6527,9 +5821,7 @@ int CPU::BIT_4_HLp()
 	((*mMap)[reg_HL.dat] & (1 << 4)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 4, (HL)\n");
-#endif
+	debugPrint("BIT 4, (HL)\n");
 	return 4;
 }
 
@@ -6544,9 +5836,7 @@ int CPU::BIT_4_A()
 	(reg_AF.hi & (1 << 4)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 4, A\n");
-#endif
+	debugPrint("BIT 4, A\n");
 	return 4;
 }
 
@@ -6561,9 +5851,7 @@ int CPU::BIT_5_B()
 	(reg_BC.hi & (1 << 5)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 5, B\n");
-#endif
+	debugPrint("BIT 5, B\n");
 	return 4;
 }
 
@@ -6578,9 +5866,7 @@ int CPU::BIT_5_C()
 	(reg_BC.lo & (1 << 5)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 5, C\n");
-#endif
+	debugPrint("BIT 5, C\n");
 	return 4;
 }
 
@@ -6595,9 +5881,7 @@ int CPU::BIT_5_D()
 	(reg_DE.hi & (1 << 5)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 5, D\n");
-#endif
+	debugPrint("BIT 5, D\n");
 	return 4;
 }
 
@@ -6612,9 +5896,7 @@ int CPU::BIT_5_E()
 	(reg_DE.lo & (1 << 5)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 5, E\n");
-#endif
+	debugPrint("BIT 5, E\n");
 	return 4;
 }
 
@@ -6629,9 +5911,7 @@ int CPU::BIT_5_H()
 	(reg_HL.hi & (1 << 5)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 5, H\n");
-#endif
+	debugPrint("BIT 5, H\n");
 	return 4;
 }
 
@@ -6646,9 +5926,7 @@ int CPU::BIT_5_L()
 	(reg_HL.lo & (1 << 5)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 5, L\n");
-#endif
+	debugPrint("BIT 5, L\n");
 	return 4;
 }
 
@@ -6663,9 +5941,7 @@ int CPU::BIT_5_HLp()
 	((*mMap)[reg_HL.dat] & (1 << 5)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 5, (HL)\n");
-#endif
+	debugPrint("BIT 5, (HL)\n");
 	return 4;
 }
 
@@ -6680,9 +5956,7 @@ int CPU::BIT_5_A()
 	(reg_AF.hi & (1 << 5)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 5, A\n");
-#endif
+	debugPrint("BIT 5, A\n");
 	return 4;
 }
 
@@ -6697,9 +5971,7 @@ int CPU::BIT_6_B()
 	(reg_BC.hi & (1 << 6)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 6, B\n");
-#endif
+	debugPrint("BIT 6, B\n");
 	return 4;
 }
 
@@ -6714,9 +5986,7 @@ int CPU::BIT_6_C()
 	(reg_BC.lo & (1 << 6)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 6, C\n");
-#endif
+	debugPrint("BIT 6, C\n");
 	return 4;
 }
 
@@ -6731,9 +6001,7 @@ int CPU::BIT_6_D()
 	(reg_DE.hi & (1 << 6)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 6, D\n");
-#endif
+	debugPrint("BIT 6, D\n");
 	return 4;
 }
 
@@ -6748,9 +6016,7 @@ int CPU::BIT_6_E()
 	(reg_DE.lo & (1 << 6)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 6, E\n");
-#endif
+	debugPrint("BIT 6, E\n");
 	return 4;
 }
 
@@ -6765,9 +6031,7 @@ int CPU::BIT_6_H()
 	(reg_HL.hi & (1 << 6)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 6, H\n");
-#endif
+	debugPrint("BIT 6, H\n");
 	return 4;
 }
 
@@ -6782,9 +6046,7 @@ int CPU::BIT_6_L()
 	(reg_HL.lo & (1 << 6)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 6, L\n");
-#endif
+	debugPrint("BIT 6, L\n");
 	return 4;
 }
 
@@ -6799,9 +6061,7 @@ int CPU::BIT_6_HLp()
 	((*mMap)[reg_HL.dat] & (1 << 6)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 6, (HL)\n");
-#endif
+	debugPrint("BIT 6, (HL)\n");
 	return 4;
 }
 
@@ -6816,9 +6076,7 @@ int CPU::BIT_6_A()
 	(reg_AF.hi & (1 << 6)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 6, A\n");
-#endif
+	debugPrint("BIT 6, A\n");
 	return 4;
 }
 
@@ -6833,9 +6091,7 @@ int CPU::BIT_7_B()
 	(reg_BC.hi & (1 << 7)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 7, B\n");
-#endif
+	debugPrint("BIT 7, B\n");
 	return 4;
 }
 
@@ -6850,9 +6106,7 @@ int CPU::BIT_7_C()
 	(reg_BC.lo & (1 << 7)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 7, C\n");
-#endif
+	debugPrint("BIT 7, C\n");
 	return 4;
 }
 
@@ -6867,9 +6121,7 @@ int CPU::BIT_7_D()
 	(reg_DE.hi & (1 << 7)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 7, D\n");
-#endif
+	debugPrint("BIT 7, D\n");
 	return 4;
 }
 
@@ -6884,9 +6136,7 @@ int CPU::BIT_7_E()
 	(reg_DE.lo & (1 << 7)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 7, E\n");
-#endif
+	debugPrint("BIT 7, E\n");
 	return 4;
 }
 
@@ -6901,9 +6151,7 @@ int CPU::BIT_7_H()
 	(reg_HL.hi & (1 << 7)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 7, H\n");
-#endif
+	debugPrint("BIT 7, H\n");
 	return 4;
 }
 
@@ -6918,9 +6166,7 @@ int CPU::BIT_7_L()
 	(reg_HL.lo & (1 << 7)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 7, L\n");
-#endif
+	debugPrint("BIT 7, L\n");
 	return 4;
 }
 
@@ -6935,9 +6181,7 @@ int CPU::BIT_7_HLp()
 	((*mMap)[reg_HL.dat] & (1 << 7)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 7, (HL)\n");
-#endif
+	debugPrint("BIT 7, (HL)\n");
 	return 4;
 }
 
@@ -6952,9 +6196,7 @@ int CPU::BIT_7_A()
 	(reg_AF.hi & (1 << 7)) ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("BIT 7, A\n");
-#endif
+	debugPrint("BIT 7, A\n");
 	return 4;
 }
 
@@ -6966,9 +6208,7 @@ int CPU::RES_0_B()
 	reg_BC.hi &= 0xFF ^ (1 << 0);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 0, B\n");
-#endif
+	debugPrint("RES 0, B\n");
 	return 4;
 }
 
@@ -6980,9 +6220,7 @@ int CPU::RES_0_C()
 	reg_BC.lo &= 0xFF ^ (1 << 0);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 0, C\n");
-#endif
+	debugPrint("RES 0, C\n");
 	return 4;
 }
 
@@ -6994,9 +6232,7 @@ int CPU::RES_0_D()
 	reg_DE.hi &= 0xFF ^ (1 << 0);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 0, D\n");
-#endif
+	debugPrint("RES 0, D\n");
 	return 4;
 }
 
@@ -7008,9 +6244,7 @@ int CPU::RES_0_E()
 	reg_DE.lo &= 0xFF ^ (1 << 0);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 0, E\n");
-#endif
+	debugPrint("RES 0, E\n");
 	return 4;
 }
 
@@ -7022,9 +6256,7 @@ int CPU::RES_0_H()
 	reg_HL.hi &= 0xFF ^ (1 << 0);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 0, H\n");
-#endif
+	debugPrint("RES 0, H\n");
 	return 4;
 }
 
@@ -7036,9 +6268,7 @@ int CPU::RES_0_L()
 	reg_HL.lo &= 0xFF ^ (1 << 0);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 0, L\n");
-#endif
+	debugPrint("RES 0, L\n");
 	return 4;
 }
 
@@ -7050,9 +6280,7 @@ int CPU::RES_0_HLp()
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 0))));
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 0, (HL)\n");
-#endif
+	debugPrint("RES 0, (HL)\n");
 	return 4;
 }
 
@@ -7064,9 +6292,7 @@ int CPU::RES_0_A()
 	reg_AF.hi &= 0xFF ^ (1 << 0);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 0, A\n");
-#endif
+	debugPrint("RES 0, A\n");
 	return 4;
 }
 
@@ -7078,9 +6304,7 @@ int CPU::RES_1_B()
 	reg_BC.hi &= 0xFF ^ (1 << 1);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 1, B\n");
-#endif
+	debugPrint("RES 1, B\n");
 	return 4;
 }
 
@@ -7092,9 +6316,7 @@ int CPU::RES_1_C()
 	reg_BC.lo &= 0xFF ^ (1 << 1);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 1, C\n");
-#endif
+	debugPrint("RES 1, C\n");
 	return 4;
 }
 
@@ -7106,9 +6328,7 @@ int CPU::RES_1_D()
 	reg_DE.hi &= 0xFF ^ (1 << 1);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 1, D\n");
-#endif
+	debugPrint("RES 1, D\n");
 	return 4;
 }
 
@@ -7120,9 +6340,7 @@ int CPU::RES_1_E()
 	reg_DE.lo &= 0xFF ^ (1 << 1);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 1, E\n");
-#endif
+	debugPrint("RES 1, E\n");
 	return 4;
 }
 
@@ -7134,9 +6352,7 @@ int CPU::RES_1_H()
 	reg_HL.hi &= 0xFF ^ (1 << 1);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 1, H\n");
-#endif
+	debugPrint("RES 1, H\n");
 	return 4;
 }
 
@@ -7148,9 +6364,7 @@ int CPU::RES_1_L()
 	reg_HL.lo &= 0xFF ^ (1 << 1);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 1, L\n");
-#endif
+	debugPrint("RES 1, L\n");
 	return 4;
 }
 
@@ -7162,9 +6376,7 @@ int CPU::RES_1_HLp()
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 1))));
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 1, (HL)\n");
-#endif
+	debugPrint("RES 1, (HL)\n");
 	return 4;
 }
 
@@ -7176,9 +6388,7 @@ int CPU::RES_1_A()
 	reg_AF.hi &= 0xFF ^ (1 << 1);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 1, A\n");
-#endif
+	debugPrint("RES 1, A\n");
 	return 4;
 }
 
@@ -7190,9 +6400,7 @@ int CPU::RES_2_B()
 	reg_BC.hi &= 0xFF ^ (1 << 2);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 2, B\n");
-#endif
+	debugPrint("RES 2, B\n");
 	return 4;
 }
 
@@ -7204,9 +6412,7 @@ int CPU::RES_2_C()
 	reg_BC.lo &= 0xFF ^ (1 << 2);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 2, C\n");
-#endif
+	debugPrint("RES 2, C\n");
 	return 4;
 }
 
@@ -7218,9 +6424,7 @@ int CPU::RES_2_D()
 	reg_DE.hi &= 0xFF ^ (1 << 2);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 2, D\n");
-#endif
+	debugPrint("RES 2, D\n");
 	return 4;
 }
 
@@ -7232,9 +6436,7 @@ int CPU::RES_2_E()
 	reg_DE.lo &= 0xFF ^ (1 << 2);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 2, E\n");
-#endif
+	debugPrint("RES 2, E\n");
 	return 4;
 }
 
@@ -7246,9 +6448,7 @@ int CPU::RES_2_H()
 	reg_HL.hi &= 0xFF ^ (1 << 2);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 2, H\n");
-#endif
+	debugPrint("RES 2, H\n");
 	return 4;
 }
 
@@ -7260,9 +6460,7 @@ int CPU::RES_2_L()
 	reg_HL.lo &= 0xFF ^ (1 << 2);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 2, L\n");
-#endif
+	debugPrint("RES 2, L\n");
 	return 4;
 }
 
@@ -7274,9 +6472,7 @@ int CPU::RES_2_HLp()
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 2))));
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 2, (HL)\n");
-#endif
+	debugPrint("RES 2, (HL)\n");
 	return 4;
 }
 
@@ -7288,9 +6484,7 @@ int CPU::RES_2_A()
 	reg_AF.hi &= 0xFF ^ (1 << 2);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 2, A\n");
-#endif
+	debugPrint("RES 2, A\n");
 	return 4;
 }
 
@@ -7302,9 +6496,7 @@ int CPU::RES_3_B()
 	reg_BC.hi &= 0xFF ^ (1 << 3);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 3, B\n");
-#endif
+	debugPrint("RES 3, B\n");
 	return 4;
 }
 
@@ -7316,9 +6508,7 @@ int CPU::RES_3_C()
 	reg_BC.lo &= 0xFF ^ (1 << 3);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 3, C\n");
-#endif
+	debugPrint("RES 3, C\n");
 	return 4;
 }
 
@@ -7330,9 +6520,7 @@ int CPU::RES_3_D()
 	reg_DE.hi &= 0xFF ^ (1 << 3);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 3, D\n");
-#endif
+	debugPrint("RES 3, D\n");
 	return 4;
 }
 
@@ -7344,9 +6532,7 @@ int CPU::RES_3_E()
 	reg_DE.lo &= 0xFF ^ (1 << 3);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 3, E\n");
-#endif
+	debugPrint("RES 3, E\n");
 	return 4;
 }
 
@@ -7358,9 +6544,7 @@ int CPU::RES_3_H()
 	reg_HL.hi &= 0xFF ^ (1 << 3);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 3, H\n");
-#endif
+	debugPrint("RES 3, H\n");
 	return 4;
 }
 
@@ -7372,9 +6556,7 @@ int CPU::RES_3_L()
 	reg_HL.lo &= 0xFF ^ (1 << 3);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 3, L\n");
-#endif
+	debugPrint("RES 3, L\n");
 	return 4;
 }
 
@@ -7386,9 +6568,7 @@ int CPU::RES_3_HLp()
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 3))));
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 3, (HL)\n");
-#endif
+	debugPrint("RES 3, (HL)\n");
 	return 4;
 }
 
@@ -7400,9 +6580,7 @@ int CPU::RES_3_A()
 	reg_AF.hi &= 0xFF ^ (1 << 3);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 3, A\n");
-#endif
+	debugPrint("RES 3, A\n");
 	return 4;
 }
 
@@ -7414,9 +6592,7 @@ int CPU::RES_4_B()
 	reg_BC.hi &= 0xFF ^ (1 << 4);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 4, B\n");
-#endif
+	debugPrint("RES 4, B\n");
 	return 4;
 }
 
@@ -7428,9 +6604,7 @@ int CPU::RES_4_C()
 	reg_BC.lo &= 0xFF ^ (1 << 4);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 4, C\n");
-#endif
+	debugPrint("RES 4, C\n");
 	return 4;
 }
 
@@ -7442,9 +6616,7 @@ int CPU::RES_4_D()
 	reg_DE.hi &= 0xFF ^ (1 << 4);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 4, D\n");
-#endif
+	debugPrint("RES 4, D\n");
 	return 4;
 }
 
@@ -7456,9 +6628,7 @@ int CPU::RES_4_E()
 	reg_DE.lo &= 0xFF ^ (1 << 4);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 4, E\n");
-#endif
+	debugPrint("RES 4, E\n");
 	return 4;
 }
 
@@ -7470,9 +6640,7 @@ int CPU::RES_4_H()
 	reg_HL.hi &= 0xFF ^ (1 << 4);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 4, H\n");
-#endif
+	debugPrint("RES 4, H\n");
 	return 4;
 }
 
@@ -7484,9 +6652,7 @@ int CPU::RES_4_L()
 	reg_HL.lo &= 0xFF ^ (1 << 4);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 4, L\n");
-#endif
+	debugPrint("RES 4, L\n");
 	return 4;
 }
 
@@ -7498,9 +6664,7 @@ int CPU::RES_4_HLp()
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 4))));
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 4, (HL)\n");
-#endif
+	debugPrint("RES 4, (HL)\n");
 	return 4;
 }
 
@@ -7512,9 +6676,7 @@ int CPU::RES_4_A()
 	reg_AF.hi &= 0xFF ^ (1 << 4);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 4, A\n");
-#endif
+	debugPrint("RES 4, A\n");
 	return 4;
 }
 
@@ -7526,9 +6688,7 @@ int CPU::RES_5_B()
 	reg_BC.hi &= 0xFF ^ (1 << 5);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 5, B\n");
-#endif
+	debugPrint("RES 5, B\n");
 	return 4;
 }
 
@@ -7540,9 +6700,7 @@ int CPU::RES_5_C()
 	reg_BC.lo &= 0xFF ^ (1 << 5);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 5, C\n");
-#endif
+	debugPrint("RES 5, C\n");
 	return 4;
 }
 
@@ -7554,9 +6712,7 @@ int CPU::RES_5_D()
 	reg_DE.hi &= 0xFF ^ (1 << 5);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 5, D\n");
-#endif
+	debugPrint("RES 5, D\n");
 	return 4;
 }
 
@@ -7568,9 +6724,7 @@ int CPU::RES_5_E()
 	reg_DE.lo &= 0xFF ^ (1 << 5);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 5, E\n");
-#endif
+	debugPrint("RES 5, E\n");
 	return 4;
 }
 
@@ -7582,9 +6736,7 @@ int CPU::RES_5_H()
 	reg_HL.hi &= 0xFF ^ (1 << 5);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 5, H\n");
-#endif
+	debugPrint("RES 5, H\n");
 	return 4;
 }
 
@@ -7596,9 +6748,7 @@ int CPU::RES_5_L()
 	reg_HL.lo &= 0xFF ^ (1 << 5);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 5, L\n");
-#endif
+	debugPrint("RES 5, L\n");
 	return 4;
 }
 
@@ -7610,9 +6760,7 @@ int CPU::RES_5_HLp()
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 5))));
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 5, (HL)\n");
-#endif
+	debugPrint("RES 5, (HL)\n");
 	return 4;
 }
 
@@ -7624,9 +6772,7 @@ int CPU::RES_5_A()
 	reg_AF.hi &= 0xFF ^ (1 << 5);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 5, A\n");
-#endif
+	debugPrint("RES 5, A\n");
 	return 4;
 }
 
@@ -7638,9 +6784,7 @@ int CPU::RES_6_B()
 	reg_BC.hi &= 0xFF ^ (1 << 6);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 6, B\n");
-#endif
+	debugPrint("RES 6, B\n");
 	return 4;
 }
 
@@ -7652,9 +6796,7 @@ int CPU::RES_6_C()
 	reg_BC.lo &= 0xFF ^ (1 << 6);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 6, C\n");
-#endif
+	debugPrint("RES 6, C\n");
 	return 4;
 }
 
@@ -7666,9 +6808,7 @@ int CPU::RES_6_D()
 	reg_DE.hi &= 0xFF ^ (1 << 6);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 6, D\n");
-#endif
+	debugPrint("RES 6, D\n");
 	return 4;
 }
 
@@ -7680,9 +6820,7 @@ int CPU::RES_6_E()
 	reg_DE.lo &= 0xFF ^ (1 << 6);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 6, E\n");
-#endif
+	debugPrint("RES 6, E\n");
 	return 4;
 }
 
@@ -7694,9 +6832,7 @@ int CPU::RES_6_H()
 	reg_HL.hi &= 0xFF ^ (1 << 6);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 6, H\n");
-#endif
+	debugPrint("RES 6, H\n");
 	return 4;
 }
 
@@ -7708,9 +6844,7 @@ int CPU::RES_6_L()
 	reg_HL.lo &= 0xFF ^ (1 << 6);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 6, L\n");
-#endif
+	debugPrint("RES 6, L\n");
 	return 4;
 }
 
@@ -7722,9 +6856,7 @@ int CPU::RES_6_HLp()
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 6))));
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 6, (HL)\n");
-#endif
+	debugPrint("RES 6, (HL)\n");
 	return 4;
 }
 
@@ -7736,9 +6868,7 @@ int CPU::RES_6_A()
 	reg_AF.hi &= 0xFF ^ (1 << 6);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 6, A\n");
-#endif
+	debugPrint("RES 6, A\n");
 	return 4;
 }
 
@@ -7750,9 +6880,7 @@ int CPU::RES_7_B()
 	reg_BC.hi &= 0xFF ^ (1 << 7);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 7, B\n");
-#endif
+	debugPrint("RES 7, B\n");
 	return 4;
 }
 
@@ -7764,9 +6892,7 @@ int CPU::RES_7_C()
 	reg_BC.lo &= 0xFF ^ (1 << 7);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 7, C\n");
-#endif
+	debugPrint("RES 7, C\n");
 	return 4;
 }
 
@@ -7778,9 +6904,7 @@ int CPU::RES_7_D()
 	reg_DE.hi &= 0xFF ^ (1 << 7);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 7, D\n");
-#endif
+	debugPrint("RES 7, D\n");
 	return 4;
 }
 
@@ -7792,9 +6916,7 @@ int CPU::RES_7_E()
 	reg_DE.lo &= 0xFF ^ (1 << 7);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 7, E\n");
-#endif
+	debugPrint("RES 7, E\n");
 	return 4;
 }
 
@@ -7806,9 +6928,7 @@ int CPU::RES_7_H()
 	reg_HL.hi &= 0xFF ^ (1 << 7);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 7, H\n");
-#endif
+	debugPrint("RES 7, H\n");
 	return 4;
 }
 
@@ -7820,9 +6940,7 @@ int CPU::RES_7_L()
 	reg_HL.lo &= 0xFF ^ (1 << 7);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 7, L\n");
-#endif
+	debugPrint("RES 7, L\n");
 	return 4;
 }
 
@@ -7834,9 +6952,7 @@ int CPU::RES_7_HLp()
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 7))));
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 7, (HL)\n");
-#endif
+	debugPrint("RES 7, (HL)\n");
 	return 4;
 }
 
@@ -7848,9 +6964,7 @@ int CPU::RES_7_A()
 	reg_AF.hi &= 0xFF ^ (1 << 7);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("RES 7, A\n");
-#endif
+	debugPrint("RES 7, A\n");
 	return 4;
 }
 
@@ -7862,9 +6976,7 @@ int CPU::SET_0_B()
 	reg_BC.hi |= (1 << 0);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 0, B\n");
-#endif
+	debugPrint("SET 0, B\n");
 	return 4;
 }
 
@@ -7876,9 +6988,7 @@ int CPU::SET_0_C()
 	reg_BC.lo |= (1 << 0);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 0, C\n");
-#endif
+	debugPrint("SET 0, C\n");
 	return 4;
 }
 
@@ -7890,9 +7000,7 @@ int CPU::SET_0_D()
 	reg_DE.hi |= (1 << 0);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 0, D\n");
-#endif
+	debugPrint("SET 0, D\n");
 	return 4;
 }
 
@@ -7904,9 +7012,7 @@ int CPU::SET_0_E()
 	reg_DE.lo |= (1 << 0);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 0, E\n");
-#endif
+	debugPrint("SET 0, E\n");
 	return 4;
 }
 
@@ -7918,9 +7024,7 @@ int CPU::SET_0_H()
 	reg_HL.hi |= (1 << 0);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 0, H\n");
-#endif
+	debugPrint("SET 0, H\n");
 	return 4;
 }
 
@@ -7932,9 +7036,7 @@ int CPU::SET_0_L()
 	reg_HL.lo |= (1 << 0);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 0, L\n");
-#endif
+	debugPrint("SET 0, L\n");
 	return 4;
 }
 
@@ -7946,9 +7048,7 @@ int CPU::SET_0_HLp()
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 0));
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 0, (HL)\n");
-#endif
+	debugPrint("SET 0, (HL)\n");
 	return 4;
 }
 
@@ -7960,9 +7060,7 @@ int CPU::SET_0_A()
 	reg_AF.hi |= (1 << 0);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 0, A\n");
-#endif
+	debugPrint("SET 0, A\n");
 	return 4;
 }
 
@@ -7974,9 +7072,7 @@ int CPU::SET_1_B()
 	reg_BC.hi |= (1 << 1);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 1, B\n");
-#endif
+	debugPrint("SET 1, B\n");
 	return 4;
 }
 
@@ -7988,9 +7084,7 @@ int CPU::SET_1_C()
 	reg_BC.lo |= (1 << 1);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 1, C\n");
-#endif
+	debugPrint("SET 1, C\n");
 	return 4;
 }
 
@@ -8002,9 +7096,7 @@ int CPU::SET_1_D()
 	reg_DE.hi |= (1 << 1);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 1, D\n");
-#endif
+	debugPrint("SET 1, D\n");
 	return 4;
 }
 
@@ -8016,9 +7108,7 @@ int CPU::SET_1_E()
 	reg_DE.lo |= (1 << 1);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 1, E\n");
-#endif
+	debugPrint("SET 1, E\n");
 	return 4;
 }
 
@@ -8030,9 +7120,7 @@ int CPU::SET_1_H()
 	reg_HL.hi |= (1 << 1);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 1, H\n");
-#endif
+	debugPrint("SET 1, H\n");
 	return 4;
 }
 
@@ -8044,9 +7132,7 @@ int CPU::SET_1_L()
 	reg_HL.lo |= (1 << 1);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 1, L\n");
-#endif
+	debugPrint("SET 1, L\n");
 	return 4;
 }
 
@@ -8058,9 +7144,7 @@ int CPU::SET_1_HLp()
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 1));
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 1, (HL)\n");
-#endif
+	debugPrint("SET 1, (HL)\n");
 	return 4;
 }
 
@@ -8072,9 +7156,7 @@ int CPU::SET_1_A()
 	reg_AF.hi |= (1 << 1);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 1, A\n");
-#endif
+	debugPrint("SET 1, A\n");
 	return 4;
 }
 
@@ -8086,9 +7168,7 @@ int CPU::SET_2_B()
 	reg_BC.hi |= (1 << 2);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 2, B\n");
-#endif
+	debugPrint("SET 2, B\n");
 	return 4;
 }
 
@@ -8100,9 +7180,7 @@ int CPU::SET_2_C()
 	reg_BC.lo |= (1 << 2);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 2, C\n");
-#endif
+	debugPrint("SET 2, C\n");
 	return 4;
 }
 
@@ -8114,9 +7192,7 @@ int CPU::SET_2_D()
 	reg_DE.hi |= (1 << 2);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 2, D\n");
-#endif
+	debugPrint("SET 2, D\n");
 	return 4;
 }
 
@@ -8128,9 +7204,7 @@ int CPU::SET_2_E()
 	reg_DE.lo |= (1 << 2);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 2, E\n");
-#endif
+	debugPrint("SET 2, E\n");
 	return 4;
 }
 
@@ -8142,9 +7216,7 @@ int CPU::SET_2_H()
 	reg_HL.hi |= (1 << 2);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 2, H\n");
-#endif
+	debugPrint("SET 2, H\n");
 	return 4;
 }
 
@@ -8156,9 +7228,7 @@ int CPU::SET_2_L()
 	reg_HL.lo |= (1 << 2);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 2, L\n");
-#endif
+	debugPrint("SET 2, L\n");
 	return 4;
 }
 
@@ -8170,9 +7240,7 @@ int CPU::SET_2_HLp()
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 2));
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 2, (HL)\n");
-#endif
+	debugPrint("SET 2, (HL)\n");
 	return 4;
 }
 
@@ -8184,9 +7252,7 @@ int CPU::SET_2_A()
 	reg_AF.hi |= (1 << 2);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 2, A\n");
-#endif
+	debugPrint("SET 2, A\n");
 	return 4;
 }
 
@@ -8198,9 +7264,7 @@ int CPU::SET_3_B()
 	reg_BC.hi |= (1 << 3);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 3, B\n");
-#endif
+	debugPrint("SET 3, B\n");
 	return 4;
 }
 
@@ -8212,9 +7276,7 @@ int CPU::SET_3_C()
 	reg_BC.lo |= (1 << 3);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 3, C\n");
-#endif
+	debugPrint("SET 3, C\n");
 	return 4;
 }
 
@@ -8226,9 +7288,7 @@ int CPU::SET_3_D()
 	reg_DE.hi |= (1 << 3);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 3, D\n");
-#endif
+	debugPrint("SET 3, D\n");
 	return 4;
 }
 
@@ -8240,9 +7300,7 @@ int CPU::SET_3_E()
 	reg_DE.lo |= (1 << 3);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 3, E\n");
-#endif
+	debugPrint("SET 3, E\n");
 	return 4;
 }
 
@@ -8254,9 +7312,7 @@ int CPU::SET_3_H()
 	reg_HL.hi |= (1 << 3);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 3, H\n");
-#endif
+	debugPrint("SET 3, H\n");
 	return 4;
 }
 
@@ -8268,9 +7324,7 @@ int CPU::SET_3_L()
 	reg_HL.lo |= (1 << 3);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 3, L\n");
-#endif
+	debugPrint("SET 3, L\n");
 	return 4;
 }
 
@@ -8282,9 +7336,7 @@ int CPU::SET_3_HLp()
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 3));
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 3, (HL)\n");
-#endif
+	debugPrint("SET 3, (HL)\n");
 	return 4;
 }
 
@@ -8296,9 +7348,7 @@ int CPU::SET_3_A()
 	reg_AF.hi |= (1 << 3);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 3, A\n");
-#endif
+	debugPrint("SET 3, A\n");
 	return 4;
 }
 
@@ -8310,9 +7360,7 @@ int CPU::SET_4_B()
 	reg_BC.hi |= (1 << 4);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 4, B\n");
-#endif
+	debugPrint("SET 4, B\n");
 	return 4;
 }
 
@@ -8324,9 +7372,7 @@ int CPU::SET_4_C()
 	reg_BC.lo |= (1 << 4);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 4, C\n");
-#endif
+	debugPrint("SET 4, C\n");
 	return 4;
 }
 
@@ -8338,9 +7384,7 @@ int CPU::SET_4_D()
 	reg_DE.hi |= (1 << 4);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 4, D\n");
-#endif
+	debugPrint("SET 4, D\n");
 	return 4;
 }
 
@@ -8352,9 +7396,7 @@ int CPU::SET_4_E()
 	reg_DE.lo |= (1 << 4);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 4, E\n");
-#endif
+	debugPrint("SET 4, E\n");
 	return 4;
 }
 
@@ -8366,9 +7408,7 @@ int CPU::SET_4_H()
 	reg_HL.hi |= (1 << 4);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 4, H\n");
-#endif
+	debugPrint("SET 4, H\n");
 	return 4;
 }
 
@@ -8380,9 +7420,7 @@ int CPU::SET_4_L()
 	reg_HL.lo |= (1 << 4);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 4, L\n");
-#endif
+	debugPrint("SET 4, L\n");
 	return 4;
 }
 
@@ -8394,9 +7432,7 @@ int CPU::SET_4_HLp()
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 4));
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 4, (HL)\n");
-#endif
+	debugPrint("SET 4, (HL)\n");
 	return 4;
 }
 
@@ -8408,9 +7444,7 @@ int CPU::SET_4_A()
 	reg_AF.hi |= (1 << 4);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 4, A\n");
-#endif
+	debugPrint("SET 4, A\n");
 	return 4;
 }
 
@@ -8422,9 +7456,7 @@ int CPU::SET_5_B()
 	reg_BC.hi |= (1 << 5);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 5, B\n");
-#endif
+	debugPrint("SET 5, B\n");
 	return 4;
 }
 
@@ -8436,9 +7468,7 @@ int CPU::SET_5_C()
 	reg_BC.lo |= (1 << 5);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 5, C\n");
-#endif
+	debugPrint("SET 5, C\n");
 	return 4;
 }
 
@@ -8450,9 +7480,7 @@ int CPU::SET_5_D()
 	reg_DE.hi |= (1 << 5);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 5, D\n");
-#endif
+	debugPrint("SET 5, D\n");
 	return 4;
 }
 
@@ -8464,9 +7492,7 @@ int CPU::SET_5_E()
 	reg_DE.lo |= (1 << 5);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 5, E\n");
-#endif
+	debugPrint("SET 5, E\n");
 	return 4;
 }
 
@@ -8478,9 +7504,7 @@ int CPU::SET_5_H()
 	reg_HL.hi |= (1 << 5);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 5, H\n");
-#endif
+	debugPrint("SET 5, H\n");
 	return 4;
 }
 
@@ -8492,9 +7516,7 @@ int CPU::SET_5_L()
 	reg_HL.lo |= (1 << 5);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 5, L\n");
-#endif
+	debugPrint("SET 5, L\n");
 	return 4;
 }
 
@@ -8506,9 +7528,7 @@ int CPU::SET_5_HLp()
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 5));
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 5, (HL)\n");
-#endif
+	debugPrint("SET 5, (HL)\n");
 	return 4;
 }
 
@@ -8520,9 +7540,7 @@ int CPU::SET_5_A()
 	reg_AF.hi |= (1 << 5);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 5, A\n");
-#endif
+	debugPrint("SET 5, A\n");
 	return 4;
 }
 
@@ -8534,9 +7552,7 @@ int CPU::SET_6_B()
 	reg_BC.hi |= (1 << 6);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 6, B\n");
-#endif
+	debugPrint("SET 6, B\n");
 	return 4;
 }
 
@@ -8548,9 +7564,7 @@ int CPU::SET_6_C()
 	reg_BC.lo |= (1 << 6);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 6, C\n");
-#endif
+	debugPrint("SET 6, C\n");
 	return 4;
 }
 
@@ -8562,9 +7576,7 @@ int CPU::SET_6_D()
 	reg_DE.hi |= (1 << 6);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 6, D\n");
-#endif
+	debugPrint("SET 6, D\n");
 	return 4;
 }
 
@@ -8576,9 +7588,7 @@ int CPU::SET_6_E()
 	reg_DE.lo |= (1 << 6);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 6, E\n");
-#endif
+	debugPrint("SET 6, E\n");
 	return 4;
 }
 
@@ -8590,9 +7600,7 @@ int CPU::SET_6_H()
 	reg_HL.hi |= (1 << 6);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 6, H\n");
-#endif
+	debugPrint("SET 6, H\n");
 	return 4;
 }
 
@@ -8604,9 +7612,7 @@ int CPU::SET_6_L()
 	reg_HL.lo |= (1 << 6);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 6, L\n");
-#endif
+	debugPrint("SET 6, L\n");
 	return 4;
 }
 
@@ -8618,9 +7624,7 @@ int CPU::SET_6_HLp()
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 6));
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 6, (HL)\n");
-#endif
+	debugPrint("SET 6, (HL)\n");
 	return 4;
 }
 
@@ -8632,9 +7636,7 @@ int CPU::SET_6_A()
 	reg_AF.hi |= (1 << 6);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 6, A\n");
-#endif
+	debugPrint("SET 6, A\n");
 	return 4;
 }
 
@@ -8646,9 +7648,7 @@ int CPU::SET_7_B()
 	reg_BC.hi |= (1 << 7);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 7, B\n");
-#endif
+	debugPrint("SET 7, B\n");
 	return 4;
 }
 
@@ -8660,9 +7660,7 @@ int CPU::SET_7_C()
 	reg_BC.lo |= (1 << 7);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 7, C\n");
-#endif
+	debugPrint("SET 7, C\n");
 	return 4;
 }
 
@@ -8674,9 +7672,7 @@ int CPU::SET_7_D()
 	reg_DE.hi |= (1 << 7);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 7, D\n");
-#endif
+	debugPrint("SET 7, D\n");
 	return 4;
 }
 
@@ -8688,9 +7684,7 @@ int CPU::SET_7_E()
 	reg_DE.lo |= (1 << 7);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 7, E\n");
-#endif
+	debugPrint("SET 7, E\n");
 	return 4;
 }
 
@@ -8702,9 +7696,7 @@ int CPU::SET_7_H()
 	reg_HL.hi |= (1 << 7);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 7, H\n");
-#endif
+	debugPrint("SET 7, H\n");
 	return 4;
 }
 
@@ -8716,9 +7708,7 @@ int CPU::SET_7_L()
 	reg_HL.lo |= (1 << 7);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 7, L\n");
-#endif
+	debugPrint("SET 7, L\n");
 	return 4;
 }
 
@@ -8730,9 +7720,7 @@ int CPU::SET_7_HLp()
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 7));
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 7, (HL)\n");
-#endif
+	debugPrint("SET 7, (HL)\n");
 	return 4;
 }
 
@@ -8744,9 +7732,7 @@ int CPU::SET_7_A()
 	reg_AF.hi |= (1 << 7);
 
 	reg_PC.dat += 1;
-#ifdef DEBUG
-	printf("SET 7, A\n");
-#endif
+	debugPrint("SET 7, A\n");
 	return 4;
 }
 
