@@ -1122,4 +1122,5 @@ public:
 
 	int executeNextInstruction();
 	int executePrefixedInstruction();
+	int performInterrupt();
 };

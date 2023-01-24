@@ -560,7 +560,7 @@ void GBE::update()
 		}
 		// updateTimers()
 		// updateGraphics()
-		// Do Interrupts()
+		s_Cycles += gbe_cpu->performInterrupt();
 	}
 	// renderGraphics()
 }
