@@ -3317,9 +3317,9 @@ int CPU::JP_Z_u16()
 int CPU::PREFIX_CB()
 {
 	reg_PC.dat += 1;
-	executePrefixedInstruction();
+	int temp = executePrefixedInstruction();
 	debugPrint("PREFIX CB\n");
-	return 4;
+	return temp + 4;
 }
 
 // CALL Z, u16
