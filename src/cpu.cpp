@@ -2128,7 +2128,7 @@ int CPU::ADD_A_HLp()
 	UNSET_SUBTRACT_FLAG;
 
 	// Set zero flag if result is zero
-	(reg_AF.hi + (*mMap)[reg_HL.dat]) & 0xff ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+	(reg_AF.hi + (*mMap)[reg_HL.dat]) & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	// Set half carry flag if carry from bit 3
 	((reg_AF.hi & 0x0F) + ((*mMap)[reg_HL.dat] & 0x0F)) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
