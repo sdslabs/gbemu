@@ -3725,11 +3725,11 @@ int CPU::JP_Z_u16()
 int CPU::PREFIX_CB()
 {
 	reg_PC.dat += 1;
-	executePrefixedInstruction();
+	int temp = executePrefixedInstruction();
 #ifdef DEBUG
 	printf("PREFIX CB\n");
 #endif
-	return 4;
+	return temp + 4;
 }
 
 // CALL Z, u16
