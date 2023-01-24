@@ -58,6 +58,10 @@ private:
 	// 1 Byte 0xFFFF
 	Byte* interruptEnableRegister;
 
+	// The Joypad Input
+	// stays in the I/O Ports at 0xFF00
+	Byte* reg_JOYP
+
 	// The divider register
 	// stays in the I/O Ports at 0xFF04
 	Byte* reg_DIV;

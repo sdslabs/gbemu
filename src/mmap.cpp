@@ -47,6 +47,9 @@ MemoryMap::MemoryMap()
 	// 1 byte Interrupt Enable Register
 	interruptEnableRegister = new Byte;
 
+	// Joypad Input at 0xFF00
+	reg_JOYP = ioPorts + 0x00;
+
 	// DIV at 0xFF04
 	reg_DIV = ioPorts + 0x04;
 
