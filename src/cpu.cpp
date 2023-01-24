@@ -7745,3 +7745,29 @@ void CPU::dumpState()
 {
 	fprintf(outfile, "A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X\n", reg_AF.hi, reg_AF.lo, reg_BC.hi, reg_BC.lo, reg_DE.hi, reg_DE.lo, reg_HL.hi, reg_HL.lo, reg_SP.dat, reg_PC.dat, (*mMap)[reg_PC.dat], (*mMap)[reg_PC.dat + 1], (*mMap)[reg_PC.dat + 2], (*mMap)[reg_PC.dat + 3]);
 }
+
+int performInterrupt()
+{
+	if ( IMEReg == false ) return 0;
+
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat) >> 8);
+	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat) & 0xFF);
+	
+	int temp = 4;
+
+	Word interrupts [5] = { 0x0040 , 0x0048 , 0x0050 , 0x0058 , 0x0060 };
+	
+	for ( int i = 0 ; i < 5 ; i++ )
+	{
+		if ( ( ( (*mMap)[0xFF0F] >> i ) & 1 ) && ( ( (*mMap)[0xFFFF] >> i ) & 1 ) )
+		{
+			IMEReg = 0;
+			mMap->writeMemory(0xFFFF, (*mMap)[0xFFFF] ^ (1 << i));
+			temp += 1;
+			reg_PC.dat = interrupts[i];
+			temp += executeNextInstruction();
+		}
+	}
+
+	return temp;
+}
