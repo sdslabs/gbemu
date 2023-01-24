@@ -7762,12 +7762,12 @@ int performInterrupt()
 	
 	for ( int i = 0 ; i < 5 ; i++ )
 	{
-		if ( ( ( (*mMap)[0xFF0F] >> i ) & 1 ) && ( ( (*mMap)[0xFFFF] >> i ) & 1 ) )
+		if ( ( ( (*mMap)[0xFF0F] >> i ) & 1 ) && ( ( (*mMap)[0xFFFF] >> i ) & 1 ) && ( IMEReg == true ) )
 		{
-			IMEReg = 0;
+			IMEReg = false;
 			mMap->writeMemory(0xFFFF, (*mMap)[0xFFFF] ^ (1 << i));
-			temp += 1;
 			reg_PC.dat = interrupts[i];
+			temp += 1;
 			temp += executeNextInstruction();
 		}
 	}
