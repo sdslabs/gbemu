@@ -3,15 +3,15 @@
 ```
 git submodule update --init --recursive
 mkdir build && cd build
-cmake ..
-cmake --build . -j8 --config Release
+cmake -DDEBUG=off ..
+cmake --build . -j8 
 ```
 
 ## Debug
 ``` 
 git submodule update --init --recursive
 mkdir build && cd build
-cmake ..
+cmake -DDEBUG=on ..
 cmake --build . -j8
 ```
 
