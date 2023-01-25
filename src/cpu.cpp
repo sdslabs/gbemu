@@ -1,7 +1,9 @@
 #include "types.h"
 #include "cpu.h"
 #include <stdio.h>
+#ifndef DEBUG
 #define debugPrint(...)
+#endif
 #ifdef DEBUG
 #define debugPrint(...) printf(__VA_ARGS__)
 #endif
@@ -3490,7 +3492,7 @@ int CPU::SUB_u8()
 	reg_AF.hi -= (*mMap)[reg_PC.dat + 1];
 
 	reg_PC.dat += 2;
-	debugPrint("SUB %02X\n");
+	debugPrint("SUB %02X\n", (*mMap)[reg_PC.dat - 1]);
 	return 8;
 }
 
