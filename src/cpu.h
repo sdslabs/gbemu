@@ -66,6 +66,15 @@ private:
 		FLAG_ZERO_z = 0x80
 	};
 
+	// Interrupts
+	// 0x0040 - V-Blank
+	// 0x0048 - LCD STAT
+	// 0x0050 - Timer
+	// 0x0058 - Serial
+	// 0x0060 - Joypad
+	// PC must jump to these addresses to service the interrupt
+	Word interrupts[5] = { 0x0040, 0x0048, 0x0050, 0x0058, 0x0060 };
+
 	// Memory Map
 	MemoryMap* mMap;
 
@@ -1118,9 +1127,18 @@ public:
 	// get the Program Counter
 	Word get_reg_PC() { return reg_PC.dat; }
 
+	// get the HL register
 	Word get_reg_HL() { return reg_HL.dat; }
 
+	// execute the next instruction
 	int executeNextInstruction();
+
+	// execute the next prefixed instruction
 	int executePrefixedInstruction();
+
+	// service interrupts
 	int performInterrupt();
+
+	// update the timers
+	void updateTimers(int cycles);
 };
