@@ -7753,7 +7753,7 @@ int CPU::performInterrupt()
 	// look at CPU::EI() for more info
 	if (IMEFlag == 1)
 		IMEReg = true;
-	
+
 	// If EI just executed
 	// increment the flag
 	if (!IMEFlag)
@@ -7761,35 +7761,28 @@ int CPU::performInterrupt()
 
 	// If IME is disabled
 	// don't perform interrupt
-	if ( IMEReg == false ) return 0;
+	if (IMEReg == false)
+		return 0;
 
-	// Interrupts
-	// 0x0040 - V-Blank
-	// 0x0048 - LCD STAT
-	// 0x0050 - Timer
-	// 0x0058 - Serial
-	// 0x0060 - Joypad
-	// PC must jump to these addresses to service the interrupt
-	Word interrupts [5] = { 0x0040 , 0x0048 , 0x0050 , 0x0058 , 0x0060 };
-	
 	// Loop through all interrupts
 	// In the priority order listed above
-	for ( int i = 0 ; i < 5 ; i++ )
+	for (int i = 0; i < 5; i++)
 	{
 		// Check if interrupt is enabled (IE at 0xFFFF), requested (IF at 0xFF0F) and IME is enabled
-		if ( ( ( (*mMap)[0xFF0F] >> i ) & 1 ) && ( ( (*mMap)[0xFFFF] >> i ) & 1 ) && ( IMEReg == true ) )
+		if ((((*mMap)[0xFF0F] >> i) & 1) && (((*mMap)[0xFFFF] >> i) & 1))
 		{
 			// Disable IME
 			IMEReg = false;
 
 			// Clear the interrupt flag as we are servicing it
-			mMap->writeMemory(0xFFFF, (*mMap)[0xFFFF] ^ (1 << i));
+			mMap->writeMemory(0xFF0F, (*mMap)[0xFF0F] ^ (1 << i));
 
 			// Push PC onto stack
 			mMap->writeMemory(--reg_SP.dat, (reg_PC.dat) >> 8);
 			mMap->writeMemory(--reg_SP.dat, (reg_PC.dat) & 0xFF);
 
 			// Jump to interrupt address
+			// given in the interrupts array in cpu.h
 			reg_PC.dat = interrupts[i];
 
 			// Return 20 cycles
@@ -7800,4 +7793,9 @@ int CPU::performInterrupt()
 	// No interrupt to service
 	// Return 0 cycles
 	return 0;
+}
+
+void CPU::updateTimers(int cycles)
+{
+	// Update the reg_DIV register
 }
