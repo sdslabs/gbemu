@@ -8755,28 +8755,58 @@ void CPU::dumpState()
 	fprintf(outfile, "A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X\n", reg_AF.hi, reg_AF.lo, reg_BC.hi, reg_BC.lo, reg_DE.hi, reg_DE.lo, reg_HL.hi, reg_HL.lo, reg_SP.dat, reg_PC.dat, (*mMap)[reg_PC.dat], (*mMap)[reg_PC.dat + 1], (*mMap)[reg_PC.dat + 2], (*mMap)[reg_PC.dat + 3]);
 }
 
-int performInterrupt()
+int CPU::performInterrupt()
 {
+	// check if interrupts must be enabled
+	// after execution of opcode after EI
+	// look at CPU::EI() for more info
+	if (IMEFlag == 1)
+		IMEReg = true;
+	
+	// If EI just executed
+	// increment the flag
+	if (IMEFlag == 0)
+		IMEFlag = 1;
+
+	// If IME is disabled
+	// don't perform interrupt
 	if ( IMEReg == false ) return 0;
 
-	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat) >> 8);
-	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat) & 0xFF);
-	
-	int temp = 4;
-
+	// Interrupts
+	// 0x0040 - V-Blank
+	// 0x0048 - LCD STAT
+	// 0x0050 - Timer
+	// 0x0058 - Serial
+	// 0x0060 - Joypad
+	// PC must jump to these addresses to service the interrupt
 	Word interrupts [5] = { 0x0040 , 0x0048 , 0x0050 , 0x0058 , 0x0060 };
 	
+	// Loop through all interrupts
+	// In the priority order listed above
 	for ( int i = 0 ; i < 5 ; i++ )
 	{
+		// Check if interrupt is enabled (IE at 0xFFFF), requested (IF at 0xFF0F) and IME is enabled
 		if ( ( ( (*mMap)[0xFF0F] >> i ) & 1 ) && ( ( (*mMap)[0xFFFF] >> i ) & 1 ) && ( IMEReg == true ) )
 		{
+			// Disable IME
 			IMEReg = false;
+
+			// Clear the interrupt flag as we are servicing it
 			mMap->writeMemory(0xFFFF, (*mMap)[0xFFFF] ^ (1 << i));
+
+			// Push PC onto stack
+			mMap->writeMemory(--reg_SP.dat, (reg_PC.dat) >> 8);
+			mMap->writeMemory(--reg_SP.dat, (reg_PC.dat) & 0xFF);
+
+			// Jump to interrupt address
 			reg_PC.dat = interrupts[i];
-			temp += 1;
-			temp += executeNextInstruction();
+
+			// Return 20 cycles
+			return 20;
 		}
 	}
 
-	return temp;
+	// No interrupt to service
+	// Return 0 cycles
+	return 0;
 }
