@@ -7756,7 +7756,7 @@ int CPU::performInterrupt()
 	
 	// If EI just executed
 	// increment the flag
-	if (IMEFlag == 0)
+	if (!IMEFlag)
 		IMEFlag = 1;
 
 	// If IME is disabled
