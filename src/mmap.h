@@ -92,9 +92,6 @@ public:
 	// Constructor
 	MemoryMap();
 
-	// Destructor
-	~MemoryMap();
-
 	// Returns the ROM Bank 0
 	Byte* getRomBank0() const { return romBank0; }
 

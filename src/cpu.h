@@ -102,7 +102,7 @@ private:
 	} timer_counter;
 
 	// Memory Map
-	MemoryMap* mMap;
+	Ref<MemoryMap> mMap;
 
 	// ISA
 	// Pulled from https://izik1.github.io/gbops/index.html
@@ -1142,7 +1142,7 @@ public:
 	CPU();
 
 	// set the memory map
-	void setMemory(MemoryMap* memory) { mMap = memory; }
+	void setMemory(MemoryMap& memory) { mMap = MakeRef<MemoryMap>(memory); }
 
 	// set the Accumulator
 	void set_reg_A(Byte value) { reg_AF.hi = value; }
