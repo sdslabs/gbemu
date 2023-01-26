@@ -108,8 +108,13 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 	}
 	else if (address < 0xFF80)
 	{
-		// Write to I/O Ports
-		ioPorts[address - 0xFF00] = value;
+		// Check for reg_DIV write quirk
+		// Writes to DIV reset the DIV to 0
+		// else write to I/O ports
+		if (address == 0xFF04)
+			*reg_DIV = 0x00;
+		else
+			ioPorts[address - 0xFF00] = value;
 	}
 	else if (address < 0xFFFF)
 	{
