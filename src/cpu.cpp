@@ -55,6 +55,9 @@ CPU::CPU()
 	// Set isLowPower to false
 	isLowPower = false;
 
+	// Set isHalted to false
+	isHalted = false;
+
 	// The debug logging file
 	outfile = fopen("logfile.txt", "w");
 
@@ -1613,11 +1616,18 @@ int CPU::LD_HLp_L()
 }
 
 // HALT
-// Halts the CPU until an interrupt occurs
-// TODO
+// Halts the CPU until an interrupt occurs (Low Power Mode)
+// If interrupts are disabled, don't go in Low power and skip next byte
+// TODO: Implement HALT Bug
 int CPU::HALT()
 {
-	return 0;
+	// If interrupts are enabled, go in HALT mode
+	// Which is low power mode, but I made another bool
+	// to differentiate from STOP behaviour
+	// If interrupts are disabled, skip the next byte
+	isHalted = true;
+
+	return 4;
 }
 
 // LD (HL), A
@@ -7753,6 +7763,8 @@ void CPU::dumpState()
 	fprintf(outfile, "A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X\n", reg_AF.hi, reg_AF.lo, reg_BC.hi, reg_BC.lo, reg_DE.hi, reg_DE.lo, reg_HL.hi, reg_HL.lo, reg_SP.dat, reg_PC.dat, (*mMap)[reg_PC.dat], (*mMap)[reg_PC.dat + 1], (*mMap)[reg_PC.dat + 2], (*mMap)[reg_PC.dat + 3]);
 }
 
+// Checks for interrupts and services them if needed
+// Behaviour source: https://gbdev.io/pandocs/Interrupts.html
 int CPU::performInterrupt()
 {
 	// check if interrupts must be enabled
@@ -7769,24 +7781,42 @@ int CPU::performInterrupt()
 	// If IME is disabled
 	// don't perform interrupt
 	if (IMEReg == false)
+	{
+		if (isHalted && (mMap->getRegIE() & mMap->getRegIF()))
+		{
+			isHalted = false;
+			reg_PC.dat += 2;
+		}
 		return 0;
+	}
 
 	// Loop through all interrupts
 	// In the priority order listed above
 	for (int i = 0; i < 5; i++)
 	{
 		// Check if interrupt is enabled (IE at 0xFFFF), requested (IF at 0xFF0F) and IME is enabled
-		if ((((*mMap)[0xFF0F] >> i) & 1) && (((*mMap)[0xFFFF] >> i) & 1))
+		if (((mMap->getRegIF() >> i) & 1) && ((mMap->getRegIE() >> i) & 1))
 		{
 			// Disable IME
 			IMEReg = false;
 
 			// Clear the interrupt flag as we are servicing it
-			mMap->writeMemory(0xFF0F, (*mMap)[0xFF0F] ^ (1 << i));
+			mMap->writeMemory(0xFF0F, mMap->getRegIF() ^ (1 << i));
 
-			// Push PC onto stack
-			mMap->writeMemory(--reg_SP.dat, (reg_PC.dat) >> 8);
-			mMap->writeMemory(--reg_SP.dat, (reg_PC.dat) & 0xFF);
+			// Push PC onto stack if not halted
+			// if halted, push PC + 1
+			// and resume CPU execution
+			if (!isHalted)
+			{
+				mMap->writeMemory(--reg_SP.dat, (reg_PC.dat) >> 8);
+				mMap->writeMemory(--reg_SP.dat, (reg_PC.dat) & 0xFF);
+			}
+			else
+			{
+				mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
+				mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
+				isHalted = false;
+			}
 
 			// Jump to interrupt address
 			// given in the interrupts array in cpu.h
@@ -7802,6 +7832,9 @@ int CPU::performInterrupt()
 	return 0;
 }
 
+// Updates the DIV and TIMA timers
+// Calls for interrupts if necessary
+// Behaviour source: https://gbdev.io/pandocs/Timer_and_Divider_Registers.html
 void CPU::updateTimers(int cycles)
 {
 	// Update the reg_DIV register
@@ -7812,5 +7845,29 @@ void CPU::updateTimers(int cycles)
 	{
 		timer_counter.div -= 0xFF;
 		mMap->updateDividerRegister();
+	}
+
+	// check if timer is enabled
+	if (mMap->getRegTAC() & 0x04)
+	{
+		// get the frequency from reg_TAC
+		int freq = timer_counter.time_modes[mMap->getRegTAC() & 0x03];
+
+		// check if TIMA has been overwritten by code
+		if ((timer_counter.tima / freq) != mMap->getRegTIMA())
+			timer_counter.tima = (mMap->getRegTIMA()) * freq;
+
+		// increment the counter
+		timer_counter.tima += cycles;
+
+		// reset reg_TIMA by value of reg_TMA if overflow and call interrupt
+		if (timer_counter.tima > (0xFF * freq))
+		{
+			timer_counter.tima = (mMap->getRegTMA() * freq);
+			mMap->setRegIF(TIMER);
+		}
+
+		// Write reg_TIMA value by calculting from our counter
+		mMap->setRegTIMA(timer_counter.tima / freq);
 	}
 }

@@ -137,4 +137,25 @@ public:
 
 	// increments the divider register
 	void updateDividerRegister() { (*reg_DIV)++; }
+
+	// gets the reg_TAC
+	Byte getRegTAC() { return *reg_TAC; }
+
+	// gets the reg_TMA
+	Byte getRegTMA() { return *reg_TMA; }
+
+	// gets the reg_TIMA
+	Byte getRegTIMA() { return *reg_TIMA; }
+
+	// gets the reg_IF
+	Byte getRegIF() { return *reg_IF; }
+
+	// gets the reg_IE
+	Byte getRegIE() { return *interruptEnableRegister; }
+
+	// sets the reg_TIMA
+	void setRegTIMA(Byte value) { *reg_TIMA = value; }
+
+	// sets the reg_IF to request an interrupt
+	void setRegIF(Byte value) { *reg_IF |= value; }
 };
