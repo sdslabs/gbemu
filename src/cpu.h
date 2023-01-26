@@ -41,6 +41,10 @@ private:
 	// Low PowerMode Bool
 	bool isLowPower;
 
+	// halt bool
+	// as isLowPower is set by STOP too
+	bool isHalted;
+
 	// IME Flag to enable interrupts on next opcode
 	// The EI opcode sets the IME flag
 	// After execution of opcode after EI
@@ -75,14 +79,26 @@ private:
 	// PC must jump to these addresses to service the interrupt
 	Word interrupts[5] = { 0x0040, 0x0048, 0x0050, 0x0058, 0x0060 };
 
+	enum interrupt_name
+	{
+		V_BLANK = 0x01,
+		LCD_STAT = 0x02,
+		TIMER = 0x04,
+		SERIAL = 0x08,
+		JOYPAD = 0x10
+	};
+
 	// Timer counter structs
 	// Pulled from https://gbdev.io/pandocs/Timer_and_Divider_Registers.html
 	// div increments mMap->reg_DIV at 16384Hz
 	// tima increments mMap->reg_TIMA at the frequency specified by mMap->reg_TAC
+	// time_modes is the frequency of the timer corresponding to
+	// first two bits of mMap->reg_TAC
 	struct
 	{
 		int div;
 		int tima;
+		int time_modes[4] = { 1024, 16, 64, 256 };
 	} timer_counter;
 
 	// Memory Map
