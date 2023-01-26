@@ -125,9 +125,16 @@ public:
 	// Returns the Interrupt Enable Register
 	Byte* getInterruptEnableRegister() { return interruptEnableRegister; }
 
+	// Writes a byte to the memory address
 	bool writeMemory(Word address, Byte value);
 	void debugWriteMemory(Word address, Byte value);
+
+	// Reads a byte from the memory address
 	Byte readMemory(Word address);
 
+	// Operator overload for the readMemory function
 	Byte operator[](Word address);
+
+	// increments the divider register
+	void updateDividerRegister() { (*reg_DIV)++; }
 };

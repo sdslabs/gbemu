@@ -42,6 +42,10 @@ CPU::CPU()
 	reg_HL.dat = 0x0000;
 	reg_SP.dat = 0x0000;
 
+	// set the timer_counters
+	timer_counter.div = 0;
+	timer_counter.tima = 0;
+
 	// Set isLowPower to false
 	isLowPower = false;
 
@@ -8807,4 +8811,12 @@ int CPU::performInterrupt()
 void CPU::updateTimers(int cycles)
 {
 	// Update the reg_DIV register
+	// Every 256 cycles
+	timer_counter.div += cycles;
+
+	if (timer_counter.div >= 0xFF)
+	{
+		timer_counter.div -= 0xFF;
+		mMap->updateDividerRegister();
+	}
 }

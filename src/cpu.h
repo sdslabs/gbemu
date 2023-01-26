@@ -75,6 +75,16 @@ private:
 	// PC must jump to these addresses to service the interrupt
 	Word interrupts[5] = { 0x0040, 0x0048, 0x0050, 0x0058, 0x0060 };
 
+	// Timer counter structs
+	// Pulled from https://gbdev.io/pandocs/Timer_and_Divider_Registers.html
+	// div increments mMap->reg_DIV at 16384Hz
+	// tima increments mMap->reg_TIMA at the frequency specified by mMap->reg_TAC
+	struct
+	{
+		int div;
+		int tima;
+	} timer_counter;
+
 	// Memory Map
 	MemoryMap* mMap;
 
