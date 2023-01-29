@@ -4434,12 +4434,12 @@ int CPU::RST_38H()
 
 int CPU::executeNextInstruction()
 {
-	// Check if boot execution is complete
-	// If yes, we can do logging in debug log outfile
-	if (mMap->readMemory(0xFF50) == 0x01)
-	{
-		dumpState();
-	}
+//	// Check if boot execution is complete
+//	// If yes, we can do logging in debug log outfile
+//	if (mMap->readMemory(0xFF50) == 0x01)
+//	{
+//		dumpState();
+//	}
 
 	// Turn off logging
 	// If reached infinite loop

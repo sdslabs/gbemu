@@ -144,17 +144,24 @@ void GBE::update()
 	// GB has 59.73 frames per second
 	while (true)
 	{
-		// Execute the next instruction
-		s_Cycles += gbe_cpu->executeNextInstruction();
-		if ((*gbe_mMap)[0xFF02] == 0x81)
+//		// Execute the next instruction
+//		s_Cycles += gbe_cpu->executeNextInstruction();
+//		if ((*gbe_mMap)[0xFF02] == 0x81)
+//		{
+//			printf("%c", (*gbe_mMap)[0xFF01]);
+//			gbe_mMap->writeMemory(0xFF02, 0x00);
+//		}
+//
+//		// update the DIV and TIMA timers
+//		gbe_cpu->updateTimers(s_Cycles);
+		if (gbe_ppu->IsRunning())
 		{
-			printf("%c", (*gbe_mMap)[0xFF01]);
-			gbe_mMap->writeMemory(0xFF02, 0x00);
+			gbe_ppu->UpdateGraphics();
 		}
-
-		// update the DIV and TIMA timers
-		gbe_cpu->updateTimers(s_Cycles);
-		//		gbe_ppu->UpdateGraphics();
+		else
+		{
+			break;
+		}
 		s_Cycles = 0;
 		s_Cycles += gbe_cpu->performInterrupt();
 	}

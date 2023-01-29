@@ -1,5 +1,6 @@
 #pragma once
 #include "mmap.h"
+#include "SDL.h"
 
 class PPU
 {
@@ -19,10 +20,19 @@ private:
 
 	Ref<Byte> getTileData(Word address);
 
+	// SDL stuff
+	SDL_Window* m_Window;
+	SDL_Renderer* m_Renderer;
+	SDL_Texture* m_Texture;
+	SDL_Event m_Event;
+	bool m_IsRunning = true;
+
 public:
-	PPU() = default;
+	PPU();
 
 	inline void SetMemory(MemoryMap& memory) { mMap = MakeRef<MemoryMap>(memory); };
 
 	void UpdateGraphics();
+
+	bool IsRunning() { return m_IsRunning; };
 };
