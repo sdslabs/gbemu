@@ -1641,7 +1641,7 @@ int CPU::HALT()
 	// The interrupt is handled, but returned back to HALT
 	// so HALT gets called twice
 
-	if (!IMEReg & (mMap->getRegIE() & mMap->getRegIF()))
+	if ((!IMEReg) && (mMap->getRegIE() & mMap->getRegIF()))
 	{
 		// Check if EI executed just before HALT
 		// Pass through without a PC increment if true
@@ -7793,7 +7793,7 @@ int CPU::SET_7_A()
 
 void CPU::dumpState()
 {
-	fprintf(outfile, "A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X\n", reg_AF.hi, reg_AF.lo, reg_BC.hi, reg_BC.lo, reg_DE.hi, reg_DE.lo, reg_HL.hi, reg_HL.lo, reg_SP.dat, reg_PC.dat, (*mMap)[reg_PC.dat], (*mMap)[reg_PC.dat + 1], (*mMap)[reg_PC.dat + 2], (*mMap)[reg_PC.dat + 3]);
+	//fprintf(outfile, "A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X\n", reg_AF.hi, reg_AF.lo, reg_BC.hi, reg_BC.lo, reg_DE.hi, reg_DE.lo, reg_HL.hi, reg_HL.lo, reg_SP.dat, reg_PC.dat, (*mMap)[reg_PC.dat], (*mMap)[reg_PC.dat + 1], (*mMap)[reg_PC.dat + 2], (*mMap)[reg_PC.dat + 3]);
 }
 
 // Checks for interrupts and services them if needed
