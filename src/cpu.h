@@ -1156,6 +1156,9 @@ public:
 	// get the HL register
 	Word get_reg_HL() { return reg_HL.dat; }
 
+	// execute an arbitrary instruction
+	int executeInstruction(Byte opcode);
+
 	// execute the next instruction
 	int executeNextInstruction();
 

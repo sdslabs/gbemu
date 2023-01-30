@@ -1618,9 +1618,38 @@ int CPU::LD_HLp_L()
 // HALT
 // Halts the CPU until an interrupt occurs (Low Power Mode)
 // If interrupts are disabled, don't go in Low power and skip next byte
-// TODO: Implement HALT Bug
 int CPU::HALT()
 {
+
+	// The HALT BUG
+	// iF IME = 0 and IE & IF != 0
+	// the halt bug occurs where CPU reads the next byte twice
+	// or more aptly, PC fails to increment (above statement is refuted in case of halt after halt)
+	// Low Power Mode is NOT entered in this case
+
+	// IMPORTANT - POTENTIAL BUG SOURCE
+	// My implementation of the halt bug here is to
+	// decrement PC, executeInstruction manually and return
+	// 4 + whatever the next opcode returns
+	// This skips on updateTimers, performInterrupts and updateGraphics
+	// for one iteration, and might create problems in future
+	// The other alternative is to have an if statement in executeNextInstruction
+	// which is highly inefficient, so will go with this for now
+
+	// Another quirk of this bug is if
+	// HALT is caled just after EI
+	// The interrupt is handled, but returned back to HALT
+	// so HALT gets called twice
+
+	if (!IMEReg & (mMap->getRegIE() & mMap->getRegIF()))
+	{
+		// Check if EI executed just before HALT
+		// Pass through without a PC increment if true
+		if (IMEFlag == 1)
+			return 4;
+		return 4 + executeInstruction((*mMap)[reg_PC.dat + 1]);
+	}
+
 	// If interrupts are enabled, go in HALT mode
 	// Which is low power mode, but I made another bool
 	// to differentiate from STOP behaviour
@@ -3933,6 +3962,11 @@ int CPU::RST_38H()
 	reg_PC.dat = 0x0038;
 	debugPrint("RST 38H\n");
 	return 16;
+}
+
+int CPU::executeInstruction(Byte opcode)
+{
+	return (this->*method_pointer[opcode])();
 }
 
 int CPU::executeNextInstruction()
@@ -7777,12 +7811,12 @@ int CPU::performInterrupt()
 
 	// If IME is disabled
 	// don't perform interrupt
-	if (IMEReg == false)
+	if (!IMEReg)
 	{
 		if (isHalted && (mMap->getRegIE() & mMap->getRegIF()))
 		{
 			isHalted = false;
-			reg_PC.dat += 2;
+			reg_PC.dat += 1;
 		}
 		return 0;
 	}
