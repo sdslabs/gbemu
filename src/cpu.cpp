@@ -4134,7 +4134,7 @@ int CPU::RLC_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RLC (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RLC A
@@ -4294,7 +4294,7 @@ int CPU::RRC_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RRC (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RRC A
@@ -4468,7 +4468,7 @@ int CPU::RL_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RL (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RL A
@@ -4644,7 +4644,7 @@ int CPU::RR_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RR (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RR A
@@ -4806,7 +4806,7 @@ int CPU::SLA_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SLA (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SLA A
@@ -4966,7 +4966,7 @@ int CPU::SRA_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SRA (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SRA A
@@ -5112,7 +5112,7 @@ int CPU::SWAP_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SWAP (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SWAP A
@@ -5270,7 +5270,7 @@ int CPU::SRL_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SRL (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SRL A
@@ -5395,7 +5395,7 @@ int CPU::BIT_0_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("BIT 0, (HL)\n");
-	return 4;
+	return 8;
 }
 
 // BIT 0, A
@@ -5515,7 +5515,7 @@ int CPU::BIT_1_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("BIT 1, (HL)\n");
-	return 4;
+	return 8;
 }
 
 // BIT 1, A
@@ -5635,7 +5635,7 @@ int CPU::BIT_2_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("BIT 2, (HL)\n");
-	return 4;
+	return 8;
 }
 
 // BIT 2, A
@@ -5755,7 +5755,7 @@ int CPU::BIT_3_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("BIT 3, (HL)\n");
-	return 4;
+	return 8;
 }
 
 // BIT 3, A
@@ -5875,7 +5875,7 @@ int CPU::BIT_4_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("BIT 4, (HL)\n");
-	return 4;
+	return 8;
 }
 
 // BIT 4, A
@@ -5995,7 +5995,7 @@ int CPU::BIT_5_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("BIT 5, (HL)\n");
-	return 4;
+	return 8;
 }
 
 // BIT 5, A
@@ -6115,7 +6115,7 @@ int CPU::BIT_6_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("BIT 6, (HL)\n");
-	return 4;
+	return 8;
 }
 
 // BIT 6, A
@@ -6235,7 +6235,7 @@ int CPU::BIT_7_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("BIT 7, (HL)\n");
-	return 4;
+	return 8;
 }
 
 // BIT 7, A
@@ -6334,7 +6334,7 @@ int CPU::RES_0_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RES 0, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RES 0, A
@@ -6430,7 +6430,7 @@ int CPU::RES_1_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RES 1, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RES 1, A
@@ -6526,7 +6526,7 @@ int CPU::RES_2_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RES 2, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RES 2, A
@@ -6622,7 +6622,7 @@ int CPU::RES_3_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RES 3, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RES 3, A
@@ -6718,7 +6718,7 @@ int CPU::RES_4_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RES 4, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RES 4, A
@@ -6814,7 +6814,7 @@ int CPU::RES_5_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RES 5, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RES 5, A
@@ -6910,7 +6910,7 @@ int CPU::RES_6_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RES 6, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RES 6, A
@@ -7006,7 +7006,7 @@ int CPU::RES_7_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RES 7, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RES 7, A
@@ -7102,7 +7102,7 @@ int CPU::SET_0_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SET 0, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SET 0, A
@@ -7198,7 +7198,7 @@ int CPU::SET_1_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SET 1, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SET 1, A
@@ -7294,7 +7294,7 @@ int CPU::SET_2_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SET 2, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SET 2, A
@@ -7390,7 +7390,7 @@ int CPU::SET_3_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SET 3, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SET 3, A
@@ -7486,7 +7486,7 @@ int CPU::SET_4_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SET 4, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SET 4, A
@@ -7582,7 +7582,7 @@ int CPU::SET_5_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SET 5, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SET 5, A
@@ -7678,7 +7678,7 @@ int CPU::SET_6_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SET 6, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SET 6, A
@@ -7774,7 +7774,7 @@ int CPU::SET_7_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SET 7, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SET 7, A
@@ -7886,7 +7886,7 @@ void CPU::updateTimers(int cycles)
 
 		// check if TIMA has been overwritten by code
 		if ((timer_counter.tima / freq) != mMap->getRegTIMA())
-			timer_counter.tima = (mMap->getRegTIMA()) * freq;
+			timer_counter.tima = ((mMap->getRegTIMA()) * freq) + (timer_counter.tima % freq);
 
 		// increment the counter
 		timer_counter.tima += cycles;
