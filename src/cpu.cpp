@@ -48,8 +48,15 @@ CPU::CPU()
 	reg_HL.dat = 0x0000;
 	reg_SP.dat = 0x0000;
 
+	// set the timer_counters
+	timer_counter.div = 0;
+	timer_counter.tima = 0;
+
 	// Set isLowPower to false
 	isLowPower = false;
+
+	// Set isHalted to false
+	isHalted = false;
 
 	// The debug logging file
 	outfile = fopen("logfile.txt", "w");
@@ -1609,11 +1616,47 @@ int CPU::LD_HLp_L()
 }
 
 // HALT
-// Halts the CPU until an interrupt occurs
-// TODO
+// Halts the CPU until an interrupt occurs (Low Power Mode)
+// If interrupts are disabled, don't go in Low power and skip next byte
 int CPU::HALT()
 {
-	return 0;
+
+	// The HALT BUG
+	// iF IME = 0 and IE & IF != 0
+	// the halt bug occurs where CPU reads the next byte twice
+	// or more aptly, PC fails to increment (above statement is refuted in case of halt after halt)
+	// Low Power Mode is NOT entered in this case
+
+	// IMPORTANT - POTENTIAL BUG SOURCE
+	// My implementation of the halt bug here is to
+	// decrement PC, executeInstruction manually and return
+	// 4 + whatever the next opcode returns
+	// This skips on updateTimers, performInterrupts and updateGraphics
+	// for one iteration, and might create problems in future
+	// The other alternative is to have an if statement in executeNextInstruction
+	// which is highly inefficient, so will go with this for now
+
+	// Another quirk of this bug is if
+	// HALT is caled just after EI
+	// The interrupt is handled, but returned back to HALT
+	// so HALT gets called twice
+
+	if ((!IMEReg) && (mMap->getRegIE() & mMap->getRegIF()))
+	{
+		// Check if EI executed just before HALT
+		// Pass through without a PC increment if true
+		if (IMEFlag == 1)
+			return 4;
+		return 4 + executeInstruction((*mMap)[reg_PC.dat + 1]);
+	}
+
+	// If interrupts are enabled, go in HALT mode
+	// Which is low power mode, but I made another bool
+	// to differentiate from STOP behaviour
+	// If interrupts are disabled, skip the next byte
+	isHalted = true;
+
+	return 4;
 }
 
 // LD (HL), A
@@ -1868,7 +1911,7 @@ int CPU::ADD_A_HLp()
 	UNSET_SUBTRACT_FLAG;
 
 	// Set zero flag if result is zero
-	(reg_AF.hi + (*mMap)[reg_HL.dat]) & 0xff ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+	(reg_AF.hi + (*mMap)[reg_HL.dat]) & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	// Set half carry flag if carry from bit 3
 	((reg_AF.hi & 0x0F) + ((*mMap)[reg_HL.dat] & 0x0F)) & 0x10 ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
@@ -3317,9 +3360,9 @@ int CPU::JP_Z_u16()
 int CPU::PREFIX_CB()
 {
 	reg_PC.dat += 1;
-	executePrefixedInstruction();
+	int temp = executePrefixedInstruction();
 	debugPrint("PREFIX CB\n");
-	return 4;
+	return temp + 4;
 }
 
 // CALL Z, u16
@@ -3921,6 +3964,11 @@ int CPU::RST_38H()
 	return 16;
 }
 
+int CPU::executeInstruction(Byte opcode)
+{
+	return (this->*method_pointer[opcode])();
+}
+
 int CPU::executeNextInstruction()
 {
 	// Check if boot execution is complete
@@ -4086,7 +4134,7 @@ int CPU::RLC_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RLC (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RLC A
@@ -4246,7 +4294,7 @@ int CPU::RRC_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RRC (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RRC A
@@ -4420,7 +4468,7 @@ int CPU::RL_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RL (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RL A
@@ -4596,7 +4644,7 @@ int CPU::RR_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RR (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RR A
@@ -4758,7 +4806,7 @@ int CPU::SLA_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SLA (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SLA A
@@ -4918,7 +4966,7 @@ int CPU::SRA_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SRA (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SRA A
@@ -5064,7 +5112,7 @@ int CPU::SWAP_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SWAP (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SWAP A
@@ -5222,7 +5270,7 @@ int CPU::SRL_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SRL (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SRL A
@@ -5347,7 +5395,7 @@ int CPU::BIT_0_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("BIT 0, (HL)\n");
-	return 4;
+	return 8;
 }
 
 // BIT 0, A
@@ -5467,7 +5515,7 @@ int CPU::BIT_1_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("BIT 1, (HL)\n");
-	return 4;
+	return 8;
 }
 
 // BIT 1, A
@@ -5587,7 +5635,7 @@ int CPU::BIT_2_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("BIT 2, (HL)\n");
-	return 4;
+	return 8;
 }
 
 // BIT 2, A
@@ -5707,7 +5755,7 @@ int CPU::BIT_3_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("BIT 3, (HL)\n");
-	return 4;
+	return 8;
 }
 
 // BIT 3, A
@@ -5827,7 +5875,7 @@ int CPU::BIT_4_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("BIT 4, (HL)\n");
-	return 4;
+	return 8;
 }
 
 // BIT 4, A
@@ -5947,7 +5995,7 @@ int CPU::BIT_5_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("BIT 5, (HL)\n");
-	return 4;
+	return 8;
 }
 
 // BIT 5, A
@@ -6067,7 +6115,7 @@ int CPU::BIT_6_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("BIT 6, (HL)\n");
-	return 4;
+	return 8;
 }
 
 // BIT 6, A
@@ -6187,7 +6235,7 @@ int CPU::BIT_7_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("BIT 7, (HL)\n");
-	return 4;
+	return 8;
 }
 
 // BIT 7, A
@@ -6286,7 +6334,7 @@ int CPU::RES_0_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RES 0, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RES 0, A
@@ -6382,7 +6430,7 @@ int CPU::RES_1_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RES 1, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RES 1, A
@@ -6478,7 +6526,7 @@ int CPU::RES_2_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RES 2, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RES 2, A
@@ -6574,7 +6622,7 @@ int CPU::RES_3_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RES 3, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RES 3, A
@@ -6670,7 +6718,7 @@ int CPU::RES_4_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RES 4, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RES 4, A
@@ -6766,7 +6814,7 @@ int CPU::RES_5_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RES 5, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RES 5, A
@@ -6862,7 +6910,7 @@ int CPU::RES_6_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RES 6, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RES 6, A
@@ -6958,7 +7006,7 @@ int CPU::RES_7_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("RES 7, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // RES 7, A
@@ -7054,7 +7102,7 @@ int CPU::SET_0_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SET 0, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SET 0, A
@@ -7150,7 +7198,7 @@ int CPU::SET_1_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SET 1, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SET 1, A
@@ -7246,7 +7294,7 @@ int CPU::SET_2_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SET 2, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SET 2, A
@@ -7342,7 +7390,7 @@ int CPU::SET_3_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SET 3, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SET 3, A
@@ -7438,7 +7486,7 @@ int CPU::SET_4_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SET 4, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SET 4, A
@@ -7534,7 +7582,7 @@ int CPU::SET_5_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SET 5, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SET 5, A
@@ -7630,7 +7678,7 @@ int CPU::SET_6_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SET 6, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SET 6, A
@@ -7726,7 +7774,7 @@ int CPU::SET_7_HLp()
 
 	reg_PC.dat += 1;
 	debugPrint("SET 7, (HL)\n");
-	return 4;
+	return 12;
 }
 
 // SET 7, A
@@ -7743,5 +7791,114 @@ int CPU::SET_7_A()
 
 void CPU::dumpState()
 {
-	fprintf(outfile, "A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X\n", reg_AF.hi, reg_AF.lo, reg_BC.hi, reg_BC.lo, reg_DE.hi, reg_DE.lo, reg_HL.hi, reg_HL.lo, reg_SP.dat, reg_PC.dat, (*mMap)[reg_PC.dat], (*mMap)[reg_PC.dat + 1], (*mMap)[reg_PC.dat + 2], (*mMap)[reg_PC.dat + 3]);
+	//fprintf(outfile, "A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X\n", reg_AF.hi, reg_AF.lo, reg_BC.hi, reg_BC.lo, reg_DE.hi, reg_DE.lo, reg_HL.hi, reg_HL.lo, reg_SP.dat, reg_PC.dat, (*mMap)[reg_PC.dat], (*mMap)[reg_PC.dat + 1], (*mMap)[reg_PC.dat + 2], (*mMap)[reg_PC.dat + 3]);
+}
+
+// Checks for interrupts and services them if needed
+// Behaviour source: https://gbdev.io/pandocs/Interrupts.html
+int CPU::performInterrupt()
+{
+	// check if interrupts must be enabled
+	// after execution of opcode after EI
+	// look at CPU::EI() for more info
+	if (IMEFlag == 1)
+		IMEReg = true;
+
+	// If EI just executed
+	// increment the flag
+	if (!IMEFlag)
+		IMEFlag = 1;
+
+	// If IME is disabled
+	// don't perform interrupt
+	if (!IMEReg)
+	{
+		if (isHalted && (mMap->getRegIE() & mMap->getRegIF()))
+		{
+			isHalted = false;
+			reg_PC.dat += 1;
+		}
+		return 0;
+	}
+
+	// Loop through all interrupts
+	// In the priority order listed above
+	for (int i = 0; i < 5; i++)
+	{
+		// Check if interrupt is enabled (IE at 0xFFFF), requested (IF at 0xFF0F) and IME is enabled
+		if (((mMap->getRegIF() >> i) & 1) && ((mMap->getRegIE() >> i) & 1))
+		{
+			// Disable IME
+			IMEReg = false;
+
+			// Clear the interrupt flag as we are servicing it
+			mMap->writeMemory(0xFF0F, mMap->getRegIF() ^ (1 << i));
+
+			// Push PC onto stack if not halted
+			// if halted, push PC + 1
+			// and resume CPU execution
+			if (!isHalted)
+			{
+				mMap->writeMemory(--reg_SP.dat, (reg_PC.dat) >> 8);
+				mMap->writeMemory(--reg_SP.dat, (reg_PC.dat) & 0xFF);
+			}
+			else
+			{
+				mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
+				mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
+				isHalted = false;
+			}
+
+			// Jump to interrupt address
+			// given in the interrupts array in cpu.h
+			reg_PC.dat = interrupts[i];
+
+			// Return 20 cycles
+			return 20;
+		}
+	}
+
+	// No interrupt to service
+	// Return 0 cycles
+	return 0;
+}
+
+// Updates the DIV and TIMA timers
+// Calls for interrupts if necessary
+// Behaviour source: https://gbdev.io/pandocs/Timer_and_Divider_Registers.html
+void CPU::updateTimers(int cycles)
+{
+	// Update the reg_DIV register
+	// Every 256 cycles
+	timer_counter.div += cycles;
+
+	if (timer_counter.div >= 0xFF)
+	{
+		timer_counter.div -= 0xFF;
+		mMap->updateDividerRegister();
+	}
+
+	// check if timer is enabled
+	if (mMap->getRegTAC() & 0x04)
+	{
+		// get the frequency from reg_TAC
+		int freq = timer_counter.time_modes[mMap->getRegTAC() & 0x03];
+
+		// check if TIMA has been overwritten by code
+		if ((timer_counter.tima / freq) != mMap->getRegTIMA())
+			timer_counter.tima = ((mMap->getRegTIMA()) * freq) + (timer_counter.tima % freq);
+
+		// increment the counter
+		timer_counter.tima += cycles;
+
+		// reset reg_TIMA by value of reg_TMA if overflow and call interrupt
+		if (timer_counter.tima > (0xFF * freq))
+		{
+			timer_counter.tima = (mMap->getRegTMA() * freq);
+			mMap->setRegIF(TIMER);
+		}
+
+		// Write reg_TIMA value by calculting from our counter
+		mMap->setRegTIMA(timer_counter.tima / freq);
+	}
 }

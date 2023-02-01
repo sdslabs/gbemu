@@ -47,6 +47,9 @@ MemoryMap::MemoryMap()
 	// 1 byte Interrupt Enable Register
 	interruptEnableRegister = new Byte;
 
+	// Joypad Input at 0xFF00
+	reg_JOYP = ioPorts + 0x00;
+
 	// DIV at 0xFF04
 	reg_DIV = ioPorts + 0x04;
 
@@ -58,6 +61,9 @@ MemoryMap::MemoryMap()
 
 	// TAC at 0xFF07
 	reg_TAC = ioPorts + 0x07;
+
+	// IF at 0xFF0F
+	reg_IF = ioPorts + 0x0F;
 }
 
 // Write to memory
@@ -102,8 +108,13 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 	}
 	else if (address < 0xFF80)
 	{
-		// Write to I/O Ports
-		ioPorts[address - 0xFF00] = value;
+		// Check for reg_DIV write quirk
+		// Writes to DIV reset the DIV to 0
+		// else write to I/O ports
+		if (address == 0xFF04)
+			*reg_DIV = 0x00;
+		else
+			ioPorts[address - 0xFF00] = value;
 	}
 	else if (address < 0xFFFF)
 	{

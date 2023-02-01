@@ -41,6 +41,10 @@ private:
 	// Low PowerMode Bool
 	bool isLowPower;
 
+	// halt bool
+	// as isLowPower is set by STOP too
+	bool isHalted;
+
 	// IME Flag to enable interrupts on next opcode
 	// The EI opcode sets the IME flag
 	// After execution of opcode after EI
@@ -65,6 +69,37 @@ private:
 		FLAG_SUBTRACT_n = 0x40,
 		FLAG_ZERO_z = 0x80
 	};
+
+	// Interrupts
+	// 0x0040 - V-Blank
+	// 0x0048 - LCD STAT
+	// 0x0050 - Timer
+	// 0x0058 - Serial
+	// 0x0060 - Joypad
+	// PC must jump to these addresses to service the interrupt
+	Word interrupts[5] = { 0x0040, 0x0048, 0x0050, 0x0058, 0x0060 };
+
+	enum interrupt_name
+	{
+		V_BLANK = 0x01,
+		LCD_STAT = 0x02,
+		TIMER = 0x04,
+		SERIAL = 0x08,
+		JOYPAD = 0x10
+	};
+
+	// Timer counter structs
+	// Pulled from https://gbdev.io/pandocs/Timer_and_Divider_Registers.html
+	// div increments mMap->reg_DIV at 16384Hz
+	// tima increments mMap->reg_TIMA at the frequency specified by mMap->reg_TAC
+	// time_modes is the frequency of the timer corresponding to
+	// first two bits of mMap->reg_TAC
+	struct
+	{
+		int div;
+		int tima;
+		int time_modes[4] = { 1024, 16, 64, 256 };
+	} timer_counter;
 
 	// Memory Map
 	MemoryMap* mMap;
@@ -1118,8 +1153,21 @@ public:
 	// get the Program Counter
 	Word get_reg_PC() { return reg_PC.dat; }
 
+	// get the HL register
 	Word get_reg_HL() { return reg_HL.dat; }
 
+	// execute an arbitrary instruction
+	int executeInstruction(Byte opcode);
+
+	// execute the next instruction
 	int executeNextInstruction();
+
+	// execute the next prefixed instruction
 	int executePrefixedInstruction();
+
+	// service interrupts
+	int performInterrupt();
+
+	// update the timers
+	void updateTimers(int cycles);
 };

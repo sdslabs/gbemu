@@ -20,7 +20,7 @@ GBE::GBE()
 		printf("boot rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/cpu_instrs/individual/11-op a,(hl).gb", "rb")) == NULL)
+	if ((gameROM = fopen("../tests/instr_timing.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Load the Boot ROM
@@ -558,9 +558,12 @@ void GBE::update()
 			printf("%c", (*gbe_mMap)[0xFF01]);
 			gbe_mMap->writeMemory(0xFF02, 0x00);
 		}
-		// updateTimers()
+
+		// update the DIV and TIMA timers
+		gbe_cpu->updateTimers(s_Cycles);
 		// updateGraphics()
-		// Do Interrupts()
+		s_Cycles = 0;
+		s_Cycles += gbe_cpu->performInterrupt();
 	}
 	// renderGraphics()
 }

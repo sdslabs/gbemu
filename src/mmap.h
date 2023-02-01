@@ -58,6 +58,10 @@ private:
 	// 1 Byte 0xFFFF
 	Byte* interruptEnableRegister;
 
+	// The Joypad Input
+	// stays in the I/O Ports at 0xFF00
+	Byte* reg_JOYP;
+
 	// The divider register
 	// stays in the I/O Ports at 0xFF04
 	Byte* reg_DIV;
@@ -78,6 +82,11 @@ private:
 	// stays in I/O Ports at 0xFF07
 	// Specifies frequency at which to update TIMA and enable timer
 	Byte* reg_TAC;
+
+	// Interrupt Flag
+	// Stays in the I/O Ports at 0xFF0F
+	// Signals which interrupt must take place
+	Byte* reg_IF;
 
 public:
 	// Constructor
@@ -116,9 +125,37 @@ public:
 	// Returns the Interrupt Enable Register
 	Byte* getInterruptEnableRegister() { return interruptEnableRegister; }
 
+	// Writes a byte to the memory address
 	bool writeMemory(Word address, Byte value);
 	void debugWriteMemory(Word address, Byte value);
+
+	// Reads a byte from the memory address
 	Byte readMemory(Word address);
 
+	// Operator overload for the readMemory function
 	Byte operator[](Word address);
+
+	// increments the divider register
+	void updateDividerRegister() { (*reg_DIV)++; }
+
+	// gets the reg_TAC
+	Byte getRegTAC() { return *reg_TAC; }
+
+	// gets the reg_TMA
+	Byte getRegTMA() { return *reg_TMA; }
+
+	// gets the reg_TIMA
+	Byte getRegTIMA() { return *reg_TIMA; }
+
+	// gets the reg_IF
+	Byte getRegIF() { return *reg_IF; }
+
+	// gets the reg_IE
+	Byte getRegIE() { return *interruptEnableRegister; }
+
+	// sets the reg_TIMA
+	void setRegTIMA(Byte value) { *reg_TIMA = value; }
+
+	// sets the reg_IF to request an interrupt
+	void setRegIF(Byte value) { *reg_IF |= value; }
 };
