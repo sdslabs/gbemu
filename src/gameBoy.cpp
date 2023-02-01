@@ -20,7 +20,7 @@ GBE::GBE()
 		printf("boot rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/cpu_instrs/individual/02-interrupts.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../tests/instr_timing.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Load the Boot ROM
