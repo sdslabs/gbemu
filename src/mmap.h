@@ -88,6 +88,22 @@ private:
 	// Signals which interrupt must take place
 	Byte* reg_IF;
 
+	// The LCD Control Register
+	// Stays in the I/O Ports at 0xFF40
+	Byte* reg_LCDC;
+
+	// The SCX Register
+	// Stays in the I/O Ports at 0xFF43
+	Byte* reg_SCX;
+
+	// The SCY Register
+	// Stays in the I/O Ports at 0xFF42
+	Byte* reg_SCY;
+
+	// The BGP Register
+	// Stays in the I/O Ports at 0xFF47
+	Byte* reg_BGP;
+
 public:
 	// Constructor
 	MemoryMap();
@@ -152,6 +168,18 @@ public:
 
 	// gets the reg_IE
 	Byte getRegIE() { return *interruptEnableRegister; }
+
+	// gets the reg_LCDC
+	Byte getRegLCDC() { return *reg_LCDC; }
+
+	// gets the reg_SCX
+	Byte getRegSCX() { return *reg_SCX; }
+
+	// gets the reg_SCY
+	Byte getRegSCY() { return *reg_SCY; }
+
+	// gets the reg_BGP
+	Byte getRegBGP() { return *reg_BGP; }
 
 	// sets the reg_TIMA
 	void setRegTIMA(Byte value) { *reg_TIMA = value; }

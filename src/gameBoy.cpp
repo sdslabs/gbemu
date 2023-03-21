@@ -12,15 +12,26 @@ GBE::GBE()
 	// Initialize the MemoryMap
 	gbe_mMap = new MemoryMap();
 
+	// Initialize the Graphics
+	gbe_graphics = new PPU();
+
 	// Unify the CPU and MemoryMap
 	gbe_cpu->setMemory(gbe_mMap);
+
+	// Unify the CPU and PPU
+	gbe_cpu->setPPU(gbe_graphics);
+
+	// Unify the PPU and MmeoryMap
+	gbe_graphics->setMemoryMap(gbe_mMap);
+
+	gbe_graphics->init();
 
 	// Open the Boot ROM
 	if ((bootROM = fopen("../src/dmg_boot.gb", "rb")) == NULL)
 		printf("boot rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/instr_timing.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../tests/cpu_instrs/cpu_instrs.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Load the Boot ROM
@@ -555,15 +566,16 @@ void GBE::update()
 		s_Cycles += gbe_cpu->executeNextInstruction();
 		if ((*gbe_mMap)[0xFF02] == 0x81)
 		{
+			gbe_graphics->load();
 			printf("%c", (*gbe_mMap)[0xFF01]);
 			gbe_mMap->writeMemory(0xFF02, 0x00);
 		}
 
 		// update the DIV and TIMA timers
 		gbe_cpu->updateTimers(s_Cycles);
-		// updateGraphics()
 		s_Cycles = 0;
 		s_Cycles += gbe_cpu->performInterrupt();
+		gbe_graphics->pollEvents();
 	}
 	// renderGraphics()
 }

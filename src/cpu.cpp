@@ -3980,7 +3980,7 @@ int CPU::executeNextInstruction()
 
 	// Turn off logging
 	// If reached infinite loop
-	if (reg_PC.dat == 0xCC62)
+	if (reg_PC.dat > 0xCC62)
 	{
 		fclose(outfile);
 	}

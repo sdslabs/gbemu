@@ -1,6 +1,7 @@
 #pragma once
 #include "types.h"
 #include "mmap.h"
+#include "graphics.h"
 
 // CPU Register
 // Pulled from https://gbdev.io/pandocs/CPU_Registers_and_Flags.html
@@ -103,6 +104,8 @@ private:
 
 	// Memory Map
 	MemoryMap* mMap;
+
+	PPU* ppu;
 
 	// ISA
 	// Pulled from https://izik1.github.io/gbops/index.html
@@ -1143,6 +1146,9 @@ public:
 
 	// set the memory map
 	void setMemory(MemoryMap* memory) { mMap = memory; }
+
+	// set the PPU
+	void setPPU(PPU* ppu_arg) { ppu = ppu_arg; }
 
 	// set the Accumulator
 	void set_reg_A(Byte value) { reg_AF.hi = value; }

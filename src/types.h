@@ -7,3 +7,4 @@ typedef unsigned char Byte;
 typedef char SByte;
 typedef unsigned short Word;
 typedef signed short SWord;
+typedef unsigned int color;

@@ -64,6 +64,18 @@ MemoryMap::MemoryMap()
 
 	// IF at 0xFF0F
 	reg_IF = ioPorts + 0x0F;
+
+	// LCDC at 0xFF40
+	reg_LCDC = ioPorts + 0x40;
+
+	// SCX at 0xFF43
+	reg_SCX = ioPorts + 0x43;
+
+	// SCY at 0xFF42
+	reg_SCY = ioPorts + 0x42;
+
+	// BGP at 0xFF47
+	reg_BGP = ioPorts + 0x47;
 }
 
 // Write to memory
@@ -72,7 +84,7 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 {
 	if (address < 0x8000)
 	{
-		printf("Writing to ROM is not allowed");
+		printf("Writing to ROM is not allowed! Write attempted at %04X", address);
 		return false;
 	}
 	else if (address < 0xA000)
