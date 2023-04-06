@@ -12,13 +12,26 @@ private:
 	SDL_Renderer* renderer;
 	SDL_Texture* texture;
 	SDL_Event* event;
-	color renderArray[256 * 256];
-	color nullArray[256 * 256];
+
+	// Source and Destination rects to enable scrolling over texture
+	SDL_Rect* source;
+	SDL_Rect* dest;
+
+	// renderArray to be converted to texture
+	color renderArray[256 * 256 * 4];
 
 	MemoryMap* mMap;
+
+	// LCDC 0th bit is the LCD enable flag
 	bool isEnabled;
-	Word bgTileMapAddr;
+
+	// LCDC 3rd bit is the BG and Window Tile Data Select flag
 	Word bgTileDataAddr;
+
+	// LCDC 4th bit is the BG Tile Map Display Select flag
+	Word bgTileMapAddr;
+
+	// BGP register is the BG Palette Data
 	Byte bgPalette;
 
 	// The GameBoy screen
@@ -36,6 +49,22 @@ private:
 	// indices 1, 2, 3 are the actual colors and will be populated later
 	color obj_colors[4] = { 0x00000000, 0x00000000, 0x00000000, 0x00000000 };
 
+	// Current line being rendered
+	int currentLine;
+
+	// PPU Mode
+	Byte ppuMode;
+
+	// PPU Mode Clocks
+	// Mode 0: 204 cycles
+	// Mode 1: 456 cycles
+	// Mode 2: 80 cycles
+	// Mode 3: 172 cycles
+	int modeClocks[4] = { 204, 456, 80, 172 };
+
+	// Current PPU Mode Clock
+	int currentClock;
+
 public:
 	PPU();
 	bool init();
@@ -43,4 +72,5 @@ public:
 	void load();
 	void close();
 	void setMemoryMap(MemoryMap* m) { mMap = m; }
+	void executePPU(int cycles);
 };

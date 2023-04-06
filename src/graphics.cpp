@@ -8,13 +8,18 @@ PPU::PPU()
 	renderer = nullptr;
 	texture = nullptr;
 	isEnabled = false;
+	mMap = nullptr;
+	bgTileDataAddr = 0x0000;
+	bgTileMapAddr = 0x0000;
+	bgPalette = 0x00;
+	currentLine = 0x00;
+	ppuMode = 0x02;
 	event = new SDL_Event();
+	source = new SDL_Rect({ 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT });
+	dest = new SDL_Rect({ 0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2 });
 
-	// Fill renderArray initially with white (lightest color in palette
-	std::fill(renderArray, renderArray + (256 * 256), bg_colors[0]);
-
-	// Copy the same array as a null array (or flush array)
-	std::copy(renderArray, renderArray + (256 * 256), nullArray);
+	// Fill renderArray initially with white (lightest color in palette)
+	std::fill(renderArray, renderArray + (256 * 256 * 4), bg_colors[0]);
 }
 
 bool PPU::init()
@@ -41,7 +46,7 @@ bool PPU::init()
 	}
 
 	// Create window and renderer
-	if (!(window = SDL_CreateWindow("GameBoy Emulator", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 256, 256, SDL_WINDOW_SHOWN)))
+	if (!(window = SDL_CreateWindow("GameBoy Emulator", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, SDL_WINDOW_SHOWN)))
 	{
 		printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
 		return false;
@@ -64,12 +69,13 @@ bool PPU::init()
 	bgPalette = mMap->getRegBGP();
 
 	// Create a placeholder texture
-	texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 160, 144);
+	// 512x512 to have 4 copies of tilemap
+	texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 256 * 2, 256 * 2);
 
 	// Render the texture
-	SDL_UpdateTexture(texture, NULL, renderArray, 160 * 4);
+	SDL_UpdateTexture(texture, NULL, renderArray, 512 * 4);
 	SDL_RenderClear(renderer);
-	SDL_RenderCopy(renderer, texture, NULL, NULL);
+	SDL_RenderCopy(renderer, texture, source, dest);
 	SDL_RenderPresent(renderer);
 	return true;
 }
@@ -78,10 +84,11 @@ bool PPU::init()
 // And process them
 bool PPU::pollEvents()
 {
-	while (SDL_PollEvent(&(*event)))
+	while (SDL_PollEvent(event))
 	{
 		if (event->type == SDL_KEYDOWN)
 		{
+			mMap->writeMemory(0xFF02, 0x81);
 			printf("Key pressed: %c\n", event->key.keysym.sym);
 			if (event->key.keysym.sym == SDLK_ESCAPE)
 				exit(0);
@@ -138,14 +145,28 @@ void PPU::load()
 				pixelCol = ((*mMap)[bgTileDataAddr + 0x800 + ((SWord)tilenum * 0x10) + (i % 8 * 2)] >> (7 - (j % 8)) & 0x1) + (((*mMap)[bgTileDataAddr + 0x800 + ((SWord)tilenum * 0x10) + (i % 8 * 2) + 1] >> (7 - (j % 8)) & 0x1) * 2);
 			}
 
-			renderArray[i * 256 + j] = bg_colors[(bgPalette >> (pixelCol * 2)) & 0x3];
+			renderArray[(i * 512) + j] = bg_colors[(bgPalette >> (pixelCol * 2)) & 0x3];
+			renderArray[(i * 512) + (256 + j)] = bg_colors[(bgPalette >> (pixelCol * 2)) & 0x3];
 		}
 	}
 
-	SDL_UpdateTexture(texture, NULL, renderArray, 256 * 4);
+	// As SDL2 does not have texture warping
+	// We need to keep 4 copies of the tilemap on the texture side by side
+	// so the scroll window can warp around
+	std::copy(renderArray, renderArray + (512 * 256), renderArray + (512 * 256));
+
+	source->y = mMap->getRegSCY();
+	source->x = mMap->getRegSCX();
+
+	SDL_UpdateTexture(texture, NULL, renderArray, 256 * 4 * 2);
 	SDL_RenderClear(renderer);
-	SDL_RenderCopy(renderer, texture, NULL, NULL);
+	SDL_RenderCopy(renderer, texture, source, dest);
 	SDL_RenderPresent(renderer);
+	printf("\n%02X, %02X\n", mMap->getRegSCX(), mMap->getRegSCY());
+}
+
+void PPU::executePPU(int cycles)
+{
 }
 
 void PPU::close()
