@@ -566,13 +566,14 @@ void GBE::update()
 		s_Cycles += gbe_cpu->executeNextInstruction();
 		if ((*gbe_mMap)[0xFF02] == 0x81)
 		{
-			gbe_graphics->load();
+			//gbe_graphics->load();
 			printf("%c", (*gbe_mMap)[0xFF01]);
 			gbe_mMap->writeMemory(0xFF02, 0x00);
 		}
 
 		// update the DIV and TIMA timers
 		gbe_cpu->updateTimers(s_Cycles);
+		gbe_graphics->executePPU(s_Cycles);
 		s_Cycles = 0;
 		s_Cycles += gbe_cpu->performInterrupt();
 		gbe_graphics->pollEvents();
@@ -587,11 +588,12 @@ void GBE::executeBootROM()
 		s_Cycles += gbe_cpu->executeNextInstruction();
 		if ((*gbe_mMap)[0xFF02] == 0x81)
 		{
-			gbe_graphics->load();
+			//gbe_graphics->load();
 			printf("%c", (*gbe_mMap)[0xFF01]);
 			gbe_mMap->writeMemory(0xFF02, 0x00);
 		}
 		gbe_cpu->updateTimers(s_Cycles);
+		gbe_graphics->executePPU(s_Cycles);
 		s_Cycles = 0;
 		s_Cycles += gbe_cpu->performInterrupt();
 	}

@@ -18,7 +18,8 @@ private:
 	SDL_Rect* dest;
 
 	// renderArray to be converted to texture
-	color renderArray[256 * 256 * 4];
+	// stores 4 copies of texture for wrapping of screen
+	color renderArray[512 * 512];
 
 	MemoryMap* mMap;
 
@@ -65,6 +66,17 @@ private:
 	// Current PPU Mode Clock
 	int currentClock;
 
+	// Scanline Rendered Flag
+	bool scanlineRendered;
+
+	enum PPU_MODES
+	{
+		HBLANK,
+		VBLANK,
+		OAM,
+		TRANSFER
+	};
+
 public:
 	PPU();
 	bool init();
@@ -73,4 +85,5 @@ public:
 	void close();
 	void setMemoryMap(MemoryMap* m) { mMap = m; }
 	void executePPU(int cycles);
+	Byte getPPUMode() { return ppuMode; }
 };

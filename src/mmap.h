@@ -104,6 +104,10 @@ private:
 	// Stays in the I/O Ports at 0xFF47
 	Byte* reg_BGP;
 
+	// The LY Register
+	// Stays in the I/O Ports at 0xFF44
+	Byte* reg_LY;
+
 public:
 	// Constructor
 	MemoryMap();
@@ -181,9 +185,15 @@ public:
 	// gets the reg_BGP
 	Byte getRegBGP() { return *reg_BGP; }
 
+	// gets the reg_LY
+	Byte getRegLY() { return *reg_LY; }
+
 	// sets the reg_TIMA
 	void setRegTIMA(Byte value) { *reg_TIMA = value; }
 
 	// sets the reg_IF to request an interrupt
 	void setRegIF(Byte value) { *reg_IF |= value; }
+
+	// sets the reg_LY
+	void setRegLY(Byte value) { *reg_LY = value; }
 };

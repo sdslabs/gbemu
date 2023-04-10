@@ -18,6 +18,10 @@ PPU::PPU()
 	source = new SDL_Rect({ 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT });
 	dest = new SDL_Rect({ 0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2 });
 
+	ppuMode = 0;
+	currentClock = modeClocks[ppuMode];
+	scanlineRendered = false;
+
 	// Fill renderArray initially with white (lightest color in palette)
 	std::fill(renderArray, renderArray + (256 * 256 * 4), bg_colors[0]);
 }
@@ -162,11 +166,78 @@ void PPU::load()
 	SDL_RenderClear(renderer);
 	SDL_RenderCopy(renderer, texture, source, dest);
 	SDL_RenderPresent(renderer);
-	printf("\n%02X, %02X\n", mMap->getRegSCX(), mMap->getRegSCY());
 }
 
 void PPU::executePPU(int cycles)
 {
+	currentClock -= cycles;
+	switch (ppuMode)
+	{
+	case HBLANK:
+	{
+		if (currentClock < 0)
+		{
+			Byte LY = mMap->getRegLY();
+			mMap->setRegLY(LY + 1);
+			if (LY == 0x8F)
+			{
+				ppuMode = 1;
+			}
+			else
+			{
+				ppuMode = 2;
+			}
+			currentClock += modeClocks[ppuMode];
+		}
+	}
+		return;
+	case VBLANK:
+	{
+		if (currentClock < 0)
+		{
+			Byte LY = mMap->getRegLY();
+			mMap->setRegLY(LY + 1);
+			if (LY == 0x99)
+			{
+				ppuMode = 2;
+				scanlineRendered = false;
+				mMap->setRegLY(0);
+			}
+			currentClock += modeClocks[ppuMode];
+		}
+	}
+		return;
+	case OAM:
+	{
+		if (currentClock < 0)
+		{
+			// TODO: Implement OAM memory restriction
+			ppuMode = 3;
+			currentClock += modeClocks[ppuMode];
+		}
+	}
+		return;
+	case TRANSFER:
+	{
+		// TODO: Implement scanline rendering
+		if (!scanlineRendered)
+		{
+			load();
+			scanlineRendered = true;
+		}
+
+		if (currentClock < 0)
+		{
+			// TODO: Implement All memory restriction
+			ppuMode = 0;
+			currentClock += modeClocks[ppuMode];
+		}
+	}
+		return;
+	default:
+		printf("Unknown PPU Mode %d\n", ppuMode);
+		return;
+	}
 }
 
 void PPU::close()

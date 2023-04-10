@@ -76,6 +76,9 @@ MemoryMap::MemoryMap()
 
 	// BGP at 0xFF47
 	reg_BGP = ioPorts + 0x47;
+
+	// LY at 0xFF44
+	reg_LY = ioPorts + 0x44;
 }
 
 // Write to memory
