@@ -103,8 +103,18 @@ bool PPU::pollEvents()
 
 void PPU::load()
 {
+	// Evaluate LCDC register
+	Byte LCDC = mMap->getRegLCDC();
+
+	isEnabled = (LCDC & 0x80);
+	// bgTileMapAddr = (LCDC & 0x04) ? 0x9C00 : 0x9800;
+	bgTileMapAddr = 0x9800;
+	// bgTileDataAddr = (LCDC & 0x08) ? 0x8000 : 0x8800;
+	bgTileDataAddr = 0x8000;
+
 	// Read background palette register
 	bgPalette = mMap->getRegBGP();
+	// bgPalette = 0xE4;
 
 	Word tilenum;
 	Byte pixelCol;
@@ -146,7 +156,7 @@ void PPU::load()
 			}
 			else
 			{
-				pixelCol = ((*mMap)[bgTileDataAddr + 0x800 + ((SWord)tilenum * 0x10) + (i % 8 * 2)] >> (7 - (j % 8)) & 0x1) + (((*mMap)[bgTileDataAddr + 0x800 + ((SWord)tilenum * 0x10) + (i % 8 * 2) + 1] >> (7 - (j % 8)) & 0x1) * 2);
+				pixelCol = ((*mMap)[bgTileDataAddr + ((SWord)tilenum * 0x10) + (i % 8 * 2)] >> (7 - (j % 8)) & 0x1) + (((*mMap)[bgTileDataAddr + ((SWord)tilenum * 0x10) + (i % 8 * 2) + 1] >> (7 - (j % 8)) & 0x1) * 2);
 			}
 
 			renderArray[(i * 512) + j] = bg_colors[(bgPalette >> (pixelCol * 2)) & 0x3];

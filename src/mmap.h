@@ -8,6 +8,8 @@
 class MemoryMap
 {
 private:
+	Byte mbcMode;
+
 	// First ROM Bank
 	// 16 KB 0x0000 - 0x3FFF
 	// Contains the first 16 KB of the ROM
