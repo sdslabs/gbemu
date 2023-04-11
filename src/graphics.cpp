@@ -191,6 +191,7 @@ void PPU::executePPU(int cycles)
 			mMap->setRegLY(LY + 1);
 			if (LY == 0x8F)
 			{
+				mMap->setRegIF(mMap->getRegIF() | 0x1);
 				ppuMode = 1;
 			}
 			else
