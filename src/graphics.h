@@ -19,11 +19,14 @@ private:
 
 	MemoryMap* mMap;
 
-	// LCDC 0th bit is the LCD enable flag
+	// LCDC 7th bit is the LCD enable flag
 	bool isEnabled;
 
-	//
+	// LCDC 0th bit is the BG and Window Display Enable flag
 	bool showBGWin;
+
+	// LCDC 5th bit is the Window Display Enable flag
+	bool showWindow;
 
 	// LCDC 3rd bit is the BG and Window Tile Data Select flag
 	Word bgTileDataAddr;

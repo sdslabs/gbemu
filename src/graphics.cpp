@@ -9,6 +9,7 @@ PPU::PPU()
 	texture = nullptr;
 	isEnabled = false;
 	showBGWin = false;
+	showWindow = false;
 	mMap = nullptr;
 	bgTileDataAddr = 0x0000;
 	bgTileMapAddr = 0x0000;
@@ -110,6 +111,7 @@ void PPU::renderScanline(Byte line)
 
 	isEnabled = (LCDC & 0x80);
 	showBGWin = (LCDC & 0x1);
+	showWindow = (LCDC & 0x20);
 
 	if (!isEnabled)
 		return;
@@ -159,11 +161,11 @@ void PPU::renderScanline(Byte line)
 
 		if (bgTileDataAddr == 0x8800)
 		{
-			bg_pixel_col = ((*mMap)[bgTileDataAddr + (bg_tilenum * 0x10) + (bg_pixel_y % 8 * 2)] >> (7 - (bg_pixel_x % 8)) & 0x1) + ((*mMap)[bgTileDataAddr + (bg_tilenum * 0x10) + (bg_pixel_y % 8 * 2) + 1] >> (7 - (bg_pixel_x % 8)) & 0x1) * 2;
+			bg_pixel_col = ((*mMap)[bgTileDataAddr + 0x800 + ((SByte)bg_tilenum * 0x10) + (bg_pixel_y % 8 * 2)] >> (7 - (bg_pixel_x % 8)) & 0x1) + ((*mMap)[bgTileDataAddr + 0x800 + ((SByte)bg_tilenum * 0x10) + (bg_pixel_y % 8 * 2) + 1] >> (7 - (bg_pixel_x % 8)) & 0x1) * 2;
 		}
 		else
 		{
-			bg_pixel_col = ((*mMap)[bgTileDataAddr + ((SWord)bg_tilenum * 0x10) + (bg_pixel_y % 8 * 2)] >> (7 - (bg_pixel_x % 8)) & 0x1) + (((*mMap)[bgTileDataAddr + ((SWord)bg_tilenum * 0x10) + (bg_pixel_y % 8 * 2) + 1] >> (7 - (bg_pixel_x % 8)) & 0x1) * 2);
+			bg_pixel_col = ((*mMap)[bgTileDataAddr + (bg_tilenum * 0x10) + (bg_pixel_y % 8 * 2)] >> (7 - (bg_pixel_x % 8)) & 0x1) + (((*mMap)[bgTileDataAddr + (bg_tilenum * 0x10) + (bg_pixel_y % 8 * 2) + 1] >> (7 - (bg_pixel_x % 8)) & 0x1) * 2);
 		}
 
 		if (showBGWin)
