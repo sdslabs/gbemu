@@ -13,10 +13,6 @@ private:
 	SDL_Texture* texture;
 	SDL_Event* event;
 
-	// Source and Destination rects to enable scrolling over texture
-	SDL_Rect* source;
-	SDL_Rect* dest;
-
 	// renderArray to be converted to texture
 	// stores 4 copies of texture for wrapping of screen
 	color renderArray[160 * 144];
@@ -26,11 +22,16 @@ private:
 	// LCDC 0th bit is the LCD enable flag
 	bool isEnabled;
 
+	//
+	bool showBGWin;
+
 	// LCDC 3rd bit is the BG and Window Tile Data Select flag
 	Word bgTileDataAddr;
 
 	// LCDC 4th bit is the BG Tile Map Display Select flag
 	Word bgTileMapAddr;
+
+	Word winTileMapAddr;
 
 	// BGP register is the BG Palette Data
 	Byte bgPalette;
@@ -68,6 +69,8 @@ private:
 
 	// Scanline Rendered Flag
 	bool scanlineRendered;
+
+	bool frameRendered;
 
 	enum PPU_MODES
 	{

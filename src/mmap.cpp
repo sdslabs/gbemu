@@ -79,6 +79,12 @@ MemoryMap::MemoryMap()
 
 	// LY at 0xFF44
 	reg_LY = ioPorts + 0x44;
+
+	// LYC at 0xFF45
+	reg_LYC = ioPorts + 0x45;
+
+	// STAT at 0xFF41
+	reg_STAT = ioPorts + 0x41;
 }
 
 // Write to memory

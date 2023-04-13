@@ -110,6 +110,14 @@ private:
 	// Stays in the I/O Ports at 0xFF44
 	Byte* reg_LY;
 
+	// The LYC Register
+	// Stays in the I/O Ports at 0xFF45
+	Byte* reg_LYC;
+
+	// The STAT Register
+	// Stays in the I/O Ports at 0xFF41
+	Byte* reg_STAT;
+
 public:
 	// Constructor
 	MemoryMap();
@@ -190,6 +198,12 @@ public:
 	// gets the reg_LY
 	Byte getRegLY() { return *reg_LY; }
 
+	// gets the reg_LYC
+	Byte getRegLYC() { return *reg_LYC; }
+
+	// gets the reg_STAT
+	Byte getRegSTAT() { return *reg_STAT; }
+
 	// sets the reg_TIMA
 	void setRegTIMA(Byte value) { *reg_TIMA = value; }
 
@@ -198,4 +212,7 @@ public:
 
 	// sets the reg_LY
 	void setRegLY(Byte value) { *reg_LY = value; }
+
+	// sets the reg_STAT
+	void setRegSTAT(Byte value) { *reg_STAT = value; }
 };
