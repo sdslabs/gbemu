@@ -118,6 +118,14 @@ private:
 	// Stays in the I/O Ports at 0xFF41
 	Byte* reg_STAT;
 
+	// The WY Register
+	// Stays in the I/O Ports at 0xFF4A
+	Byte* reg_WY;
+
+	// The WX Register
+	// Stays in the I/O Ports at 0xFF4B
+	Byte* reg_WX;
+
 public:
 	// Constructor
 	MemoryMap();
@@ -203,6 +211,12 @@ public:
 
 	// gets the reg_STAT
 	Byte getRegSTAT() { return *reg_STAT; }
+
+	// gets the reg_WY
+	Byte getRegWY() { return *reg_WY; }
+
+	// gets the reg_WX
+	Byte getRegWX() { return *reg_WX; }
 
 	// sets the reg_TIMA
 	void setRegTIMA(Byte value) { *reg_TIMA = value; }

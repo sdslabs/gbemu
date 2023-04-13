@@ -85,6 +85,12 @@ MemoryMap::MemoryMap()
 
 	// STAT at 0xFF41
 	reg_STAT = ioPorts + 0x41;
+
+	// WY at 0xFF4A
+	reg_WY = ioPorts + 0x4A;
+
+	// WX at 0xFF4B
+	reg_WX = ioPorts + 0x4B;
 }
 
 // Write to memory
