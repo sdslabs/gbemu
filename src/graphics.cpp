@@ -126,6 +126,32 @@ void PPU::renderScanline(Byte line)
 	Byte bg_pixel_x, bg_pixel_col;
 	Word bg_tilenum;
 
+	// Filling pixel array
+	// Going over each pixel on screen
+	// And filling it with the correct color
+	// If LCDC.4 is set, then the background tile map uses $8000 method and unsigned addressing
+	// If LCDC.4 is not set, then the background tile map uses $8800 method and signed addressing
+	// Each tile has 8x8 pixels, and each pixel has a color ID of 0 to 3
+	// Each tile occupies 16 bytes, where each line is represented by 2 bytes
+	// For each line, the 1st byte specifies the LSB of the color ID of each pixel, and the 2nd byte specifies the MSB.
+	// The color numbers are translated into gray shades depending on the current palette
+
+	// First we calculate the tile number of the tile that the pixel is in
+	// To do that, we divide the pixel's x and y coordinates by 8 (floor division)
+	// Then we multiply the resultant y by 32 (the number of tiles in a row) (256 pixels / 8 pixels per tile = 32 tiles)
+	// Then we add the resultant x which gives us the tile number we must check for data
+	// Here i is y and j is x
+
+	// Now, using the tile number, we can calculate the address of the tile data by multiplying the tile number by 16 and adding it to the tile data address
+	// The tile data address is either 0x8000 or 0x8800 depending on LCDC.4 for Background
+	// If the tile data address is 0x8000, then the tile number is unsigned, else signed at 0x8800
+	// Now, depending on the row of pixel, we find which 2 bytes of data to use out of the 16 in pixel data, by taking remainder from 8 and choosing the pair of bytes
+	// Then, we find the color ID of the pixel by taking the bit at the position of the pixel in the row (7 - (j % 8)) and shifting it to the LSB for both the bytes in the pair
+	// 7-(j % 8) will give us the 7th bit for j = 0, 6th bit for j = 1, and so on, and the last bit for j = 8. Exactly the bit we need from both bytes in pair
+	// Adding these LSBs will give us the pixel color we want
+
+	// Source: https://gbdev.io/pandocs/Tile_Data.html
+
 	for (Byte j = 0; j < 160; j++)
 	{
 		bg_pixel_x = scroll_x + j;
@@ -146,74 +172,6 @@ void PPU::renderScanline(Byte line)
 			renderArray[(line * 160) + j] = bg_colors[0];
 	}
 }
-
-//void PPU::load()
-//{
-//	// Evaluate LCDC register
-//	Byte LCDC = mMap->getRegLCDC();
-//
-//	isEnabled = (LCDC & 0x80);
-//	// bgTileMapAddr = (LCDC & 0x04) ? 0x9C00 : 0x9800;
-//	bgTileMapAddr = 0x9800;
-//	// bgTileDataAddr = (LCDC & 0x08) ? 0x8000 : 0x8800;
-//	bgTileDataAddr = 0x8000;
-//
-//	// Read background palette register
-//	bgPalette = mMap->getRegBGP();
-//	// bgPalette = 0xE4;
-//
-//	Word bg_tilenum;
-//	Byte pixelCol;
-//
-//	// Filling pixel array
-//	// Going over each pixel on screen
-//	// And filling it with the correct color
-//	// If LCDC.4 is set, then the background tile map uses $8000 method and unsigned addressing
-//	// If LCDC.4 is not set, then the background tile map uses $8800 method and signed addressing
-//	// Each tile has 8x8 pixels, and each pixel has a color ID of 0 to 3
-//	// Each tile occupies 16 bytes, where each line is represented by 2 bytes
-//	// For each line, the 1st byte specifies the LSB of the color ID of each pixel, and the 2nd byte specifies the MSB.
-//	// The color numbers are translated into gray shades depending on the current palette
-//
-//	// First we calculate the tile number of the tile that the pixel is in
-//	// To do that, we divide the pixel's x and y coordinates by 8 (floor division)
-//	// Then we multiply the resultant y by 32 (the number of tiles in a row) (256 pixels / 8 pixels per tile = 32 tiles)
-//	// Then we add the resultant x which gives us the tile number we must check for data
-//	// Here i is y and j is x
-//
-//	// Now, using the tile number, we can calculate the address of the tile data by multiplying the tile number by 16 and adding it to the tile data address
-//	// The tile data address is either 0x8000 or 0x8800 depending on LCDC.4 for Background
-//	// If the tile data address is 0x8000, then the tile number is unsigned, else signed at 0x8800
-//	// Now, depending on the row of pixel, we find which 2 bytes of data to use out of the 16 in pixel data, by taking remainder from 8 and choosing the pair of bytes
-//	// Then, we find the color ID of the pixel by taking the bit at the position of the pixel in the row (7 - (j % 8)) and shifting it to the LSB for both the bytes in the pair
-//	// 7-(j % 8) will give us the 7th bit for j = 0, 6th bit for j = 1, and so on, and the last bit for j = 8. Exactly the bit we need from both bytes in pair
-//	// Adding these LSBs will give us the pixel color we want
-//
-//	// Source: https://gbdev.io/pandocs/Tile_Data.html
-//
-//	for (int i = 0; i < 256; i++)
-//	{
-//		for (int j = 0; j < 256; j++)
-//		{
-//			bg_tilenum = (*mMap)[bgTileMapAddr + ((i / 8) * 32) + (j / 8)];
-//			if (bgTileDataAddr == 0x8800)
-//			{
-//				pixelCol = ((*mMap)[bgTileDataAddr + (bg_tilenum * 0x10) + (i % 8 * 2)] >> (7 - (j % 8)) & 0x1) + ((*mMap)[bgTileDataAddr + (bg_tilenum * 0x10) + (i % 8 * 2) + 1] >> (7 - (j % 8)) & 0x1) * 2;
-//			}
-//			else
-//			{
-//				pixelCol = ((*mMap)[bgTileDataAddr + ((SWord)bg_tilenum * 0x10) + (i % 8 * 2)] >> (7 - (j % 8)) & 0x1) + (((*mMap)[bgTileDataAddr + ((SWord)bg_tilenum * 0x10) + (i % 8 * 2) + 1] >> (7 - (j % 8)) & 0x1) * 2);
-//			}
-//
-//			renderArray[(i * 512) + j] = bg_colors[(bgPalette >> (pixelCol * 2)) & 0x3];
-//			renderArray[(i * 512) + (256 + j)] = bg_colors[(bgPalette >> (pixelCol * 2)) & 0x3];
-//		}
-//	}
-//
-//	// As SDL2 does not have texture warping
-//	// We need to keep 4 copies of the tilemap on the texture side by side
-//	// so the scroll window can warp around
-//}
 
 void PPU::executePPU(int cycles)
 {

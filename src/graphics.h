@@ -84,7 +84,6 @@ public:
 	PPU();
 	bool init();
 	bool pollEvents();
-	void load();
 	void renderScanline(Byte line);
 	void close();
 	void setMemoryMap(MemoryMap* m) { mMap = m; }
