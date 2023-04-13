@@ -229,4 +229,7 @@ public:
 
 	// sets the reg_STAT
 	void setRegSTAT(Byte value) { *reg_STAT = value; }
+
+	// sets the reg_WY
+	void setRegWY(Byte value) { *reg_WY = value; }
 };

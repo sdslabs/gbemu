@@ -118,15 +118,19 @@ void PPU::renderScanline(Byte line)
 
 	bgTileMapAddr = (LCDC & 0x08) ? 0x9C00 : 0x9800;
 	bgTileDataAddr = (LCDC & 0x10) ? 0x8000 : 0x8800;
+	winTileMapAddr = (LCDC & 0x40) ? 0x9C00 : 0x9800;
 
 	// Read background palette register
 	bgPalette = mMap->getRegBGP();
 	// bgPalette = 0xE4;
 
+	Byte win_y = mMap->getRegWY();
+	Byte win_x = mMap->getRegWX() - 7;
+	Byte win_pixel_y = line - win_y;
 	Byte bg_pixel_y = line + mMap->getRegSCY();
 	Byte scroll_x = mMap->getRegSCX();
-	Byte bg_pixel_x, bg_pixel_col;
-	Word bg_tilenum;
+	Byte bg_pixel_x, bg_pixel_col, win_pixel_x, win_pixel_col;
+	Byte bg_tilenum, win_tilenum;
 
 	// Filling pixel array
 	// Going over each pixel on screen
@@ -156,6 +160,7 @@ void PPU::renderScanline(Byte line)
 
 	for (Byte j = 0; j < 160; j++)
 	{
+		// Background rendering
 		bg_pixel_x = scroll_x + j;
 		bg_tilenum = (*mMap)[bgTileMapAddr + ((bg_pixel_y / 8) * 32) + (bg_pixel_x / 8)];
 
@@ -172,6 +177,26 @@ void PPU::renderScanline(Byte line)
 			renderArray[(line * 160) + j] = bg_colors[(bgPalette >> (bg_pixel_col * 2)) & 0x3];
 		else
 			renderArray[(line * 160) + j] = bg_colors[0];
+		
+
+		// Window rendering
+		if (showWindow && (win_x <= j) && (j <= (win_x + 160)) && (win_y <= line) && (line <= (win_y + 143)))
+		{
+			win_pixel_x = j - win_x;
+			win_tilenum = (*mMap)[winTileMapAddr + ((win_pixel_y / 8) * 32) + (win_pixel_x / 8)];
+
+			if (bgTileDataAddr == 0x8800)
+			{
+				win_pixel_col = ((*mMap)[bgTileDataAddr + 0x800 + ((SByte)win_tilenum * 0x10) + (win_pixel_y % 8 * 2)] >> (7 - (win_pixel_x % 8)) & 0x1) + ((*mMap)[bgTileDataAddr + 0x800 + ((SByte)win_tilenum * 0x10) + (win_pixel_y % 8 * 2) + 1] >> (7 - (win_pixel_x % 8)) & 0x1) * 2;
+			}
+			else
+			{
+				win_pixel_col = ((*mMap)[bgTileDataAddr + (win_tilenum * 0x10) + (win_pixel_y % 8 * 2)] >> (7 - (win_pixel_x % 8)) & 0x1) + (((*mMap)[bgTileDataAddr + (win_tilenum * 0x10) + (win_pixel_y % 8 * 2) + 1] >> (7 - (win_pixel_x % 8)) & 0x1) * 2);
+			}
+
+			if (win_pixel_col != 0)
+				renderArray[(line * 160) + j] = bg_colors[(bgPalette >> (win_pixel_col * 2)) & 0x3];
+		}
 	}
 }
 
@@ -186,6 +211,8 @@ void PPU::executePPU(int cycles)
 		{
 			renderScanline(mMap->getRegLY());
 			scanlineRendered = true;
+			// if ((mMap->getRegLCDC() & 0x20) && (mMap->getRegLCDC() & 0x1) && (0 <= mMap->getRegWY() < 144) && (0 <= mMap->getRegWX() < 167))
+			// 	mMap->setRegWY(mMap->getRegWY() + 1);
 		}
 
 		if (currentClock < 0)
@@ -261,6 +288,7 @@ void PPU::executePPU(int cycles)
 				ppuMode = 2;
 				scanlineRendered = false;
 				mMap->setRegLY(0);
+				// mMap->setRegWY(0);
 				if (LYC == 0)
 				{
 					mMap->setRegSTAT(STAT & 0x4);
@@ -291,13 +319,6 @@ void PPU::executePPU(int cycles)
 	break;
 	case TRANSFER:
 	{
-		// TODO: Implement scanline rendering
-		/*if (!scanlineRendered)
-		{
-			load();
-			scanlineRendered = true;
-		}*/
-
 		scanlineRendered = false;
 
 		if (currentClock < 0)

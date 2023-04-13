@@ -34,6 +34,7 @@ private:
 	// LCDC 4th bit is the BG Tile Map Display Select flag
 	Word bgTileMapAddr;
 
+	// LCDC 6th bit is the Window Tile Map Display Select flag
 	Word winTileMapAddr;
 
 	// BGP register is the BG Palette Data
