@@ -23,7 +23,7 @@ PPU::PPU()
 	scanlineRendered = false;
 
 	// Fill renderArray initially with white (lightest color in palette)
-	std::fill(renderArray, renderArray + (256 * 256 * 4), bg_colors[0]);
+	std::fill(renderArray, renderArray + (160 * 144), bg_colors[0]);
 }
 
 bool PPU::init()
@@ -74,10 +74,10 @@ bool PPU::init()
 
 	// Create a placeholder texture
 	// 512x512 to have 4 copies of tilemap
-	texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 256 * 2, 256 * 2);
+	texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 160, 144);
 
 	// Render the texture
-	SDL_UpdateTexture(texture, NULL, renderArray, 512 * 4);
+	SDL_UpdateTexture(texture, NULL, renderArray, 160 * 4);
 	SDL_RenderClear(renderer);
 	SDL_RenderCopy(renderer, texture, source, dest);
 	SDL_RenderPresent(renderer);
@@ -99,6 +99,48 @@ bool PPU::pollEvents()
 		}
 	}
 	return false;
+}
+
+void PPU::renderScanline(Byte line)
+{
+	// Evaluate LCDC register
+	Byte LCDC = mMap->getRegLCDC();
+
+	isEnabled = (LCDC & 0x80);
+
+	if (!isEnabled)
+		return;
+
+	// bgTileMapAddr = (LCDC & 0x04) ? 0x9C00 : 0x9800;
+	bgTileMapAddr = 0x9800;
+	// bgTileDataAddr = (LCDC & 0x08) ? 0x8000 : 0x8800;
+	bgTileDataAddr = 0x8000;
+
+	// Read background palette register
+	bgPalette = mMap->getRegBGP();
+	// bgPalette = 0xE4;
+
+	Byte pixel_y = line + mMap->getRegSCY();
+	Byte scrollX = mMap->getRegSCX();
+	Byte pixel_x, pixel_col;
+	Word tilenum;
+
+	for (Byte j = 0; j < 160; j++)
+	{
+		pixel_x = scrollX + j;
+		tilenum = (*mMap)[bgTileMapAddr + ((pixel_y / 8) * 32) + (pixel_x / 8)];
+
+		if (bgTileDataAddr == 0x8800)
+		{
+			pixel_col = ((*mMap)[bgTileDataAddr + (tilenum * 0x10) + (pixel_y % 8 * 2)] >> (7 - (pixel_x % 8)) & 0x1) + ((*mMap)[bgTileDataAddr + (tilenum * 0x10) + (pixel_y % 8 * 2) + 1] >> (7 - (pixel_x % 8)) & 0x1) * 2;
+		}
+		else
+		{
+			pixel_col = ((*mMap)[bgTileDataAddr + ((SWord)tilenum * 0x10) + (pixel_y % 8 * 2)] >> (7 - (pixel_x % 8)) & 0x1) + (((*mMap)[bgTileDataAddr + ((SWord)tilenum * 0x10) + (pixel_y % 8 * 2) + 1] >> (7 - (pixel_x % 8)) & 0x1) * 2);
+		}
+
+		renderArray[(line * 160) + j] = bg_colors[(bgPalette >> (pixel_col * 2)) & 0x3];
+	}
 }
 
 void PPU::load()
@@ -204,6 +246,14 @@ void PPU::executePPU(int cycles)
 		return;
 	case VBLANK:
 	{
+		if (!scanlineRendered)
+		{
+			SDL_UpdateTexture(texture, NULL, renderArray, 160 * 4);
+			SDL_RenderClear(renderer);
+			SDL_RenderCopy(renderer, texture, NULL, NULL);
+			SDL_RenderPresent(renderer);
+			scanlineRendered = true;
+		}
 		if (currentClock < 0)
 		{
 			Byte LY = mMap->getRegLY();
@@ -231,11 +281,13 @@ void PPU::executePPU(int cycles)
 	case TRANSFER:
 	{
 		// TODO: Implement scanline rendering
-		if (!scanlineRendered)
+		/*if (!scanlineRendered)
 		{
 			load();
 			scanlineRendered = true;
-		}
+		}*/
+
+		renderScanline(mMap->getRegLY());
 
 		if (currentClock < 0)
 		{

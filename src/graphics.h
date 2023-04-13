@@ -19,7 +19,7 @@ private:
 
 	// renderArray to be converted to texture
 	// stores 4 copies of texture for wrapping of screen
-	color renderArray[512 * 512];
+	color renderArray[160 * 144];
 
 	MemoryMap* mMap;
 
@@ -82,6 +82,7 @@ public:
 	bool init();
 	bool pollEvents();
 	void load();
+	void renderScanline(Byte line);
 	void close();
 	void setMemoryMap(MemoryMap* m) { mMap = m; }
 	void executePPU(int cycles);
