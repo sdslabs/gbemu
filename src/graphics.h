@@ -40,6 +40,9 @@ private:
 	// BGP register is the BG Palette Data
 	Byte bgPalette;
 
+	// Internal window line counter 
+	Byte hiddenWindowLineCounter;
+
 	// The GameBoy screen
 	// 160x144 screen resolution withing a 256x224 border
 	// The original GameBoy supported 4 colors

@@ -10,12 +10,14 @@ PPU::PPU()
 	isEnabled = false;
 	showBGWin = false;
 	showWindow = false;
+	//renderWindow = false;
 	mMap = nullptr;
 	bgTileDataAddr = 0x0000;
 	bgTileMapAddr = 0x0000;
 	winTileMapAddr = 0x0000;
 	bgPalette = 0x00;
 	currentLine = 0x00;
+	hiddenWindowLineCounter = 0x00;
 	ppuMode = 0x02;
 	event = new SDL_Event();
 
@@ -95,7 +97,6 @@ bool PPU::pollEvents()
 	{
 		if (event->type == SDL_KEYDOWN)
 		{
-			mMap->writeMemory(0xFF02, 0x81);
 			printf("Key pressed: %c\n", event->key.keysym.sym);
 			if (event->key.keysym.sym == SDLK_ESCAPE)
 				exit(0);
@@ -122,11 +123,10 @@ void PPU::renderScanline(Byte line)
 
 	// Read background palette register
 	bgPalette = mMap->getRegBGP();
-	// bgPalette = 0xE4;
 
 	Byte win_y = mMap->getRegWY();
 	Byte win_x = mMap->getRegWX() - 7;
-	Byte win_pixel_y = line - win_y;
+	Byte win_pixel_y = hiddenWindowLineCounter;
 	Byte bg_pixel_y = line + mMap->getRegSCY();
 	Byte scroll_x = mMap->getRegSCX();
 	Byte bg_pixel_x, bg_pixel_col, win_pixel_x, win_pixel_col;
@@ -180,7 +180,7 @@ void PPU::renderScanline(Byte line)
 		
 
 		// Window rendering
-		if (showWindow && (win_x <= j) && (j <= (win_x + 160)) && (win_y <= line) && (line <= (win_y + 143)))
+		if (showBGWin && showWindow && ((win_y <= line) && (win_y < 144)) && (win_x < 160) && (hiddenWindowLineCounter < 144) && (j >= win_x))
 		{
 			win_pixel_x = j - win_x;
 			win_tilenum = (*mMap)[winTileMapAddr + ((win_pixel_y / 8) * 32) + (win_pixel_x / 8)];
@@ -194,10 +194,13 @@ void PPU::renderScanline(Byte line)
 				win_pixel_col = ((*mMap)[bgTileDataAddr + (win_tilenum * 0x10) + (win_pixel_y % 8 * 2)] >> (7 - (win_pixel_x % 8)) & 0x1) + (((*mMap)[bgTileDataAddr + (win_tilenum * 0x10) + (win_pixel_y % 8 * 2) + 1] >> (7 - (win_pixel_x % 8)) & 0x1) * 2);
 			}
 
-			if (win_pixel_col != 0)
+			if ((win_pixel_col != 0) || (win_x))
 				renderArray[(line * 160) + j] = bg_colors[(bgPalette >> (win_pixel_col * 2)) & 0x3];
 		}
 	}
+
+	if (showBGWin && showWindow && ((win_y <= line) && (win_y < 144)) && (win_x < 160) && (hiddenWindowLineCounter < 144))
+		hiddenWindowLineCounter++;
 }
 
 void PPU::executePPU(int cycles)
@@ -211,8 +214,6 @@ void PPU::executePPU(int cycles)
 		{
 			renderScanline(mMap->getRegLY());
 			scanlineRendered = true;
-			// if ((mMap->getRegLCDC() & 0x20) && (mMap->getRegLCDC() & 0x1) && (0 <= mMap->getRegWY() < 144) && (0 <= mMap->getRegWX() < 167))
-			// 	mMap->setRegWY(mMap->getRegWY() + 1);
 		}
 
 		if (currentClock < 0)
@@ -240,6 +241,7 @@ void PPU::executePPU(int cycles)
 				if (STAT & 0x10)
 					mMap->setRegIF(mMap->getRegIF() | 0x2);
 				ppuMode = 1;
+				hiddenWindowLineCounter = 0;
 			}
 			else
 			{
@@ -288,7 +290,6 @@ void PPU::executePPU(int cycles)
 				ppuMode = 2;
 				scanlineRendered = false;
 				mMap->setRegLY(0);
-				// mMap->setRegWY(0);
 				if (LYC == 0)
 				{
 					mMap->setRegSTAT(STAT & 0x4);
