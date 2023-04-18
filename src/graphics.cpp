@@ -140,8 +140,8 @@ void PPU::renderScanline(Byte line)
 	Byte win_pixel_y = hiddenWindowLineCounter;
 	Byte bg_pixel_y = line + mMap->getRegSCY();
 	Byte scroll_x = mMap->getRegSCX();
-	Byte bg_pixel_x, bg_pixel_col, win_pixel_x, win_pixel_col, sprite_y;
-	Byte bg_tilenum, win_tilenum;
+	Byte bg_pixel_x, bg_pixel_col, win_pixel_x, win_pixel_col, sprite_y, sprite_pixel_col;
+	Byte bg_tilenum, win_tilenum, sprite_palette;
 	Byte sprite_height = (LCDC & 0x4) ? 16 : 8;
 
 	// Filling pixel array
@@ -236,7 +236,37 @@ void PPU::renderScanline(Byte line)
 
 		if (sprites.size())
 			std::sort(sprites.begin(), sprites.end(), [](Sprite& a, Sprite& b) { return (((a.x == b.x) && (a.address < b.address)) || (a.x > b.x)); });
-		Byte j = 0;
+		
+		for (auto it = sprites.begin(); it != sprites.end(); ++it)
+		{
+			sprite_palette = (it->flags & 0x10) ? objPalette1 : objPalette0;
+			for (int i = 0; i < 8; i++)
+			{
+				switch (it->flags & 0x60)
+				{
+					case 0x00: // Normal
+						sprite_pixel_col = ((*mMap)[0x8000 + (it->tile * 0x10) + ((line - (it->y - 16)) * 2)] >> (7 - i) & 0x1) + (((*mMap)[0x8000 + (it->tile * 0x10) + ((line - (it->y - 16)) * 2) + 1] >> (7 - i) & 0x1) * 2);
+						break;
+					case 0x20: // Flip X
+						sprite_pixel_col = ((*mMap)[0x8000 + (it->tile * 0x10) + ((line - (it->y - 16)) * 2)] >> i & 0x1) + (((*mMap)[0x8000 + (it->tile * 0x10) + ((line - (it->y - 16)) * 2) + 1] >> i & 0x1) * 2);
+						break;
+					case 0x40: // Flip Y
+						sprite_pixel_col = ((*mMap)[0x8000 + (it->tile * 0x10) + ((sprite_height - (line - (it->y - 16)) - 1) * 2)] >> (7 - i) & 0x1) + (((*mMap)[0x8000 + (it->tile * 0x10) + ((sprite_height - (line - (it->y - 16)) - 1) * 2) + 1] >> (7 - i) & 0x1) * 2);
+						break;
+					case 0x60: // Flip X and Y
+						sprite_pixel_col = ((*mMap)[0x8000 + (it->tile * 0x10) + ((sprite_height - (line - (it->y - 16)) - 1) * 2)] >> i & 0x1) + (((*mMap)[0x8000 + (it->tile * 0x10) + ((sprite_height - (line - (it->y - 16)) - 1) * 2) + 1] >> i & 0x1) * 2);
+						break;
+					default:
+						break;
+				}
+
+				if (sprite_pixel_col != 0)
+				{
+					if (((it->x + i - 8) < 160) && !(it->flags & 0x80))
+						renderArray[(line * 160) + (it->x + i - 8)] = bg_colors[(sprite_palette >> (sprite_pixel_col * 2)) & 0x3];
+				}
+			}
+		}
 	}
 }
 
