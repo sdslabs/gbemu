@@ -106,6 +106,14 @@ private:
 	// Stays in the I/O Ports at 0xFF47
 	Byte* reg_BGP;
 
+	// The OBP0 Register
+	// Stays in the I/O Ports at 0xFF48
+	Byte* reg_OBP0;
+
+	// The OBP1 Register
+	// Stays in the I/O Ports at 0xFF49
+	Byte* reg_OBP1;
+
 	// The LY Register
 	// Stays in the I/O Ports at 0xFF44
 	Byte* reg_LY;
@@ -202,6 +210,12 @@ public:
 
 	// gets the reg_BGP
 	Byte getRegBGP() { return *reg_BGP; }
+
+	// gets the reg_OBP0
+	Byte getRegOBP0() { return *reg_OBP0; }
+
+	// gets the reg_OBP1
+	Byte getRegOBP1() { return *reg_OBP1; }
 
 	// gets the reg_LY
 	Byte getRegLY() { return *reg_LY; }

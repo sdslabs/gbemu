@@ -16,6 +16,8 @@ PPU::PPU()
 	bgTileMapAddr = 0x0000;
 	winTileMapAddr = 0x0000;
 	bgPalette = 0x00;
+	objPalette0 = 0x00;
+	objPalette1 = 0x00;
 	currentLine = 0x00;
 	hiddenWindowLineCounter = 0x00;
 	ppuMode = 0x02;
@@ -77,6 +79,12 @@ bool PPU::init()
 	// Evaluate Background Palette register
 	bgPalette = mMap->getRegBGP();
 
+	// Evaluate Sprite Palette 0 register
+	objPalette0 = mMap->getRegOBP0();
+
+	// Evaluate Sprite Palette 1 register
+	objPalette1 = mMap->getRegOBP1();
+
 	// Create a placeholder texture
 	// 512x512 to have 4 copies of tilemap
 	texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 160, 144);
@@ -113,6 +121,7 @@ void PPU::renderScanline(Byte line)
 	isEnabled = (LCDC & 0x80);
 	showBGWin = (LCDC & 0x1);
 	showWindow = (LCDC & 0x20);
+	showSprites = (LCDC & 0x2);
 
 	if (!isEnabled)
 		return;
@@ -121,16 +130,19 @@ void PPU::renderScanline(Byte line)
 	bgTileDataAddr = (LCDC & 0x10) ? 0x8000 : 0x8800;
 	winTileMapAddr = (LCDC & 0x40) ? 0x9C00 : 0x9800;
 
-	// Read background palette register
+	// Read palette registers
 	bgPalette = mMap->getRegBGP();
+	objPalette0 = mMap->getRegOBP0();
+	objPalette1 = mMap->getRegOBP1();
 
 	Byte win_y = mMap->getRegWY();
 	Byte win_x = mMap->getRegWX() - 7;
 	Byte win_pixel_y = hiddenWindowLineCounter;
 	Byte bg_pixel_y = line + mMap->getRegSCY();
 	Byte scroll_x = mMap->getRegSCX();
-	Byte bg_pixel_x, bg_pixel_col, win_pixel_x, win_pixel_col;
+	Byte bg_pixel_x, bg_pixel_col, win_pixel_x, win_pixel_col, sprite_y;
 	Byte bg_tilenum, win_tilenum;
+	Byte sprite_height = (LCDC & 0x4) ? 16 : 8;
 
 	// Filling pixel array
 	// Going over each pixel on screen
@@ -177,7 +189,6 @@ void PPU::renderScanline(Byte line)
 			renderArray[(line * 160) + j] = bg_colors[(bgPalette >> (bg_pixel_col * 2)) & 0x3];
 		else
 			renderArray[(line * 160) + j] = bg_colors[0];
-		
 
 		// Window rendering
 		if (showBGWin && showWindow && ((win_y <= line) && (win_y < 144)) && (win_x < 160) && (hiddenWindowLineCounter < 144) && (j >= win_x))
@@ -201,6 +212,32 @@ void PPU::renderScanline(Byte line)
 
 	if (showBGWin && showWindow && ((win_y <= line) && (win_y < 144)) && (win_x < 160) && (hiddenWindowLineCounter < 144))
 		hiddenWindowLineCounter++;
+
+	// Sprite rendering
+	if (showSprites)
+	{
+		sprites.clear();
+		for (Word i = 0xFE00; i < 0xFEA0; i += 4)
+		{
+			if (sprites.size() >= 10)
+				break;
+			sprite_y = (*mMap)[i];
+			if ((line < (sprite_y - 16) || line > (sprite_y - 16 + sprite_height)))
+				continue;
+
+			Sprite* sprite = new Sprite();
+			sprite->address = i;
+			sprite->y = sprite_y;
+			sprite->x = (*mMap)[i + 1];
+			sprite->tile = (*mMap)[i + 2];
+			sprite->flags = (*mMap)[i + 3];
+			sprites.push_back(*sprite);
+		}
+
+		if (sprites.size())
+			std::sort(sprites.begin(), sprites.end(), [](Sprite& a, Sprite& b) { return (((a.x == b.x) && (a.address < b.address)) || (a.x > b.x)); });
+		Byte j = 0;
+	}
 }
 
 void PPU::executePPU(int cycles)

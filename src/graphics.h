@@ -4,6 +4,16 @@
 #include <stdio.h>
 #include <algorithm>
 #include <SDL.h>
+#include <vector>
+
+struct Sprite
+{
+	Word address;
+	Byte y;
+	Byte x;
+	Byte tile;
+	Byte flags;
+};
 
 class PPU
 {
@@ -28,6 +38,9 @@ private:
 	// LCDC 5th bit is the Window Display Enable flag
 	bool showWindow;
 
+	// LCDC 1st bit is the OBJ (Sprite) Display Enable flag
+	bool showSprites;
+
 	// LCDC 3rd bit is the BG and Window Tile Data Select flag
 	Word bgTileDataAddr;
 
@@ -39,6 +52,12 @@ private:
 
 	// BGP register is the BG Palette Data
 	Byte bgPalette;
+
+	// OBP0 register is the OBJ Palette 0 Data
+	Byte objPalette0;
+
+	// OBP1 register is the OBJ Palette 1 Data
+	Byte objPalette1;
 
 	// Internal window line counter 
 	Byte hiddenWindowLineCounter;
@@ -86,6 +105,8 @@ private:
 		OAM,
 		TRANSFER
 	};
+
+	std::vector<Sprite> sprites;
 
 public:
 	PPU();

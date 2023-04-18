@@ -77,6 +77,12 @@ MemoryMap::MemoryMap()
 	// BGP at 0xFF47
 	reg_BGP = ioPorts + 0x47;
 
+	// OBP0 at 0xFF48
+	reg_OBP0 = ioPorts + 0x48;
+
+	// OBP1 at 0xFF49
+	reg_OBP1 = ioPorts + 0x49;
+
 	// LY at 0xFF44
 	reg_LY = ioPorts + 0x44;
 
@@ -140,6 +146,18 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 		// else write to I/O ports
 		if (address == 0xFF04)
 			*reg_DIV = 0x00;
+		// Check for DMA transfer
+		// Writing a loop instead of std::copy
+		// as memoury is not a single unit
+		// in our architecture
+		else if (address == 0xFF46)
+		{
+			for (Word i = 0; i < 0xA0; i++)
+				oamTable[i] = readMemory(((Word)value << 8) + i);
+			ioPorts[address - 0xFF00] = value;
+		}
+		else if (address == 0xFF44)
+			*reg_LY = 0x00;
 		else
 			ioPorts[address - 0xFF00] = value;
 	}

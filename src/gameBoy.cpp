@@ -31,7 +31,7 @@ GBE::GBE()
 		printf("boot rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/dmg-acid2.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../tests/Tetris.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Load the Boot ROM
