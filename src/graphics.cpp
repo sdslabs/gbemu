@@ -235,13 +235,15 @@ void PPU::renderScanline(Byte line)
 		}
 
 		if (sprites.size())
-			std::sort(sprites.begin(), sprites.end(), [](Sprite& a, Sprite& b) { return (((a.x == b.x) && (a.address < b.address)) || (a.x > b.x)); });
+			std::sort(sprites.begin(), sprites.end(), [](Sprite& a, Sprite& b) { return (((a.x == b.x) && (a.address > b.address)) || (a.x > b.x)); });
 		
 		for (auto it = sprites.begin(); it != sprites.end(); ++it)
 		{
 			sprite_palette = (it->flags & 0x10) ? objPalette1 : objPalette0;
 			for (int i = 0; i < 8; i++)
 			{
+				if (sprite_height == 16)
+					it->tile &= 0xFE;
 				switch (it->flags & 0x60)
 				{
 					case 0x00: // Normal
