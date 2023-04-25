@@ -97,6 +97,9 @@ MemoryMap::MemoryMap()
 
 	// WX at 0xFF4B
 	reg_WX = ioPorts + 0x4B;
+
+	joyPadState = new Byte;
+	*joyPadState = 0xFF;
 }
 
 // Write to memory
@@ -152,12 +155,20 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 		// in our architecture
 		else if (address == 0xFF46)
 		{
+			Word val = value;
+			val = val << 8;
 			for (Word i = 0; i < 0xA0; i++)
-				oamTable[i] = readMemory(((Word)value << 8) + i);
+				oamTable[i] = readMemory(val + i);
 			ioPorts[address - 0xFF00] = value;
 		}
 		else if (address == 0xFF44)
 			*reg_LY = 0x00;
+		else if (address == 0xFF00)
+		{
+			readInput(value);
+		}
+		//if (value != 0xFF)
+		//printf("0x%02x\n", ioPorts[0]);}
 		else
 			ioPorts[address - 0xFF00] = value;
 	}
@@ -253,4 +264,32 @@ Byte MemoryMap::readMemory(Word address)
 Byte MemoryMap::operator[](Word address)
 {
 	return MemoryMap::readMemory(address);
+}
+
+void MemoryMap::readInput(Byte value)
+{
+	ioPorts[0] = (ioPorts[0] & 0xCF) | (value & 0x30);
+
+	Byte current = ioPorts[0] & 0xF0;
+
+	switch (current & 0x30)
+	{
+	case 0x10:
+		current = 0xD0;
+		current |= (((*joyPadState) >> 4) & 0x0F);
+		break;
+	case 0x20:
+		current = 0xE0;
+		current |= ((*joyPadState) & 0x0F);
+		break;
+	case 0x30:
+		current = 0xF0;
+		current |= 0x0F;
+		break;
+	}
+
+	if ((ioPorts[0] & (~current) & 0x0F) != 0)
+		(*reg_IF) |= 0x10;
+
+	ioPorts[0] = current;
 }

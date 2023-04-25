@@ -135,11 +135,15 @@ private:
 	Byte* reg_WX;
 
 public:
+	Byte* joyPadState;
+
 	// Constructor
 	MemoryMap();
 
 	// Destructor
 	~MemoryMap();
+
+	void readInput(Byte value);
 
 	// Returns the ROM Bank 0
 	Byte* getRomBank0() const { return romBank0; }
@@ -246,4 +250,6 @@ public:
 
 	// sets the reg_WY
 	void setRegWY(Byte value) { *reg_WY = value; }
+
+	//void setPPU(PPU* ppu) { gbe_ppu = ppu; }
 };

@@ -103,11 +103,71 @@ bool PPU::pollEvents()
 {
 	while (SDL_PollEvent(event))
 	{
-		if (event->type == SDL_KEYDOWN)
+		if (event->key.type == SDL_KEYDOWN)
 		{
-			printf("Key pressed: %c\n", event->key.keysym.sym);
-			if (event->key.keysym.sym == SDLK_ESCAPE)
+			switch (event->key.keysym.sym)
+			{
+			case SDLK_LEFT:
+				*(mMap->joyPadState) &= 0xFD;
+				break;
+			case SDLK_RIGHT:
+				*(mMap->joyPadState) &= 0xFE;
+				break;
+			case SDLK_UP:
+				*(mMap->joyPadState) &= 0xFB;
+				break;
+			case SDLK_DOWN:
+				*(mMap->joyPadState) &= 0xF7;
+				break;
+			case SDLK_a:
+				*(mMap->joyPadState) &= 0xEF;
+				break;
+			case SDLK_s:
+				*(mMap->joyPadState) &= 0xDF;
+				break;
+			case SDLK_LSHIFT:
+				*(mMap->joyPadState) &= 0xBF;
+				break;
+			case SDLK_SPACE:
+				*(mMap->joyPadState) &= 0x7F;
+				break;
+			case SDLK_ESCAPE:
 				exit(0);
+			default:
+				break;
+			}
+		}
+		else if (event->key.type == SDL_KEYUP)
+		{
+			switch (event->key.keysym.sym)
+			{
+			case SDLK_LEFT:
+				*(mMap->joyPadState) |= 0x02;
+				break;
+			case SDLK_RIGHT:
+				*(mMap->joyPadState) |= 0x01;
+				break;
+			case SDLK_UP:
+				*(mMap->joyPadState) |= 0x04;
+				break;
+			case SDLK_DOWN:
+				*(mMap->joyPadState) |= 0x08;
+				break;
+			case SDLK_a:
+				*(mMap->joyPadState) |= 0x10;
+				break;
+			case SDLK_s:
+				*(mMap->joyPadState) |= 0x20;
+				break;
+			case SDLK_LSHIFT:
+				*(mMap->joyPadState) |= 0x40;
+				break;
+			case SDLK_SPACE:
+				*(mMap->joyPadState) |= 0x80;
+				break;
+			default:
+				break;
+			}
 		}
 	}
 	return false;
@@ -236,7 +296,7 @@ void PPU::renderScanline(Byte line)
 
 		if (sprites.size())
 			std::sort(sprites.begin(), sprites.end(), [](Sprite& a, Sprite& b) { return (((a.x == b.x) && (a.address > b.address)) || (a.x > b.x)); });
-		
+
 		for (auto it = sprites.begin(); it != sprites.end(); ++it)
 		{
 			sprite_palette = (it->flags & 0x10) ? objPalette1 : objPalette0;
@@ -246,20 +306,20 @@ void PPU::renderScanline(Byte line)
 					it->tile &= 0xFE;
 				switch (it->flags & 0x60)
 				{
-					case 0x00: // Normal
-						sprite_pixel_col = ((*mMap)[0x8000 + (it->tile * 0x10) + ((line - (it->y - 16)) * 2)] >> (7 - i) & 0x1) + (((*mMap)[0x8000 + (it->tile * 0x10) + ((line - (it->y - 16)) * 2) + 1] >> (7 - i) & 0x1) * 2);
-						break;
-					case 0x20: // Flip X
-						sprite_pixel_col = ((*mMap)[0x8000 + (it->tile * 0x10) + ((line - (it->y - 16)) * 2)] >> i & 0x1) + (((*mMap)[0x8000 + (it->tile * 0x10) + ((line - (it->y - 16)) * 2) + 1] >> i & 0x1) * 2);
-						break;
-					case 0x40: // Flip Y
-						sprite_pixel_col = ((*mMap)[0x8000 + (it->tile * 0x10) + ((sprite_height - (line - (it->y - 16)) - 1) * 2)] >> (7 - i) & 0x1) + (((*mMap)[0x8000 + (it->tile * 0x10) + ((sprite_height - (line - (it->y - 16)) - 1) * 2) + 1] >> (7 - i) & 0x1) * 2);
-						break;
-					case 0x60: // Flip X and Y
-						sprite_pixel_col = ((*mMap)[0x8000 + (it->tile * 0x10) + ((sprite_height - (line - (it->y - 16)) - 1) * 2)] >> i & 0x1) + (((*mMap)[0x8000 + (it->tile * 0x10) + ((sprite_height - (line - (it->y - 16)) - 1) * 2) + 1] >> i & 0x1) * 2);
-						break;
-					default:
-						break;
+				case 0x00: // Normal
+					sprite_pixel_col = ((*mMap)[0x8000 + (it->tile * 0x10) + ((line - (it->y - 16)) * 2)] >> (7 - i) & 0x1) + (((*mMap)[0x8000 + (it->tile * 0x10) + ((line - (it->y - 16)) * 2) + 1] >> (7 - i) & 0x1) * 2);
+					break;
+				case 0x20: // Flip X
+					sprite_pixel_col = ((*mMap)[0x8000 + (it->tile * 0x10) + ((line - (it->y - 16)) * 2)] >> i & 0x1) + (((*mMap)[0x8000 + (it->tile * 0x10) + ((line - (it->y - 16)) * 2) + 1] >> i & 0x1) * 2);
+					break;
+				case 0x40: // Flip Y
+					sprite_pixel_col = ((*mMap)[0x8000 + (it->tile * 0x10) + ((sprite_height - (line - (it->y - 16)) - 1) * 2)] >> (7 - i) & 0x1) + (((*mMap)[0x8000 + (it->tile * 0x10) + ((sprite_height - (line - (it->y - 16)) - 1) * 2) + 1] >> (7 - i) & 0x1) * 2);
+					break;
+				case 0x60: // Flip X and Y
+					sprite_pixel_col = ((*mMap)[0x8000 + (it->tile * 0x10) + ((sprite_height - (line - (it->y - 16)) - 1) * 2)] >> i & 0x1) + (((*mMap)[0x8000 + (it->tile * 0x10) + ((sprite_height - (line - (it->y - 16)) - 1) * 2) + 1] >> i & 0x1) * 2);
+					break;
+				default:
+					break;
 				}
 
 				if (sprite_pixel_col != 0)

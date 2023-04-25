@@ -3987,7 +3987,7 @@ int CPU::executeNextInstruction()
 
 	// Get the opcode
 	Byte opcode = (*mMap)[reg_PC.dat];
-	mMap->writeMemory(0xFF00, 0xFF);
+	//mMap->writeMemory(0xFF00, 0xFF);
 	return (this->*method_pointer[opcode])();
 }
 
