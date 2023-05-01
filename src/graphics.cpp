@@ -282,7 +282,7 @@ void PPU::renderScanline(Byte line)
 			if (sprites.size() >= 10)
 				break;
 			sprite_y = (*mMap)[i];
-			if ((line < (sprite_y - 16) || line > (sprite_y - 16 + sprite_height)))
+			if ((line < (sprite_y - 16) || line > (sprite_y - 16 + sprite_height - 1)))
 				continue;
 
 			Sprite* sprite = new Sprite();
