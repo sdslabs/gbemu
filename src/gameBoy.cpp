@@ -31,7 +31,7 @@ GBE::GBE()
 		printf("boot rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/drmario.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../tests/dmg-acid2.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Load the Boot ROM
@@ -46,14 +46,6 @@ GBE::GBE()
 	fread(gbe_mMap->getRomBank1(), 1, 16384, gameROM);
 
 	s_Cycles = 0;
-
-	// STUB: Fooling the emulator
-	// Into thinking the frame is ready
-	// Helps us get out of the loop at
-	// 0x0064 in the boot ROM
-	// Needs to be removed once Timers
-	// and PPU is implemented
-	gbe_mMap->writeMemory(0xff44, 0x90);
 
 	// Adding the Nintendo Logo to ROM
 	// to pass the Boot check
