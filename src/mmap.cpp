@@ -100,6 +100,9 @@ MemoryMap::MemoryMap()
 
 	joyPadState = new Byte;
 	*joyPadState = 0xFF;
+
+	bootRomFile = nullptr;
+	romFile = nullptr;
 }
 
 // Write to memory
