@@ -296,3 +296,21 @@ void MemoryMap::readInput(Byte value)
 
 	ioPorts[0] = current;
 }
+
+void MemoryMap::mapRom() {
+	// Load the Boot ROM
+	// Into the first 0x100 bytes
+	fread(romBank0, 1, 256, bootRomFile);
+
+	// Load Game ROM in Bank 0
+	// After offsetting for Boot ROM first
+	fseek(romFile, 0x100, SEEK_SET);
+
+	fread(romBank0 + 0x100, 1, 16128, romFile);
+	fread(romBank1, 1, 16384, romFile);
+}
+
+void MemoryMap::unloadBootRom() {
+	fseek(romFile, 0x00, SEEK_SET);
+	fread(romBank0, 1, 256, romFile);
+}

@@ -31,19 +31,17 @@ GBE::GBE()
 		printf("boot rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/pkmnred.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../tests/Tetris.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
-	// Load the Boot ROM
-	// Into the first 0x100 bytes
-	fread(gbe_mMap->getRomBank0(), 1, 256, bootROM);
+	// Set the Boot ROM
+	gbe_mMap->setBootRomFile(bootROM);
 
-	// Load Game ROM in Bank 0
-	// After offsetting for Boot ROM first
-	fseek(gameROM, 0x100, SEEK_SET);
+	// Set the Game ROM
+	gbe_mMap->setRomFile(gameROM);
 
-	fread(gbe_mMap->getRomBank0() + 0x100, 1, 16128, gameROM);
-	fread(gbe_mMap->getRomBank1(), 1, 16384, gameROM);
+	// Map to ROMs to mMap
+	gbe_mMap->mapRom();
 
 	s_Cycles = 0;
 
@@ -128,18 +126,11 @@ void GBE::executeBootROM()
 	while (gbe_mMap->readMemory(0xFF50) == 0x00)
 	{
 		s_Cycles += gbe_cpu->executeNextInstruction();
-		if ((*gbe_mMap)[0xFF02] == 0x81)
-		{
-			printf("%c", (*gbe_mMap)[0xFF01]);
-			gbe_mMap->writeMemory(0xFF02, 0x00);
-		}
 		gbe_cpu->updateTimers(s_Cycles);
 		gbe_graphics->executePPU(s_Cycles);
 		s_Cycles = 0;
 		s_Cycles += gbe_cpu->performInterrupt();
 	}
 
-	// Overwrite the boot ROM with first 256 bytes of game ROM
-	fseek(gameROM, 0x00, SEEK_SET);
-	fread(gbe_mMap->getRomBank0(), 1, 256, gameROM);
+	gbe_mMap->unloadBootRom();
 }

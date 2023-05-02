@@ -191,6 +191,12 @@ public:
 	// increments the divider register
 	void updateDividerRegister() { (*reg_DIV)++; }
 
+	// Map the boot and game to memory4
+	void mapRom();
+
+	// Unload boot ROM after boot execution
+	void unloadBootRom();
+
 	// gets the reg_TAC
 	Byte getRegTAC() { return *reg_TAC; }
 
@@ -254,5 +260,9 @@ public:
 	// sets the reg_WY
 	void setRegWY(Byte value) { *reg_WY = value; }
 
-	//void setPPU(PPU* ppu) { gbe_ppu = ppu; }
+	// sets the boot ROM
+	void setBootRomFile(FILE* file) { bootRomFile = file; }
+
+	// sets the ROM file
+	void setRomFile(FILE* file) { romFile = file; }
 };
