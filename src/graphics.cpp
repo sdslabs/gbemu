@@ -324,7 +324,7 @@ void PPU::renderScanline(Byte line)
 
 				if (sprite_pixel_col != 0)
 				{
-					if (((it->x + i - 8) < 160) && !(it->flags & 0x80))
+					if (((it->x + i - 8) < 160) && (!(it->flags & 0x80) || (renderArray[(line * 160) + (it->x + i - 8)] == bg_colors[0])))
 						renderArray[(line * 160) + (it->x + i - 8)] = bg_colors[(sprite_palette >> (sprite_pixel_col * 2)) & 0x3];
 				}
 			}
