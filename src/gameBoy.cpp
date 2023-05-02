@@ -113,11 +113,6 @@ void GBE::update()
 	{
 		// Execute the next instruction
 		s_Cycles += gbe_cpu->executeNextInstruction();
-		if ((*gbe_mMap)[0xFF02] == 0x81)
-		{
-			printf("%c", (*gbe_mMap)[0xFF01]);
-			gbe_mMap->writeMemory(0xFF02, 0x00);
-		}
 
 		// update the DIV and TIMA timers
 		gbe_cpu->updateTimers(s_Cycles);
@@ -126,7 +121,6 @@ void GBE::update()
 		s_Cycles += gbe_cpu->performInterrupt();
 		gbe_graphics->pollEvents();
 	}
-	// renderGraphics()
 }
 
 void GBE::executeBootROM()

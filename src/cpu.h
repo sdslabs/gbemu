@@ -1132,12 +1132,6 @@ private:
 	int SET_7_HLp();
 	int SET_7_A();
 
-	// Dump CPU state in logfile
-	// Useful for debugging
-	void dumpState();
-
-	FILE* outfile;
-
 public:
 	const int clockSpeed = 4194304; // 4.194304 MHz CPU
 	const int clockSpeedPerFrame = 70224; // 4194304 / 59.73fps
