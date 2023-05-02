@@ -103,6 +103,8 @@ MemoryMap::MemoryMap()
 
 	bootRomFile = nullptr;
 	romFile = nullptr;
+
+	mbcMode = 0x0;
 }
 
 // Write to memory
@@ -308,6 +310,9 @@ void MemoryMap::mapRom() {
 
 	fread(romBank0 + 0x100, 1, 16128, romFile);
 	fread(romBank1, 1, 16384, romFile);
+
+	// Check 0x147 for MBC mode
+	mbcMode = romBank0[0x147];
 }
 
 void MemoryMap::unloadBootRom() {
