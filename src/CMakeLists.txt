@@ -5,6 +5,7 @@ set(SOURCES
         gameBoy.cpp
         mmap.cpp
         graphics.cpp
+        apu.cpp
 
         # -------
         # Header Files
@@ -13,6 +14,7 @@ set(SOURCES
         mmap.h
         types.h
         graphics.h
+        apu.h
         )
 
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})

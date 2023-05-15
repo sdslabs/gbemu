@@ -10,8 +10,8 @@ class MemoryMap
 private:
 	Byte mbcMode;
 
-	FILE *bootRomFile;
-	FILE *romFile;
+	FILE* bootRomFile;
+	FILE* romFile;
 
 	// First ROM Bank
 	// 16 KB 0x0000 - 0x3FFF
@@ -137,6 +137,10 @@ private:
 	// Stays in the I/O Ports at 0xFF4B
 	Byte* reg_WX;
 
+	// The NR52 Register
+	// Stays in the I/O Ports at 0xFF26
+	Byte* reg_NR52;
+
 public:
 	Byte* joyPadState;
 
@@ -244,6 +248,9 @@ public:
 
 	// gets the reg_WX
 	Byte getRegWX() { return *reg_WX; }
+
+	// gets the reg_NR52
+	Byte getRegNR52() { return *reg_NR52; }
 
 	// sets the reg_TIMA
 	void setRegTIMA(Byte value) { *reg_TIMA = value; }

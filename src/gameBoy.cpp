@@ -1,5 +1,4 @@
 #include "types.h"
-#include "cpu.h"
 #include "gameBoy.h"
 
 int GBE::s_Cycles;
@@ -26,12 +25,14 @@ GBE::GBE()
 
 	gbe_graphics->init();
 
+	gbe_apu = new APU(gbe_mMap);
+
 	// Open the Boot ROM
 	if ((bootROM = fopen("../src/dmg_boot.gb", "rb")) == NULL)
 		printf("boot rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/pkmnred.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../tests/drmario.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Set the Boot ROM
@@ -118,6 +119,7 @@ void GBE::update()
 		s_Cycles = 0;
 		s_Cycles += gbe_cpu->performInterrupt();
 		gbe_graphics->pollEvents();
+		gbe_apu->checkDAC();
 	}
 }
 
