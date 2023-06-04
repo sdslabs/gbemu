@@ -10,8 +10,8 @@ class MemoryMap
 private:
 	Byte mbcMode;
 
-	FILE *bootRomFile;
-	FILE *romFile;
+	FILE* bootRomFile;
+	FILE* romFile;
 
 	// First ROM Bank
 	// 16 KB 0x0000 - 0x3FFF
@@ -136,6 +136,60 @@ private:
 	// The WX Register
 	// Stays in the I/O Ports at 0xFF4B
 	Byte* reg_WX;
+
+	// Number indicating number of ROM Banks available
+	// Number of ROM Banks = ( 2 << romSize )
+	Byte romSize;
+
+	// Number of RAM Banks available
+	// Number of	ramSize		RAM Banks
+	//				0			0
+	//				2			1
+	//				3			4
+	//				4			16
+	//				5			8
+	Byte ramSize;
+
+	// All ROM Banks
+	// 16KiB each
+	Byte (*romBankList)[0x4000];
+
+	// All RAM Banks
+	// 8KiB each
+	Byte (*ramBankList)[0x2000];
+
+	// 1 bit MBC register
+	// Tells whether External RAM is enabled for read and write
+	bool ramEnable;
+
+	// 5 bit MBC register
+	// Tells which ROM Bank to use
+	Byte romBankNumber;
+
+	// 2 bit MBC register
+	// Tells which RAM Bank to use
+	// Might also tell which ROM Bank to use in case of ROM > 512KiB
+	Byte ramBankNumber;
+
+	// 1 bit MBC register
+	// Selects the banking mode
+	bool bankingModeSelect;
+
+	// 1 bit mask
+	// Tells if External RAM is available in the Cartridge
+	bool ramExistenceMask;
+
+	// 5 bit mask
+	// Tells the number of bits of ROM Bank Number that are useful
+	Byte romBankNumberMask;
+
+	// 2 bit mask
+	// Tells the number of bits of RAM Bank Number that are useful for ROM
+	Byte ramBankNumberMaskForRom;
+
+	// 2 bit mask
+	// Tells the number of bits of RAM Bank Number that are useful for RAM
+	Byte ramBankNumberMaskForRam;
 
 public:
 	Byte* joyPadState;

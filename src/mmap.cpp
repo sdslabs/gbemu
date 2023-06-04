@@ -105,6 +105,26 @@ MemoryMap::MemoryMap()
 	romFile = nullptr;
 
 	mbcMode = 0x0;
+
+	romSize = 0x0;
+
+	ramSize = 0x0;
+
+	ramEnable = 0;
+
+	romBankNumber = 0;
+
+	ramBankNumber = 0;
+
+	bankingModeSelect = 0;
+
+	ramExistenceMask = 0;
+
+	romBankNumberMask = 0;
+
+	ramBankNumberMaskForRom = 0;
+
+	ramBankNumberMaskForRam = 0;
 }
 
 // Write to memory
@@ -299,7 +319,8 @@ void MemoryMap::readInput(Byte value)
 	ioPorts[0] = current;
 }
 
-void MemoryMap::mapRom() {
+void MemoryMap::mapRom()
+{
 	// Load the Boot ROM
 	// Into the first 0x100 bytes
 	fread(romBank0, 1, 256, bootRomFile);
@@ -315,7 +336,8 @@ void MemoryMap::mapRom() {
 	mbcMode = romBank0[0x147];
 }
 
-void MemoryMap::unloadBootRom() {
+void MemoryMap::unloadBootRom()
+{
 	fseek(romFile, 0x00, SEEK_SET);
 	fread(romBank0, 1, 256, romFile);
 }
