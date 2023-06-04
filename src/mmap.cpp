@@ -131,10 +131,37 @@ MemoryMap::MemoryMap()
 // TODO: Make emulation memory secure
 bool MemoryMap::writeMemory(Word address, Byte value)
 {
-	if (address < 0x8000)
+	if (address < 0x2000)
 	{
-		printf("Writing to ROM is not allowed! Write attempted at %04X", address);
-		return false;
+		// If values is 0x0A then external RAM is enabled, else it is disabled
+		if (value == 0x0A)
+		{
+			ramEnable = true;
+		}
+		else
+		{
+			ramEnable = false;
+		}
+	}
+	else if (address < 0x4000)
+	{
+		// Decide ROM Bank Number
+		romBankNumber = (value & 0b11111);
+		bankRom();
+	}
+	else if (address < 0x6000)
+	{
+		// Decide RAM Bank Number
+		ramBankNumber = (value & 0b11);
+		bankRom();
+		bankRam();
+	}
+	else if (address < 0x8000)
+	{
+		// Decide Banking Mode Select
+		bankingModeSelect = (value & 0b1);
+		bankRom();
+		bankRam();
 	}
 	else if (address < 0xA000)
 	{
@@ -143,8 +170,11 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 	}
 	else if (address < 0xC000)
 	{
-		// Write to External RAM
-		externalRam[address - 0xA000] = value;
+		// Write to External RAM if external RAM has been enabled
+		if (ramEnable)
+		{
+			externalRam[address - 0xA000] = value;
+		}
 	}
 	else if (address < 0xE000)
 	{
@@ -420,4 +450,29 @@ void MemoryMap::unloadBootRom()
 {
 	fseek(romFile, 0x00, SEEK_SET);
 	fread(romBank0, 1, 256, romFile);
+}
+
+void MemoryMap::bankRom()
+{
+
+	Byte completeBankNumber = romBankNumber;
+
+	if (completeBankNumber == 0)
+	{
+		completeBankNumber += 1;
+	}
+
+	completeBankNumber &= romBankNumberMask;
+	completeBankNumber |= ((ramBankNumber & ramBankNumberMaskForRom) << 5);
+
+	romBank0 = romBankList[((ramBankNumber & ramBankNumberMaskForRom) << 5) & (bankingModeSelect * 0b1100000)];
+	romBank1 = romBankList[completeBankNumber];
+}
+
+void MemoryMap::bankRam()
+{
+	if (ramExistenceMask)
+	{
+		externalRam = ramBankList[(ramBankNumber & ramBankNumberMaskForRam) & (bankingModeSelect * 0b11)];
+	}
 }
