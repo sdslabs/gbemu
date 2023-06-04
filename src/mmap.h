@@ -319,4 +319,10 @@ public:
 
 	// sets the ROM file
 	void setRomFile(FILE* file) { romFile = file; }
+	
+	// Change ROM Banking according to the set registers
+	void bankRom();
+
+	// Change RAM Banking according to the set registers
+	void bankRam();
 };
