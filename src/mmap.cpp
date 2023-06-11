@@ -559,7 +559,7 @@ void MemoryMap::updateRTCReg(int cycles)
 	int value = (int)(totalNumberofCyclescount) / 4194304;
 	if ((totalNumberofCyclescount) < 4194304)
 	{
-		// return;
+		return;
 	}
 	printf("testing : %d\n",totalNumberofCyclescount);
 	//struct tm *gmtime(const time_t *time);
