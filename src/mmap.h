@@ -191,27 +191,33 @@ private:
 	// Tells the number of bits of RAM Bank Number that are useful for RAM
 	Byte ramBankNumberMaskForRam;
 
+	//1 bit boolean value
+	// Selects RAM banking (if false), RTC registers otherwise
 	bool setRTC;
+
+	// 4 bit Register number
+	// Specifies the register number amongst RTC registers
 	Byte RTCval;
+
+	// 5 RTC registers to hierachially store time
+	// RTC(0) S  RTC(1) M RTC(2) H RTC(3) DL RTC(4) DH
 	Byte RTC[5];
+
+	// Stores maximum allowed value for each RTC register like 59 for RTC(0) S
 	Byte RTCmax[5];
-	Byte dayCounter;
+
+	// 1 bit boolean value
+	// To update the timer
 	bool latch;
+
+	// To disallow simultaneous writes
+	bool halt;
+
+	// Counts total number of years
 	Byte numberOfYearsCount;
-	long long int numberofCyclescount;
+
+	// Stores total number of new cycles before latching
 	long long int totalNumberofCyclescount;
-	/*struct tm
-	{
-		int tm_sec; // seconds of minutes from 0 to 61
-		int tm_min; // minutes of hour from 0 to 59
-		int tm_hour; // hours of day from 0 to 24
-		int tm_mday; // day of month from 1 to 31
-		int tm_mon; // month of year from 0 to 11
-		int tm_year; // year since 1900
-		int tm_wday; // days since sunday
-		int tm_yday; // days since January 1st
-		int tm_isdst; // hours of daylight savings time
-	};*/
 
 public:
 	Byte* joyPadState;
@@ -348,7 +354,9 @@ public:
 	// Change RAM Banking according to the set registers
 	void bankRam();
 
+	// Sets the value of RTC registers upon write call
 	void setRTCRegisters(int value);
 
+	// Updates the RTC registers with new time to be latched
 	void updateRTCReg(int cycles);
 };

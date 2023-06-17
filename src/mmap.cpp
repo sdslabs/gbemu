@@ -127,21 +127,22 @@ MemoryMap::MemoryMap()
 
 	ramBankNumberMaskForRam = 0;
 
-	RTCmax[0]=60;
-	RTCmax[1]=60;
-	RTCmax[2]=24;
-	RTCmax[3]=0xFF;
-	RTC[0]=0;
-	RTC[1]=0;
-	RTC[2]=0;
-	RTC[3]=0;
-	RTCmax[0]=60;
-	RTC[4]=0;
+	RTCmax[0] = 60;
+	RTCmax[1] = 60;
+	RTCmax[2] = 24;
+	RTCmax[3] = 0xFF;
+	RTC[0] = 0;
+	RTC[1] = 0;
+	RTC[2] = 0;
+	RTC[3] = 0;
+	RTCmax[0] = 60;
+	RTC[4] = 0;
 	latch = false;
 	setRTC = false;
 	numberOfYearsCount = 0;
-	numberofCyclescount=0;
+	//numberofCyclescount = 0;
 	totalNumberofCyclescount = 0;
+	halt = false;
 }
 
 // Write to memory
@@ -169,28 +170,29 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 	else if (address < 0x6000)
 	{
 		// Decide RAM Bank Number - if(val<=1b11) else if(08-0C) - RTC register -> read/written A000-BFFF mainly A000 - setRTC=true
-		if (value<=0b11)
+		if (value <= 0b11)
 		{
 			ramBankNumber = (value & 0b11);
 			bankRom();
 			bankRam();
-			setRTC=false;
+			setRTC = false;
 		}
-		else if (value<=0b1100&&value>=0b100)
+		else if (value <= 0b1100 && value >= 0b100)
 		{
-			setRTC=true;
-			RTCval = value-8;
+			setRTC = true;
+			RTCval = value - 8;
 		}
-		
 	}
 	else if (address < 0x8000)
 	{
-		// Decide Banking Mode Select - 
-		latch=false;
-		if(bankingModeSelect==0&&(value&0b1==1)) 
+		// Decide Banking Mode Select 
+		// Checks for update registers call
+		if (bankingModeSelect == 0 && (value & 0b1 == 1))
 		{
-			latch=true;
+			latch = true;
+			updateRTCReg(0);
 		}
+		latch = false;
 		bankingModeSelect = (value & 0b1);
 		bankRom();
 		bankRam();
@@ -205,17 +207,14 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 		// Write to External RAM if external RAM has been enabled
 		if (ramEnable)
 		{
-			if(setRTC) 
+			if (setRTC)
 			{
-				RTC[4] = 0b10111111&RTC[4];
-				RTC[4]+=0b01000000;
-				//overflow handle??
-				// RTC[RTCval] = value;
-				// if(latch) 
-					setRTCRegisters(value);
-				RTC[4]-=0b01000000;
+				halt = true;
+				setRTCRegisters(value);
+				halt = false;
 			}
-			else externalRam[address - 0xA000] = value;
+			else
+				externalRam[address - 0xA000] = value;
 		}
 	}
 	else if (address < 0xE000)
@@ -264,8 +263,8 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 		{
 			readInput(value);
 		}
-		//if (value != 0xFF)
-		//printf("0x%02x\n", ioPorts[0]);}
+		// if (value != 0xFF)
+		// printf("0x%02x\n", ioPorts[0]);}
 		else
 			ioPorts[address - 0xFF00] = value;
 	}
@@ -313,8 +312,11 @@ Byte MemoryMap::readMemory(Word address)
 	else if (address < 0xC000)
 	{
 		// Read from External RAM
-		if(setRTC) {
-			while ((RTC[4]&&0b01000000)) ;
+		if (setRTC)
+		{
+			// printf("RTC[4]:%d",RTC[4]);
+			while ((halt))
+				;
 			return RTC[RTCval];
 		}
 		return externalRam[address - 0xA000];
@@ -505,7 +507,7 @@ void MemoryMap::bankRom()
 
 	if (completeBankNumber == 0)
 	{
-		//completeBankNumber += 1; //remove this for MBC3
+		// completeBankNumber += 1; //remove this for MBC3
 	}
 
 	completeBankNumber &= romBankNumberMask;
@@ -525,69 +527,111 @@ void MemoryMap::bankRam()
 
 void MemoryMap::setRTCRegisters(int value)
 {
-	printf("hi");
-	int curr_set_time = RTCval;
-	while (curr_set_time<4&&value>0)
+	int currentSetIndex = RTCval;
+	while (latch)
 	{
-		RTC[curr_set_time] = value%RTCmax[curr_set_time];
-		value = value/RTCmax[curr_set_time];
-		curr_set_time++;
+		/* wait till RTC completes getting updated */
 	}
-	if (value<=1)
+
+	if (currentSetIndex <= 1 && value >= 0)
 	{
-		RTC[4] = 0b11111110&RTC[4];
-		RTC[4] += value;
-		numberOfYearsCount+=value;
+		RTC[currentSetIndex] = value & 0b00111111;
+	}
+	else if (currentSetIndex == 2)
+	{
+		RTC[currentSetIndex] = value & 0b00011111;
+	}
+	else if (currentSetIndex == 3)
+	{
+		RTC[currentSetIndex] = value;
 	}
 	else
 	{
-		/*not really handled*/
-		RTC[4] = 0b01111111&RTC[4];
-		RTC[4] = 0b10000000;
+		RTC[currentSetIndex] = value & 0b11000001;
 	}
-	
 }
 
 void MemoryMap::updateRTCReg(int cycles)
 {
+	if (RTC[4] & 0b01000000)
+		return;
 	totalNumberofCyclescount += cycles;
-	//printf("in update: %d\n",cycles);
-	if (!latch)
+	if (!latch || halt)
 	{
 		return;
 	}
-	int value = (int)(totalNumberofCyclescount) / 4194304;
-	if ((totalNumberofCyclescount) < 4194304)
+	int value = (int)(totalNumberofCyclescount) / 3035700;
+	if ((totalNumberofCyclescount) < 3035700)
 	{
+		latch = false;
 		return;
 	}
-	printf("testing : %d\n",totalNumberofCyclescount);
-	//struct tm *gmtime(const time_t *time);
-	// time_t now = time(0);
-	// tm* gmtm = gmtime(&now);
-	// RTC[0]=gmtm->tm_sec;
-	// RTC[1]=gmtm->tm_min;
-	//RTC[2]=
-	int curr_set_time = 0;
-	while (curr_set_time<4&&value>0)
+	int currentSetIndex = 0;
+	while (currentSetIndex < 3 && value > 0)
 	{
-		RTC[curr_set_time] += value;
-		RTC[curr_set_time]%=RTCmax[curr_set_time];
-		value = value/RTCmax[curr_set_time];
-		curr_set_time++;
+		if (RTC[currentSetIndex] < RTCmax[currentSetIndex])
+		{
+			RTC[currentSetIndex] += value;
+			value = RTC[currentSetIndex] / RTCmax[currentSetIndex];
+			RTC[currentSetIndex] %= RTCmax[currentSetIndex];
+			currentSetIndex++;
+		}
+		else
+		{
+			RTC[currentSetIndex] += value;
+			if (currentSetIndex < 2)
+			{
+				value = 0;
+				RTC[currentSetIndex] &= 0b00111111;
+			}
+			else
+			{
+				value = 0;
+				RTC[currentSetIndex] &= 0b00011111;
+			}
+			currentSetIndex++;
+		}
 	}
-	if (value<=1)
+	if (value == 0)
 	{
-		RTC[4] = 0b11111110&RTC[4];
-		RTC[4] += value;
-		numberOfYearsCount+=value;
+		totalNumberofCyclescount = 0;
+		latch = false;
+		return;
+	}
+	long long int totalNumberOfDays = RTC[currentSetIndex] + 256 * ((RTC[4] & 1) ? 1 : 0) + value;
+	if (totalNumberOfDays > 0x1ff)
+	{
+		totalNumberOfDays = totalNumberOfDays % (0x1ff);
+		if (totalNumberOfDays < 256)
+		{
+			RTC[3] = totalNumberOfDays;
+			RTC[4] = RTC[4] & (0b11111110);
+		}
+		else
+		{
+			RTC[3] = totalNumberOfDays & (0b11111111);
+			RTC[4] = RTC[4] & (0b11111110);
+			if (totalNumberOfDays & 0b100000000)
+				RTC[4] += 1;
+		}
+		RTC[4] = RTC[4] & (0b01111111);
+		RTC[4] += (0b10000000);
 	}
 	else
 	{
-		/*not really handled*/
-		RTC[4] = 0b01111111&RTC[4];
-		RTC[4] = 0b10000000;
+		if (totalNumberOfDays < 256)
+		{
+			RTC[3] = totalNumberOfDays;
+			RTC[4] = RTC[4] & (0b11111110);
+		}
+		else
+		{
+			RTC[3] = totalNumberOfDays & (0b11111111);
+			RTC[4] = RTC[4] & (0b11111110);
+			if (totalNumberOfDays & 0b100000000)
+				RTC[4] += 1;
+		}
 	}
-	totalNumberofCyclescount=0;
+	totalNumberofCyclescount = 0;
 	latch = false;
 }
