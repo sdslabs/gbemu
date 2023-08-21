@@ -31,7 +31,7 @@ GBE::GBE()
 		printf("boot rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/rtc3test.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../tests/pkmnred.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Set the Boot ROM
@@ -111,7 +111,7 @@ void GBE::update()
 	{
 		// Execute the next instruction
 		s_Cycles += gbe_cpu->executeNextInstruction();
-		gbe_mMap->updateRTCReg(s_Cycles);
+
 		// update the DIV and TIMA timers
 		gbe_cpu->updateTimers(s_Cycles);
 		gbe_graphics->executePPU(s_Cycles);
@@ -126,7 +126,6 @@ void GBE::executeBootROM()
 	while (gbe_mMap->readMemory(0xFF50) == 0x00)
 	{
 		s_Cycles += gbe_cpu->executeNextInstruction();
-		gbe_mMap->updateRTCReg(s_Cycles);
 		gbe_cpu->updateTimers(s_Cycles);
 		gbe_graphics->executePPU(s_Cycles);
 		s_Cycles = 0;

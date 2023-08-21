@@ -160,7 +160,7 @@ private:
 
 	// 1 bit MBC register
 	// Tells whether External RAM is enabled for read and write
-	bool ramEnable; //will also enable RTC register
+	bool ramEnable;
 
 	// 5 bit MBC register
 	// Tells which ROM Bank to use
@@ -190,28 +190,6 @@ private:
 	// 2 bit mask
 	// Tells the number of bits of RAM Bank Number that are useful for RAM
 	Byte ramBankNumberMaskForRam;
-
-	bool setRTC;
-	Byte RTCval;
-	Byte RTC[5];
-	Byte RTCmax[5];
-	Byte dayCounter;
-	bool latch;
-	Byte numberOfYearsCount;
-	long long int numberofCyclescount;
-	long long int totalNumberofCyclescount;
-	/*struct tm
-	{
-		int tm_sec; // seconds of minutes from 0 to 61
-		int tm_min; // minutes of hour from 0 to 59
-		int tm_hour; // hours of day from 0 to 24
-		int tm_mday; // day of month from 1 to 31
-		int tm_mon; // month of year from 0 to 11
-		int tm_year; // year since 1900
-		int tm_wday; // days since sunday
-		int tm_yday; // days since January 1st
-		int tm_isdst; // hours of daylight savings time
-	};*/
 
 public:
 	Byte* joyPadState;
@@ -347,8 +325,4 @@ public:
 
 	// Change RAM Banking according to the set registers
 	void bankRam();
-
-	void setRTCRegisters(int value);
-
-	void updateRTCReg(int cycles);
 };

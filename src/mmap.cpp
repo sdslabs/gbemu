@@ -1,6 +1,5 @@
 #include "mmap.h"
 #include <cstring>
-#include <ctime>
 
 // Constructor
 MemoryMap::MemoryMap()
@@ -126,22 +125,6 @@ MemoryMap::MemoryMap()
 	ramBankNumberMaskForRom = 0;
 
 	ramBankNumberMaskForRam = 0;
-
-	RTCmax[0]=60;
-	RTCmax[1]=60;
-	RTCmax[2]=24;
-	RTCmax[3]=0xFF;
-	RTC[0]=0;
-	RTC[1]=0;
-	RTC[2]=0;
-	RTC[3]=0;
-	RTCmax[0]=60;
-	RTC[4]=0;
-	latch = false;
-	setRTC = false;
-	numberOfYearsCount = 0;
-	numberofCyclescount=0;
-	totalNumberofCyclescount = 0;
 }
 
 // Write to memory
@@ -150,7 +133,7 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 {
 	if (address < 0x2000)
 	{
-		// If values is 0x0A then external RAM and/or writing to RTC registers is enabled, else it is disabled
+		// If values is 0x0A then external RAM is enabled, else it is disabled
 		if (value == 0x0A)
 		{
 			ramEnable = true;
@@ -168,29 +151,14 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 	}
 	else if (address < 0x6000)
 	{
-		// Decide RAM Bank Number - if(val<=1b11) else if(08-0C) - RTC register -> read/written A000-BFFF mainly A000 - setRTC=true
-		if (value<=0b11)
-		{
-			ramBankNumber = (value & 0b11);
-			bankRom();
-			bankRam();
-			setRTC=false;
-		}
-		else if (value<=0b1100&&value>=0b100)
-		{
-			setRTC=true;
-			RTCval = value-8;
-		}
-		
+		// Decide RAM Bank Number
+		ramBankNumber = (value & 0b11);
+		bankRom();
+		bankRam();
 	}
 	else if (address < 0x8000)
 	{
-		// Decide Banking Mode Select - 
-		latch=false;
-		if(bankingModeSelect==0&&(value&0b1==1)) 
-		{
-			latch=true;
-		}
+		// Decide Banking Mode Select
 		bankingModeSelect = (value & 0b1);
 		bankRom();
 		bankRam();
@@ -205,17 +173,7 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 		// Write to External RAM if external RAM has been enabled
 		if (ramEnable)
 		{
-			if(setRTC) 
-			{
-				RTC[4] = 0b10111111&RTC[4];
-				RTC[4]+=0b01000000;
-				//overflow handle??
-				// RTC[RTCval] = value;
-				// if(latch) 
-					setRTCRegisters(value);
-				RTC[4]-=0b01000000;
-			}
-			else externalRam[address - 0xA000] = value;
+			externalRam[address - 0xA000] = value;
 		}
 	}
 	else if (address < 0xE000)
@@ -313,10 +271,6 @@ Byte MemoryMap::readMemory(Word address)
 	else if (address < 0xC000)
 	{
 		// Read from External RAM
-		if(setRTC) {
-			while ((RTC[4]&&0b01000000)) ;
-			return RTC[RTCval];
-		}
 		return externalRam[address - 0xA000];
 	}
 	else if (address < 0xE000)
@@ -505,7 +459,7 @@ void MemoryMap::bankRom()
 
 	if (completeBankNumber == 0)
 	{
-		//completeBankNumber += 1; //remove this for MBC3
+		completeBankNumber += 1;
 	}
 
 	completeBankNumber &= romBankNumberMask;
@@ -521,73 +475,4 @@ void MemoryMap::bankRam()
 	{
 		externalRam = ramBankList[(ramBankNumber & ramBankNumberMaskForRam) & (bankingModeSelect * 0b11)];
 	}
-}
-
-void MemoryMap::setRTCRegisters(int value)
-{
-	printf("hi");
-	int curr_set_time = RTCval;
-	while (curr_set_time<4&&value>0)
-	{
-		RTC[curr_set_time] = value%RTCmax[curr_set_time];
-		value = value/RTCmax[curr_set_time];
-		curr_set_time++;
-	}
-	if (value<=1)
-	{
-		RTC[4] = 0b11111110&RTC[4];
-		RTC[4] += value;
-		numberOfYearsCount+=value;
-	}
-	else
-	{
-		/*not really handled*/
-		RTC[4] = 0b01111111&RTC[4];
-		RTC[4] = 0b10000000;
-	}
-	
-}
-
-void MemoryMap::updateRTCReg(int cycles)
-{
-	totalNumberofCyclescount += cycles;
-	//printf("in update: %d\n",cycles);
-	if (!latch)
-	{
-		return;
-	}
-	int value = (int)(totalNumberofCyclescount) / 4194304;
-	if ((totalNumberofCyclescount) < 4194304)
-	{
-		return;
-	}
-	printf("testing : %d\n",totalNumberofCyclescount);
-	//struct tm *gmtime(const time_t *time);
-	// time_t now = time(0);
-	// tm* gmtm = gmtime(&now);
-	// RTC[0]=gmtm->tm_sec;
-	// RTC[1]=gmtm->tm_min;
-	//RTC[2]=
-	int curr_set_time = 0;
-	while (curr_set_time<4&&value>0)
-	{
-		RTC[curr_set_time] += value;
-		RTC[curr_set_time]%=RTCmax[curr_set_time];
-		value = value/RTCmax[curr_set_time];
-		curr_set_time++;
-	}
-	if (value<=1)
-	{
-		RTC[4] = 0b11111110&RTC[4];
-		RTC[4] += value;
-		numberOfYearsCount+=value;
-	}
-	else
-	{
-		/*not really handled*/
-		RTC[4] = 0b01111111&RTC[4];
-		RTC[4] = 0b10000000;
-	}
-	totalNumberofCyclescount=0;
-	latch = false;
 }
