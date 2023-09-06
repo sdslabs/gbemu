@@ -64,6 +64,47 @@ MemoryMap::MemoryMap()
 
 	// IF at 0xFF0F
 	reg_IF = ioPorts + 0x0F;
+
+	// LCDC at 0xFF40
+	reg_LCDC = ioPorts + 0x40;
+
+	// SCX at 0xFF43
+	reg_SCX = ioPorts + 0x43;
+
+	// SCY at 0xFF42
+	reg_SCY = ioPorts + 0x42;
+
+	// BGP at 0xFF47
+	reg_BGP = ioPorts + 0x47;
+
+	// OBP0 at 0xFF48
+	reg_OBP0 = ioPorts + 0x48;
+
+	// OBP1 at 0xFF49
+	reg_OBP1 = ioPorts + 0x49;
+
+	// LY at 0xFF44
+	reg_LY = ioPorts + 0x44;
+
+	// LYC at 0xFF45
+	reg_LYC = ioPorts + 0x45;
+
+	// STAT at 0xFF41
+	reg_STAT = ioPorts + 0x41;
+
+	// WY at 0xFF4A
+	reg_WY = ioPorts + 0x4A;
+
+	// WX at 0xFF4B
+	reg_WX = ioPorts + 0x4B;
+
+	joyPadState = new Byte;
+	*joyPadState = 0xFF;
+
+	bootRomFile = nullptr;
+	romFile = nullptr;
+
+	mbcMode = 0x0;
 }
 
 // Write to memory
@@ -72,7 +113,7 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 {
 	if (address < 0x8000)
 	{
-		printf("Writing to ROM is not allowed");
+		printf("Writing to ROM is not allowed! Write attempted at %04X", address);
 		return false;
 	}
 	else if (address < 0xA000)
@@ -113,6 +154,26 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 		// else write to I/O ports
 		if (address == 0xFF04)
 			*reg_DIV = 0x00;
+		// Check for DMA transfer
+		// Writing a loop instead of std::copy
+		// as memoury is not a single unit
+		// in our architecture
+		else if (address == 0xFF46)
+		{
+			Word val = value;
+			val = val << 8;
+			for (Word i = 0; i < 0xA0; i++)
+				oamTable[i] = readMemory(val + i);
+			ioPorts[address - 0xFF00] = value;
+		}
+		else if (address == 0xFF44)
+			*reg_LY = 0x00;
+		else if (address == 0xFF00)
+		{
+			readInput(value);
+		}
+		//if (value != 0xFF)
+		//printf("0x%02x\n", ioPorts[0]);}
 		else
 			ioPorts[address - 0xFF00] = value;
 	}
@@ -208,4 +269,53 @@ Byte MemoryMap::readMemory(Word address)
 Byte MemoryMap::operator[](Word address)
 {
 	return MemoryMap::readMemory(address);
+}
+
+void MemoryMap::readInput(Byte value)
+{
+	ioPorts[0] = (ioPorts[0] & 0xCF) | (value & 0x30);
+
+	Byte current = ioPorts[0] & 0xF0;
+
+	switch (current & 0x30)
+	{
+	case 0x10:
+		current = 0xD0;
+		current |= (((*joyPadState) >> 4) & 0x0F);
+		break;
+	case 0x20:
+		current = 0xE0;
+		current |= ((*joyPadState) & 0x0F);
+		break;
+	case 0x30:
+		current = 0xF0;
+		current |= 0x0F;
+		break;
+	}
+
+	if ((ioPorts[0] & (~current) & 0x0F) != 0)
+		(*reg_IF) |= 0x10;
+
+	ioPorts[0] = current;
+}
+
+void MemoryMap::mapRom() {
+	// Load the Boot ROM
+	// Into the first 0x100 bytes
+	fread(romBank0, 1, 256, bootRomFile);
+
+	// Load Game ROM in Bank 0
+	// After offsetting for Boot ROM first
+	fseek(romFile, 0x100, SEEK_SET);
+
+	fread(romBank0 + 0x100, 1, 16128, romFile);
+	fread(romBank1, 1, 16384, romFile);
+
+	// Check 0x147 for MBC mode
+	mbcMode = romBank0[0x147];
+}
+
+void MemoryMap::unloadBootRom() {
+	fseek(romFile, 0x00, SEEK_SET);
+	fread(romBank0, 1, 256, romFile);
 }

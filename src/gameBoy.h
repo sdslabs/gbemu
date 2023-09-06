@@ -2,6 +2,7 @@
 #include "types.h"
 #include "cpu.h"
 #include "mmap.h"
+#include "graphics.h"
 
 // GBE stands for GameBoyEmulator
 
@@ -23,6 +24,9 @@ private:
 
 	// Pointer to the MemoryMap
 	MemoryMap* gbe_mMap;
+
+	// Pointer to the Graphics
+	PPU* gbe_graphics;
 
 	// File pointer for Boot ROM
 	FILE* bootROM;

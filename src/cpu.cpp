@@ -58,9 +58,6 @@ CPU::CPU()
 	// Set isHalted to false
 	isHalted = false;
 
-	// The debug logging file
-	outfile = fopen("logfile.txt", "w");
-
 	// TODO: check the initial state of IME
 	IMEFlag = -1;
 
@@ -3971,20 +3968,6 @@ int CPU::executeInstruction(Byte opcode)
 
 int CPU::executeNextInstruction()
 {
-	// Check if boot execution is complete
-	// If yes, we can do logging in debug log outfile
-	if (mMap->readMemory(0xFF50) == 0x01)
-	{
-		dumpState();
-	}
-
-	// Turn off logging
-	// If reached infinite loop
-	if (reg_PC.dat == 0xCC62)
-	{
-		fclose(outfile);
-	}
-
 	// Get the opcode
 	Byte opcode = (*mMap)[reg_PC.dat];
 	return (this->*method_pointer[opcode])();
@@ -7787,11 +7770,6 @@ int CPU::SET_7_A()
 	reg_PC.dat += 1;
 	debugPrint("SET 7, A\n");
 	return 4;
-}
-
-void CPU::dumpState()
-{
-	//fprintf(outfile, "A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X\n", reg_AF.hi, reg_AF.lo, reg_BC.hi, reg_BC.lo, reg_DE.hi, reg_DE.lo, reg_HL.hi, reg_HL.lo, reg_SP.dat, reg_PC.dat, (*mMap)[reg_PC.dat], (*mMap)[reg_PC.dat + 1], (*mMap)[reg_PC.dat + 2], (*mMap)[reg_PC.dat + 3]);
 }
 
 // Checks for interrupts and services them if needed

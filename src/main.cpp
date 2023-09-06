@@ -1,10 +1,7 @@
-#include <iostream>
 #include "gameBoy.h"
 
-int main()
+int main(int argv, char** argc)
 {
-	std::cout << "Hello World!";
-
 	GBE* gbe = new GBE();
 
 	return 0;

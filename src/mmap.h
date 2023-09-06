@@ -8,6 +8,11 @@
 class MemoryMap
 {
 private:
+	Byte mbcMode;
+
+	FILE *bootRomFile;
+	FILE *romFile;
+
 	// First ROM Bank
 	// 16 KB 0x0000 - 0x3FFF
 	// Contains the first 16 KB of the ROM
@@ -88,12 +93,60 @@ private:
 	// Signals which interrupt must take place
 	Byte* reg_IF;
 
+	// The LCD Control Register
+	// Stays in the I/O Ports at 0xFF40
+	Byte* reg_LCDC;
+
+	// The SCX Register
+	// Stays in the I/O Ports at 0xFF43
+	Byte* reg_SCX;
+
+	// The SCY Register
+	// Stays in the I/O Ports at 0xFF42
+	Byte* reg_SCY;
+
+	// The BGP Register
+	// Stays in the I/O Ports at 0xFF47
+	Byte* reg_BGP;
+
+	// The OBP0 Register
+	// Stays in the I/O Ports at 0xFF48
+	Byte* reg_OBP0;
+
+	// The OBP1 Register
+	// Stays in the I/O Ports at 0xFF49
+	Byte* reg_OBP1;
+
+	// The LY Register
+	// Stays in the I/O Ports at 0xFF44
+	Byte* reg_LY;
+
+	// The LYC Register
+	// Stays in the I/O Ports at 0xFF45
+	Byte* reg_LYC;
+
+	// The STAT Register
+	// Stays in the I/O Ports at 0xFF41
+	Byte* reg_STAT;
+
+	// The WY Register
+	// Stays in the I/O Ports at 0xFF4A
+	Byte* reg_WY;
+
+	// The WX Register
+	// Stays in the I/O Ports at 0xFF4B
+	Byte* reg_WX;
+
 public:
+	Byte* joyPadState;
+
 	// Constructor
 	MemoryMap();
 
 	// Destructor
 	~MemoryMap();
+
+	void readInput(Byte value);
 
 	// Returns the ROM Bank 0
 	Byte* getRomBank0() const { return romBank0; }
@@ -138,6 +191,12 @@ public:
 	// increments the divider register
 	void updateDividerRegister() { (*reg_DIV)++; }
 
+	// Map the boot and game to memory4
+	void mapRom();
+
+	// Unload boot ROM after boot execution
+	void unloadBootRom();
+
 	// gets the reg_TAC
 	Byte getRegTAC() { return *reg_TAC; }
 
@@ -153,9 +212,57 @@ public:
 	// gets the reg_IE
 	Byte getRegIE() { return *interruptEnableRegister; }
 
+	// gets the reg_LCDC
+	Byte getRegLCDC() { return *reg_LCDC; }
+
+	// gets the reg_SCX
+	Byte getRegSCX() { return *reg_SCX; }
+
+	// gets the reg_SCY
+	Byte getRegSCY() { return *reg_SCY; }
+
+	// gets the reg_BGP
+	Byte getRegBGP() { return *reg_BGP; }
+
+	// gets the reg_OBP0
+	Byte getRegOBP0() { return *reg_OBP0; }
+
+	// gets the reg_OBP1
+	Byte getRegOBP1() { return *reg_OBP1; }
+
+	// gets the reg_LY
+	Byte getRegLY() { return *reg_LY; }
+
+	// gets the reg_LYC
+	Byte getRegLYC() { return *reg_LYC; }
+
+	// gets the reg_STAT
+	Byte getRegSTAT() { return *reg_STAT; }
+
+	// gets the reg_WY
+	Byte getRegWY() { return *reg_WY; }
+
+	// gets the reg_WX
+	Byte getRegWX() { return *reg_WX; }
+
 	// sets the reg_TIMA
 	void setRegTIMA(Byte value) { *reg_TIMA = value; }
 
 	// sets the reg_IF to request an interrupt
 	void setRegIF(Byte value) { *reg_IF |= value; }
+
+	// sets the reg_LY
+	void setRegLY(Byte value) { *reg_LY = value; }
+
+	// sets the reg_STAT
+	void setRegSTAT(Byte value) { *reg_STAT = value; }
+
+	// sets the reg_WY
+	void setRegWY(Byte value) { *reg_WY = value; }
+
+	// sets the boot ROM
+	void setBootRomFile(FILE* file) { bootRomFile = file; }
+
+	// sets the ROM file
+	void setRomFile(FILE* file) { romFile = file; }
 };
