@@ -419,7 +419,7 @@ void MemoryMap::mapRom()
 
 	// Set the RAM Existence Mask
 	// Tells if External RAM is available in the Cartridge
-	if ((mbcMode == 2 or mbcMode == 3) and ramBanks > 0)
+	if ((mbcMode == 2 || mbcMode == 3) && ramBanks > 0)
 	{
 		ramExistenceMask = 1;
 	}

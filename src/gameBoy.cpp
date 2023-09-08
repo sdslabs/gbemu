@@ -15,6 +15,10 @@ GBE::GBE()
 	// Initialize the Graphics
 	gbe_graphics = new PPU();
 
+	// Initialize the APU
+	gbe_sound = new APU();
+
+
 	// Unify the CPU and MemoryMap
 	gbe_cpu->setMemory(gbe_mMap);
 
@@ -24,14 +28,19 @@ GBE::GBE()
 	// Unify the PPU and MmeoryMap
 	gbe_graphics->setMemoryMap(gbe_mMap);
 
+	// Unify the CPU and MemoryMap
+	gbe_sound->setMemoryMap(gbe_mMap);
+
+	gbe_sound->test();
+
 	gbe_graphics->init();
 
 	// Open the Boot ROM
-	if ((bootROM = fopen("../src/dmg_boot.gb", "rb")) == NULL)
+	if ((bootROM = fopen("../../../src/dmg_boot.gb", "rb")) == NULL)
 		printf("boot rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/pkmnred.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../../../tests/pacman.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Set the Boot ROM
@@ -98,7 +107,6 @@ GBE::GBE()
 	gbe_mMap->debugWriteMemory(0x133, 0x3E);
 
 	executeBootROM();
-
 	update();
 }
 
