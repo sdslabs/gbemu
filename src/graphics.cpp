@@ -38,6 +38,7 @@ bool PPU::init()
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
 	{
 		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+		SDL_Quit();
 		return false;
 	}
 
@@ -45,6 +46,7 @@ bool PPU::init()
 	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
 	{
 		printf("Hardware Acceleration not enabled! SDL_Error: %s\n", SDL_GetError());
+		SDL_Quit();
 		return false;
 	}
 
@@ -52,6 +54,7 @@ bool PPU::init()
 	if (!SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1"))
 	{
 		printf("VSync not enabled! SDL_Error: %s\n", SDL_GetError());
+		SDL_Quit();
 		return false;
 	}
 
@@ -59,12 +62,14 @@ bool PPU::init()
 	if (!(window = SDL_CreateWindow("GameBoy Emulator", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, SDL_WINDOW_SHOWN)))
 	{
 		printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+		SDL_Quit();
 		return false;
 	}
 
 	if (!(renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)))
 	{
 		printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
+		SDL_Quit();
 		return false;
 	}
 
