@@ -253,6 +253,9 @@ public:
 
 	// gets the reg_TAC
 	Byte getRegTAC() { return *reg_TAC; }
+	
+	// gets the reg_DIV
+	Byte getRegDIV() { return *reg_DIV; }
 
 	// gets the reg_TMA
 	Byte getRegTMA() { return *reg_TMA; }

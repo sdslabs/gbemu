@@ -31,16 +31,19 @@ GBE::GBE()
 	// Unify the CPU and MemoryMap
 	gbe_sound->setMemoryMap(gbe_mMap);
 
-	gbe_sound->test();
-
+	// SDL_INIT_AUDIO and SDL_INIT_VIDEO both are initilised in graphics.cpp
+	// Don't change ordering of gbe_graphics and gbe_sound
 	gbe_graphics->init();
+
+	gbe_sound->init();
+	gbe_sound->test();
 
 	// Open the Boot ROM
 	if ((bootROM = fopen("../../../src/dmg_boot.gb", "rb")) == NULL)
 		printf("boot rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../../../tests/pacman.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../../../tests/tetris.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Set the Boot ROM
@@ -123,6 +126,9 @@ void GBE::update()
 		// update the DIV and TIMA timers
 		gbe_cpu->updateTimers(s_Cycles);
 		gbe_graphics->executePPU(s_Cycles);
+		// this runs at a freq of around 27 * freq(DIV) = 442368 Hz
+		// this is probably enough to implement APU
+		gbe_sound->executeAPU();
 		s_Cycles = 0;
 		s_Cycles += gbe_cpu->performInterrupt();
 		gbe_graphics->pollEvents();

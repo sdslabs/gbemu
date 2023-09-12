@@ -9,27 +9,72 @@ class PulseChannel
 private:
     // https://gbdev.io/pandocs/Audio_Registers.html
     
+    // The address of register NRx1; x can be 1 or 2 
+    Word regAddr = 0;
+
+    // NRx0, NRx1, NRx2, NRx3, NRx4
+	Word NR[5];
+
+    MemoryMap* mMap;
+
+    bool sweepPresent;
+
+    bool enable;
+
+    Byte volume;
+
     // NRx0 
     Byte sweepPace;
+    Byte sweepPaceClock;
     Byte sweepChange;
     Byte sweepSlope;
+
 
     // NRx1 
     Byte waveDuty;
     Byte lengthTimer;
+    Byte lengthTimerClock;
 
     // NRx2
     Byte envelopeVolume;
     Byte envelopeDirection;
     Byte envelopeSweepPace;
+    Byte envelopeSweepPaceClock;
 
     // Nrx3
     // needs 11 bits - 3 bits from NRX4 + 8 bits from NRx3  
     Word periodValue; 
+    Word periodValueTemp; 
+    Word periodValueClock; 
 
     // NRx4
     bool trigger;
     bool soundLengthEnable;
+
+    // Distribution of wave-form over range of 8 cycles
+    // https://gbdev.io/pandocs/Audio_Registers.html#ff11--nr11-channel-1-length-timer--duty-cycle
+    bool waveDutyTab[4][8] = 
+    {
+        {1, 1, 1, 1, 1, 1, 1, 0},
+        {0, 1, 1, 1, 1, 1, 1, 0},
+        {0, 1, 1, 1, 1, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0, 1}
+    };
+
+    Byte WaveDutyCounter;
+
+
+
+public:
+    PulseChannel();
+    bool init(Byte channelNum);
+    void run(Byte rateDIV);
+    void enableAndLoad();
+    void setMemoryMap(MemoryMap* m){  mMap = m;}
+    bool checkTrigger();
+    void takeSample();
+    Byte getVolume();
+    bool checkEnable();
 
 };
 
@@ -95,6 +140,11 @@ private:
     // memory map     
     MemoryMap* mMap;
 
+    // DIV-APU Counter
+    // https://gbdev.io/pandocs/Audio_details.html#div-apu
+    // increases every 512Hz
+    Byte rateDIV;
+
     // Audio Controllers
     bool enableOutput;
     bool channelEnable[4];
@@ -119,6 +169,7 @@ private:
 public:
     APU();
     bool init();
+    void executeAPU();
     void setMemoryMap(MemoryMap* m){ mMap = m; }
     void test();
 
