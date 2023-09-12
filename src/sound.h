@@ -145,6 +145,16 @@ private:
     // increases every 512Hz
     Byte rateDIV;
 
+    // Buffer Size
+    unsigned int bufferSize = 4096;
+    // Buffer
+    float buffer[4096] = {0}; 
+
+    unsigned int bufferIndex = 0; 
+
+    int sampleRate; 
+    int sampleRateTimer; 
+
     // Audio Controllers
     bool enableOutput;
     bool channelEnable[4];

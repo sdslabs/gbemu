@@ -43,7 +43,7 @@ GBE::GBE()
 		printf("boot rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../../../tests/tetris.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../../../tests/pacman.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Set the Boot ROM

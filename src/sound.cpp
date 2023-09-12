@@ -16,6 +16,8 @@ APU::APU()
 	rateDIV = 0;
 
     soundPann = 0;
+	sampleRate = 32;
+	sampleRateTimer = 0;
 
     enableVINLeft = 0;
     enableVINRight = 0;
@@ -37,7 +39,7 @@ bool APU::init(){
     wanted.freq = 44100;
     wanted.format = AUDIO_F32SYS;
     wanted.channels = 2;    /* 1 = mono, 2 = stereo */
-    wanted.samples = 4096;  
+    wanted.samples = bufferSize;  
     wanted.callback = NULL;
     wanted.userdata = NULL;
 
@@ -56,7 +58,6 @@ bool APU::init(){
 	
 	channel1->init(1);
 	channel2->init(2);
-
 }
 
 
@@ -75,15 +76,41 @@ void APU::executeAPU()
 	if(channel1->checkEnable()){
 		channel1->takeSample();
 	}
+	if(channel2->checkEnable()){
+		channel2->takeSample();
+	}
 	// printf("volume from channel 1: %d\n", channel1->getVolume());
-	
+
 	if(((mMap->getRegDIV() & 0b1000) >> 3 ) == 1){
 		rateDIV = (rateDIV + 1) % 8;
 
 		channel1->run(rateDIV);
+		channel2->run(rateDIV);
 	}
 
-	
+	if( sampleRateTimer == 0 ){
+		float vol = 0;
+		float vol1 = (float)channel1->getVolume() / 100;
+		float vol2 = (float)channel2->getVolume() / 100;
+
+		SDL_MixAudioFormat((Uint8*)&vol, (Uint8*)&vol1, AUDIO_F32SYS, sizeof(float), SDL_MIX_MAXVOLUME);
+		SDL_MixAudioFormat((Uint8*)&vol, (Uint8*)&vol2, AUDIO_F32SYS, sizeof(float), SDL_MIX_MAXVOLUME);
+
+		buffer[bufferIndex] = vol;
+		buffer[bufferIndex + 1] = vol;
+		bufferIndex += 2;
+	}
+	sampleRateTimer = (sampleRateTimer + 1) % sampleRate;
+
+	if(bufferIndex >= bufferSize){
+		bufferIndex = 0;
+
+		while(SDL_GetQueuedAudioSize(audioDeviceID) > bufferSize * sizeof(float)){
+			SDL_Delay(1);
+		}
+
+		SDL_QueueAudio(audioDeviceID, buffer, bufferSize * sizeof(float) );
+	}
 }
 
 
