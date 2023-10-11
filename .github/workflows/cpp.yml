@@ -33,6 +33,7 @@ jobs:
             echo "SDL2_DIR=${{ github.workspace }}/SDL2/SDL2-2.0.14" >> $GITHUB_ENV
             echo "SDL2_LIB=${{ github.workspace }}/SDL2/SDL2-2.0.14/lib/x64" >> $GITHUB_ENV
             echo "SDL2_INCLUDE=${{ github.workspace }}/SDL2/SDL2-2.0.14/include" >> $GITHUB_ENV
+            ls $SDL2_DIR
           fi
 
       - name: build
