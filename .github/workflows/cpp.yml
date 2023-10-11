@@ -28,17 +28,16 @@ jobs:
             brew install SDL2_image
           fi
           if [ "$RUNNER_OS" == "Windows" ]; then
-            mkdir SDL2
-            curl -L -O https://www.libsdl.org/release/SDL2-devel-2.0.14-mingw.tar.gz
-            tar xzf SDL2-devel-2.0.14-mingw.tar.gz -C SDL2
-            ls SDL2/SDL2-2.0.14/
+            curl -L -O https://www.libsdl.org/release/SDL2-devel-2.0.14-VC.zip
+            7z x SDL2-devel-2.0.14-VC.zip -oSDL2
+            ls SDL2/SDL2-2.0.14/cmake
           fi
 
       - name: build
         shell: bash
         run: |
           if [ "$RUNNER_OS" == "Windows" ]; then
-            export SDL2_DIR=${{ github.workspace }}/SDL2/SDL2-2.0.14/x86_64-w64-mingw32
+            export SDL2_DIR=${{ github.workspace }}/SDL2/SDL2-2.0.14/cmake
           fi
           mkdir build
           cd build
