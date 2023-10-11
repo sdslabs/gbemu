@@ -33,6 +33,10 @@ jobs:
             brew install SDL2
             brew install SDL2_image
           fi
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            choco install sdl2
+            choco list --local-only
+          fi
           mkdir build
           cd build
           cmake ..
