@@ -34,6 +34,7 @@ jobs:
             brew install SDL2_image
           fi
           if [ "$RUNNER_OS" == "Windows" ]; then
+            choco upgrade chocolatey
             choco install sdl2
             choco list --local-only
           fi
