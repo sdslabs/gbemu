@@ -36,7 +36,7 @@ jobs:
         shell: bash
         run: |
           if [ "$RUNNER_OS" == "Windows" ]; then
-            export SDL2_DIR=${{ github.workspace }}\\SDL2\\SDL2-2.28.4\\cmake
+            export SDL2_DIR=D:\\a\\gbemu\\gbemu\\SDL2\\SDL2-2.28.4\\cmake
             ls $SDL2_DIR
             echo $SDL2_DIR
           fi
