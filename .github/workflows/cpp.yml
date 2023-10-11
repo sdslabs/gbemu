@@ -30,10 +30,10 @@ jobs:
           if [ "$RUNNER_OS" == "Windows" ]; then
             curl -L -O https://www.libsdl.org/release/SDL2-devel-2.0.14-VC.zip
             7z x SDL2-devel-2.0.14-VC.zip -oSDL2
-            echo SDL2_DIR="${{ github.workspace }}/SDL2/SDL2-2.0.14" >> $GITHUB_ENV
-            echo SDL2_LIB="${{ github.workspace }}/SDL2/SDL2-2.0.14/lib/x64" >> $GITHUB_ENV
-            echo SDL2_INCLUDE="${{ github.workspace }}/SDL2/SDL2-2.0.14/include" >> $GITHUB_ENV
-            ls $SDL2_DIR
+            echo "SDL2_DIR=${{ github.workspace }}/SDL2/SDL2-2.0.14" >> $GITHUB_ENV
+            echo "SDL2_LIB=${{ github.workspace }}/SDL2/SDL2-2.0.14/lib/x64" >> $GITHUB_ENV
+            echo "SDL2_INCLUDE=${{ github.workspace }}/SDL2/SDL2-2.0.14/include" >> $GITHUB_ENV
+            ls SDL2/SDL2-2.0.14/
           fi
 
       - name: build
