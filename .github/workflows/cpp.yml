@@ -35,7 +35,7 @@ jobs:
           fi
           if [ "$RUNNER_OS" == "Windows" ]; then
             choco upgrade chocolatey
-            choco install sdl2
+            choco install SDL2
             choco list --local-only
           fi
           mkdir build
