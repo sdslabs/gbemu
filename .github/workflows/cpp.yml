@@ -29,7 +29,7 @@ jobs:
           fi
           if [ "$RUNNER_OS" == "Windows" ]; then
             curl -L -O https://www.libsdl.org/release/SDL2-devel-2.0.14-mingw.zip
-            7z x SDL2-devel-2.0.14-VC.zip -oSDL2
+            7z x SDL2-devel-2.0.14-mingw.zip -oSDL2
             ls SDL2/SDL2-2.0.14/
           fi
 
