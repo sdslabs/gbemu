@@ -3,7 +3,7 @@
 #include "mmap.h"
 #include <stdio.h>
 #include <algorithm>
-#include <SDL.h>
+#include <SDL/SDL.h>
 #include <vector>
 
 struct Sprite
