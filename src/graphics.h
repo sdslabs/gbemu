@@ -3,8 +3,13 @@
 #include "mmap.h"
 #include <stdio.h>
 #include <algorithm>
-#include <SDL.h>
 #include <vector>
+
+#ifdef __linux__
+#include <SDL2/SDL.h>
+#else
+#include <SDL.h>
+#endif
 
 struct Sprite
 {
@@ -59,7 +64,7 @@ private:
 	// OBP1 register is the OBJ Palette 1 Data
 	Byte objPalette1;
 
-	// Internal window line counter 
+	// Internal window line counter
 	Byte hiddenWindowLineCounter;
 
 	// The GameBoy screen

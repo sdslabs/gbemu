@@ -299,7 +299,8 @@ void MemoryMap::readInput(Byte value)
 	ioPorts[0] = current;
 }
 
-void MemoryMap::mapRom() {
+void MemoryMap::mapRom()
+{
 	// Load the Boot ROM
 	// Into the first 0x100 bytes
 	fread(romBank0, 1, 256, bootRomFile);
@@ -315,7 +316,8 @@ void MemoryMap::mapRom() {
 	mbcMode = romBank0[0x147];
 }
 
-void MemoryMap::unloadBootRom() {
+void MemoryMap::unloadBootRom()
+{
 	fseek(romFile, 0x00, SEEK_SET);
 	fread(romBank0, 1, 256, romFile);
 }
