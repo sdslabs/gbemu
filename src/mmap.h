@@ -10,8 +10,8 @@ class MemoryMap
 private:
 	Byte mbcMode;
 
-	FILE *bootRomFile;
-	FILE *romFile;
+	FILE* bootRomFile;
+	FILE* romFile;
 
 	// First ROM Bank
 	// 16 KB 0x0000 - 0x3FFF
