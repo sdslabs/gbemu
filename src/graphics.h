@@ -3,8 +3,13 @@
 #include "mmap.h"
 #include <stdio.h>
 #include <algorithm>
-#include <SDL2/SDL.h>
 #include <vector>
+
+#ifdef __linux__
+	#include <SDL/SDL.h>
+#else
+	#include <SDL.h>
+#endif
 
 struct Sprite
 {
