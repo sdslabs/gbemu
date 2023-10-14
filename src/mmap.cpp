@@ -105,16 +105,63 @@ MemoryMap::MemoryMap()
 	romFile = nullptr;
 
 	mbcMode = 0x0;
+
+	romSize = 0x0;
+
+	ramSize = 0x0;
+
+	ramEnable = 0;
+
+	romBankNumber = 0;
+
+	ramBankNumber = 0;
+
+	bankingModeSelect = 0;
+
+	ramExistenceMask = 0;
+
+	romBankNumberMask = 0;
+
+	ramBankNumberMaskForRom = 0;
+
+	ramBankNumberMaskForRam = 0;
 }
 
 // Write to memory
 // TODO: Make emulation memory secure
 bool MemoryMap::writeMemory(Word address, Byte value)
 {
-	if (address < 0x8000)
+	if (address < 0x2000)
 	{
-		printf("Writing to ROM is not allowed! Write attempted at %04X", address);
-		return false;
+		// If values is 0x0A then external RAM is enabled, else it is disabled
+		if (value == 0x0A)
+		{
+			ramEnable = true;
+		}
+		else
+		{
+			ramEnable = false;
+		}
+	}
+	else if (address < 0x4000)
+	{
+		// Decide ROM Bank Number
+		romBankNumber = (value & 0b11111);
+		bankRom();
+	}
+	else if (address < 0x6000)
+	{
+		// Decide RAM Bank Number
+		ramBankNumber = (value & 0b11);
+		bankRom();
+		bankRam();
+	}
+	else if (address < 0x8000)
+	{
+		// Decide Banking Mode Select
+		bankingModeSelect = (value & 0b1);
+		bankRom();
+		bankRam();
 	}
 	else if (address < 0xA000)
 	{
@@ -123,8 +170,11 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 	}
 	else if (address < 0xC000)
 	{
-		// Write to External RAM
-		externalRam[address - 0xA000] = value;
+		// Write to External RAM if external RAM has been enabled
+		if (ramEnable)
+		{
+			externalRam[address - 0xA000] = value;
+		}
 	}
 	else if (address < 0xE000)
 	{
@@ -312,12 +362,117 @@ void MemoryMap::mapRom()
 	fread(romBank0 + 0x100, 1, 16128, romFile);
 	fread(romBank1, 1, 16384, romFile);
 
+	// MBC
+
 	// Check 0x147 for MBC mode
 	mbcMode = romBank0[0x147];
+
+	// Check 0x148 for ROM size
+	romSize = romBank0[0x148];
+
+	// Check 0x149 for RAM size
+	ramSize = romBank0[0x149];
+
+	// Seek to begining of ROM
+	fseek(romFile, 0x00, SEEK_SET);
+
+	// Get the ROM banks
+	romBankList = new Byte[2 << romSize][0x4000];
+	for (int i = 0; i < (2 << romSize); ++i)
+	{
+		memset(romBankList[i], 0x00, 0x4000);
+	}
+	for (int i = 0; i < (2 << romSize); ++i)
+	{
+		fread(romBankList[i], 1, 16384, romFile);
+	}
+
+	// Set RAM banks
+	int ramBanks = 0;
+	switch (ramSize)
+	{
+	case 0:
+		ramBanks = 0;
+		break;
+	case 2:
+		ramBanks = 1;
+		break;
+	case 3:
+		ramBanks = 4;
+		break;
+	case 4:
+		ramBanks = 16;
+		break;
+	case 5:
+		ramBanks = 8;
+		break;
+	}
+	ramBankList = new Byte[ramBanks][0x2000];
+	for (int i = 0; i < ramBanks; ++i)
+	{
+		memset(ramBankList[i], 0x00, 0x2000);
+	}
+	if (ramBanks > 0)
+	{
+		externalRam = ramBankList[0];
+	}
+
+	// Set the RAM Existence Mask
+	// Tells if External RAM is available in the Cartridge
+	if ((mbcMode == 2 or mbcMode == 3) and ramBanks > 0)
+	{
+		ramExistenceMask = 1;
+	}
+
+	// Set the ROM Bank Number Mask
+	// Tells the useful bits in the ROM Bank number depending on ROM size
+	romBankNumberMask = ((2 << romSize) < 0b100000) ? (2 << romSize) : 0b100000;
+	romBankNumberMask -= 1;
+
+	// Set the RAM Bank Number Mask for ROM
+	// Tells the useful bits in the RAM Bank number for ROM depending on ROM size
+	if (romSize > 4)
+	{
+		ramBankNumberMaskForRom = ((1 << (romSize - 4)) < 0b100) ? (1 << (romSize - 4)) : 0b100;
+		ramBankNumberMaskForRom -= 1;
+	}
+
+	// Set the RAM Bank Number Mask for RAM
+	// Tells the useful bits in the RAM Bank number for RAM depending on RAM size
+	if (ramBanks > 0)
+	{
+		ramBankNumberMaskForRam = (ramBanks < 0b100) ? ramBanks : 0b100;
+		ramBankNumberMaskForRam -= 1;
+	}
 }
 
 void MemoryMap::unloadBootRom()
 {
 	fseek(romFile, 0x00, SEEK_SET);
 	fread(romBank0, 1, 256, romFile);
+}
+
+void MemoryMap::bankRom()
+{
+
+	Byte completeBankNumber = romBankNumber;
+
+	if (completeBankNumber == 0)
+	{
+		completeBankNumber += 1;
+	}
+
+	completeBankNumber &= romBankNumberMask;
+	completeBankNumber |= ((ramBankNumber & ramBankNumberMaskForRom) << 5);
+
+	romBank0 = romBankList[((ramBankNumber & ramBankNumberMaskForRom) << 5) & (bankingModeSelect * 0b1100000)];
+	romBank1 = romBankList[completeBankNumber];
+}
+
+void MemoryMap::bankRam()
+{
+	if (ramExistenceMask)
+	{
+		externalRam = ramBankList[(ramBankNumber & ramBankNumberMaskForRam) & (bankingModeSelect * 0b11)];
+	}
 }
