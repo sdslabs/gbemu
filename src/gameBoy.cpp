@@ -111,10 +111,10 @@ void GBE::update()
 	{
 		// Execute the next instruction
 		s_Cycles += gbe_cpu->executeNextInstruction();
-
 		// update the DIV and TIMA timers
 		gbe_cpu->updateTimers(s_Cycles);
 		gbe_graphics->executePPU(s_Cycles);
+		gbe_mMap->updateRTCReg(s_Cycles);
 		s_Cycles = 0;
 		s_Cycles += gbe_cpu->performInterrupt();
 		gbe_graphics->pollEvents();
@@ -128,6 +128,7 @@ void GBE::executeBootROM()
 		s_Cycles += gbe_cpu->executeNextInstruction();
 		gbe_cpu->updateTimers(s_Cycles);
 		gbe_graphics->executePPU(s_Cycles);
+		gbe_mMap->updateRTCReg(s_Cycles);
 		s_Cycles = 0;
 		s_Cycles += gbe_cpu->performInterrupt();
 	}

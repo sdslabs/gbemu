@@ -137,6 +137,88 @@ private:
 	// Stays in the I/O Ports at 0xFF4B
 	Byte* reg_WX;
 
+	// Number indicating number of ROM Banks available
+	// Number of ROM Banks = ( 2 << romSize )
+	Byte romSize;
+
+	// Number of RAM Banks available
+	// Number of	ramSize		RAM Banks
+	//				0			0
+	//				2			1
+	//				3			4
+	//				4			16
+	//				5			8
+	Byte ramSize;
+
+	// All ROM Banks
+	// 16KiB each
+	Byte (*romBankList)[0x4000];
+
+	// All RAM Banks
+	// 8KiB each
+	Byte (*ramBankList)[0x2000];
+
+	// 1 bit MBC register
+	// Tells whether External RAM is enabled for read and write
+	bool ramEnable; //will also enable RTC register
+
+	// 5 bit MBC register
+	// Tells which ROM Bank to use
+	Byte romBankNumber;
+
+	// 2 bit MBC register
+	// Tells which RAM Bank to use
+	// Might also tell which ROM Bank to use in case of ROM > 512KiB
+	Byte ramBankNumber;
+
+	// 1 bit MBC register
+	// Selects the banking mode
+	bool bankingModeSelect;
+
+	// 1 bit mask
+	// Tells if External RAM is available in the Cartridge
+	bool ramExistenceMask;
+
+	// 5 bit mask
+	// Tells the number of bits of ROM Bank Number that are useful
+	Byte romBankNumberMask;
+
+	// 2 bit mask
+	// Tells the number of bits of RAM Bank Number that are useful for ROM
+	Byte ramBankNumberMaskForRom;
+
+	// 2 bit mask
+	// Tells the number of bits of RAM Bank Number that are useful for RAM
+	Byte ramBankNumberMaskForRam;
+
+	//1 bit boolean value
+	// Selects RAM banking (if false), RTC registers otherwise
+	bool setRTC;
+
+	// 4 bit Register number
+	// Specifies the register number amongst RTC registers
+	Byte RTCval;
+
+	// 5 RTC registers to hierachially store time
+	// RTC(0) S  RTC(1) M RTC(2) H RTC(3) DL RTC(4) DH
+	Byte RTC[5];
+
+	// Stores maximum allowed value for each RTC register like 59 for RTC(0) S
+	Byte RTCmax[5];
+
+	// 1 bit boolean value
+	// To update the timer
+	bool latch;
+
+	// To disallow simultaneous writes
+	bool halt;
+
+	// Counts total number of years
+	Byte numberOfYearsCount;
+
+	// Stores total number of new cycles before latching
+	long long int totalNumberofCyclescount;
+
 public:
 	Byte* joyPadState;
 
@@ -265,4 +347,16 @@ public:
 
 	// sets the ROM file
 	void setRomFile(FILE* file) { romFile = file; }
+	
+	// Change ROM Banking according to the set registers
+	void bankRom();
+
+	// Change RAM Banking according to the set registers
+	void bankRam();
+
+	// Sets the value of RTC registers upon write call
+	void setRTCRegisters(int value);
+
+	// Updates the RTC registers with new time to be latched
+	void updateRTCReg(int cycles);
 };

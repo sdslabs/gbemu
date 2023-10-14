@@ -1,5 +1,6 @@
 #include "mmap.h"
 #include <cstring>
+#include <ctime>
 
 // Constructor
 MemoryMap::MemoryMap()
@@ -105,16 +106,96 @@ MemoryMap::MemoryMap()
 	romFile = nullptr;
 
 	mbcMode = 0x0;
+
+	romSize = 0x0;
+
+	ramSize = 0x0;
+
+	ramEnable = 0;
+
+	romBankNumber = 0;
+
+	ramBankNumber = 0;
+
+	bankingModeSelect = 0;
+
+	ramExistenceMask = 0;
+
+	romBankNumberMask = 0;
+
+	ramBankNumberMaskForRom = 0;
+
+	ramBankNumberMaskForRam = 0;
+
+	RTCmax[0] = 60;
+	RTCmax[1] = 60;
+	RTCmax[2] = 24;
+	RTCmax[3] = 0xFF;
+	RTC[0] = 0;
+	RTC[1] = 0;
+	RTC[2] = 0;
+	RTC[3] = 0;
+	RTCmax[0] = 60;
+	RTC[4] = 0;
+	latch = false;
+	setRTC = false;
+	numberOfYearsCount = 0;
+	//numberofCyclescount = 0;
+	totalNumberofCyclescount = 0;
+	halt = false;
 }
 
 // Write to memory
 // TODO: Make emulation memory secure
 bool MemoryMap::writeMemory(Word address, Byte value)
 {
-	if (address < 0x8000)
+	if (address < 0x2000)
 	{
-		printf("Writing to ROM is not allowed! Write attempted at %04X", address);
-		return false;
+		// If values is 0x0A then external RAM and/or writing to RTC registers is enabled, else it is disabled
+		if (value == 0x0A)
+		{
+			ramEnable = true;
+		}
+		else
+		{
+			ramEnable = false;
+		}
+	}
+	else if (address < 0x4000)
+	{
+		// Decide ROM Bank Number
+		romBankNumber = (value & 0b11111);
+		bankRom();
+	}
+	else if (address < 0x6000)
+	{
+		// Decide RAM Bank Number - if(val<=1b11) else if(08-0C) - RTC register -> read/written A000-BFFF mainly A000 - setRTC=true
+		if (value <= 0b11)
+		{
+			ramBankNumber = (value & 0b11);
+			bankRom();
+			bankRam();
+			setRTC = false;
+		}
+		else if (value <= 0b1100 && value >= 0b100)
+		{
+			setRTC = true;
+			RTCval = value - 8;
+		}
+	}
+	else if (address < 0x8000)
+	{
+		// Decide Banking Mode Select 
+		// Checks for update registers call
+		if (bankingModeSelect == 0 && (value & 0b1 == 1))
+		{
+			latch = true;
+			updateRTCReg(0);
+		}
+		latch = false;
+		bankingModeSelect = (value & 0b1);
+		bankRom();
+		bankRam();
 	}
 	else if (address < 0xA000)
 	{
@@ -123,8 +204,18 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 	}
 	else if (address < 0xC000)
 	{
-		// Write to External RAM
-		externalRam[address - 0xA000] = value;
+		// Write to External RAM if external RAM has been enabled
+		if (ramEnable)
+		{
+			if (setRTC)
+			{
+				halt = true;
+				setRTCRegisters(value);
+				halt = false;
+			}
+			else
+				externalRam[address - 0xA000] = value;
+		}
 	}
 	else if (address < 0xE000)
 	{
@@ -172,8 +263,8 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 		{
 			readInput(value);
 		}
-		//if (value != 0xFF)
-		//printf("0x%02x\n", ioPorts[0]);}
+		// if (value != 0xFF)
+		// printf("0x%02x\n", ioPorts[0]);}
 		else
 			ioPorts[address - 0xFF00] = value;
 	}
@@ -221,6 +312,13 @@ Byte MemoryMap::readMemory(Word address)
 	else if (address < 0xC000)
 	{
 		// Read from External RAM
+		if (setRTC)
+		{
+			// printf("RTC[4]:%d",RTC[4]);
+			while ((halt))
+				;
+			return RTC[RTCval];
+		}
 		return externalRam[address - 0xA000];
 	}
 	else if (address < 0xE000)
@@ -312,12 +410,228 @@ void MemoryMap::mapRom()
 	fread(romBank0 + 0x100, 1, 16128, romFile);
 	fread(romBank1, 1, 16384, romFile);
 
+	// MBC
+
 	// Check 0x147 for MBC mode
 	mbcMode = romBank0[0x147];
+
+	// Check 0x148 for ROM size
+	romSize = romBank0[0x148];
+
+	// Check 0x149 for RAM size
+	ramSize = romBank0[0x149];
+
+	// Seek to begining of ROM
+	fseek(romFile, 0x00, SEEK_SET);
+
+	// Get the ROM banks
+	romBankList = new Byte[2 << romSize][0x4000];
+	for (int i = 0; i < (2 << romSize); ++i)
+	{
+		memset(romBankList[i], 0x00, 0x4000);
+	}
+	for (int i = 0; i < (2 << romSize); ++i)
+	{
+		fread(romBankList[i], 1, 16384, romFile);
+	}
+
+	// Set RAM banks
+	int ramBanks = 0;
+	switch (ramSize)
+	{
+	case 0:
+		ramBanks = 0;
+		break;
+	case 2:
+		ramBanks = 1;
+		break;
+	case 3:
+		ramBanks = 4;
+		break;
+	case 4:
+		ramBanks = 16;
+		break;
+	case 5:
+		ramBanks = 8;
+		break;
+	}
+	ramBankList = new Byte[ramBanks][0x2000];
+	for (int i = 0; i < ramBanks; ++i)
+	{
+		memset(ramBankList[i], 0x00, 0x2000);
+	}
+	if (ramBanks > 0)
+	{
+		externalRam = ramBankList[0];
+	}
+
+	// Set the RAM Existence Mask
+	// Tells if External RAM is available in the Cartridge
+	if ((mbcMode == 2 or mbcMode == 3) and ramBanks > 0)
+	{
+		ramExistenceMask = 1;
+	}
+
+	// Set the ROM Bank Number Mask
+	// Tells the useful bits in the ROM Bank number depending on ROM size
+	romBankNumberMask = ((2 << romSize) < 0b100000) ? (2 << romSize) : 0b100000;
+	romBankNumberMask -= 1;
+
+	// Set the RAM Bank Number Mask for ROM
+	// Tells the useful bits in the RAM Bank number for ROM depending on ROM size
+	if (romSize > 4)
+	{
+		ramBankNumberMaskForRom = ((1 << (romSize - 4)) < 0b100) ? (1 << (romSize - 4)) : 0b100;
+		ramBankNumberMaskForRom -= 1;
+	}
+
+	// Set the RAM Bank Number Mask for RAM
+	// Tells the useful bits in the RAM Bank number for RAM depending on RAM size
+	if (ramBanks > 0)
+	{
+		ramBankNumberMaskForRam = (ramBanks < 0b100) ? ramBanks : 0b100;
+		ramBankNumberMaskForRam -= 1;
+	}
 }
 
 void MemoryMap::unloadBootRom()
 {
 	fseek(romFile, 0x00, SEEK_SET);
 	fread(romBank0, 1, 256, romFile);
+}
+
+void MemoryMap::bankRom()
+{
+
+	Byte completeBankNumber = romBankNumber;
+
+	if (completeBankNumber == 0)
+	{
+		// completeBankNumber += 1; //remove this for MBC3
+	}
+
+	completeBankNumber &= romBankNumberMask;
+	completeBankNumber |= ((ramBankNumber & ramBankNumberMaskForRom) << 5);
+
+	romBank0 = romBankList[((ramBankNumber & ramBankNumberMaskForRom) << 5) & (bankingModeSelect * 0b1100000)];
+	romBank1 = romBankList[completeBankNumber];
+}
+
+void MemoryMap::bankRam()
+{
+	if (ramExistenceMask)
+	{
+		externalRam = ramBankList[(ramBankNumber & ramBankNumberMaskForRam) & (bankingModeSelect * 0b11)];
+	}
+}
+
+void MemoryMap::setRTCRegisters(int value)
+{
+	int currentSetIndex = RTCval;
+	while (latch)
+	{
+		/* wait till RTC completes getting updated */
+	}
+
+	if (currentSetIndex <= 1 && value >= 0)
+	{
+		RTC[currentSetIndex] = value & 0b00111111;
+	}
+	else if (currentSetIndex == 2)
+	{
+		RTC[currentSetIndex] = value & 0b00011111;
+	}
+	else if (currentSetIndex == 3)
+	{
+		RTC[currentSetIndex] = value;
+	}
+	else
+	{
+		RTC[currentSetIndex] = value & 0b11000001;
+	}
+}
+
+void MemoryMap::updateRTCReg(int cycles)
+{
+	if (RTC[4] & 0b01000000)
+		return;
+	totalNumberofCyclescount += cycles;
+	if (!latch || halt)
+	{
+		return;
+	}
+	int value = (int)(totalNumberofCyclescount) / 3035700;
+	if ((totalNumberofCyclescount) < 3035700)
+	{
+		latch = false;
+		return;
+	}
+	int currentSetIndex = 0;
+	while (currentSetIndex < 3 && value > 0)
+	{
+		if (RTC[currentSetIndex] < RTCmax[currentSetIndex])
+		{
+			RTC[currentSetIndex] += value;
+			value = RTC[currentSetIndex] / RTCmax[currentSetIndex];
+			RTC[currentSetIndex] %= RTCmax[currentSetIndex];
+			currentSetIndex++;
+		}
+		else
+		{
+			RTC[currentSetIndex] += value;
+			if (currentSetIndex < 2)
+			{
+				value = 0;
+				RTC[currentSetIndex] &= 0b00111111;
+			}
+			else
+			{
+				value = 0;
+				RTC[currentSetIndex] &= 0b00011111;
+			}
+			currentSetIndex++;
+		}
+	}
+	if (value == 0)
+	{
+		totalNumberofCyclescount = 0;
+		latch = false;
+		return;
+	}
+	long long int totalNumberOfDays = RTC[currentSetIndex] + 256 * ((RTC[4] & 1) ? 1 : 0) + value;
+	if (totalNumberOfDays > 0x1ff)
+	{
+		totalNumberOfDays = totalNumberOfDays % (0x1ff);
+		if (totalNumberOfDays < 256)
+		{
+			RTC[3] = totalNumberOfDays;
+			RTC[4] = RTC[4] & (0b11111110);
+		}
+		else
+		{
+			RTC[3] = totalNumberOfDays & (0b11111111);
+			RTC[4] = RTC[4] & (0b11111110);
+			if (totalNumberOfDays & 0b100000000)
+				RTC[4] += 1;
+		}
+		RTC[4] = RTC[4] & (0b01111111);
+		RTC[4] += (0b10000000);
+	}
+	else
+	{
+		if (totalNumberOfDays < 256)
+		{
+			RTC[3] = totalNumberOfDays;
+			RTC[4] = RTC[4] & (0b11111110);
+		}
+		else
+		{
+			RTC[3] = totalNumberOfDays & (0b11111111);
+			RTC[4] = RTC[4] & (0b11111110);
+			if (totalNumberOfDays & 0b100000000)
+				RTC[4] += 1;
+		}
+	}
+	totalNumberofCyclescount = 0;
+	latch = false;
 }
