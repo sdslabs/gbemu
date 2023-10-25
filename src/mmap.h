@@ -10,6 +10,7 @@ class MemoryMap
 private:
 	Byte mbcMode;
 
+	FILE* exit;
 	FILE* bootRomFile;
 	FILE* romFile;
 

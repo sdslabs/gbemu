@@ -1153,8 +1153,33 @@ public:
 	// get the Program Counter
 	Word get_reg_PC() { return reg_PC.dat; }
 
-	// get the HL register
-	Word get_reg_HL() { return reg_HL.dat; }
+	// // Accumulator and Flags
+	// Register reg_AF;
+
+	// // General Purpose Registers
+	// Register reg_BC;
+	// Register reg_DE;
+
+	// get value of A
+	Byte get_reg_A(){ return reg_AF.hi; }
+
+	// get register B
+	Byte get_reg_B() { return reg_BC.hi; }
+
+	// get register C
+	Byte get_reg_C() { return reg_BC.lo; }
+
+	// get register D
+	Byte get_reg_D() { return reg_DE.hi; }
+
+	// get register E
+	Byte get_reg_E() { return reg_DE.lo; }
+
+	// get register H
+	Byte get_reg_H() { return reg_HL.hi; }
+
+	// get register L
+	Byte get_reg_L() { return reg_HL.lo; }
 
 	// execute an arbitrary instruction
 	int executeInstruction(Byte opcode);

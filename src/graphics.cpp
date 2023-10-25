@@ -21,7 +21,6 @@ PPU::PPU()
 	currentLine = 0x00;
 	hiddenWindowLineCounter = 0x00;
 	ppuMode = 0x02;
-	event = new SDL_Event();
 
 	ppuMode = 0;
 	currentClock = modeClocks[ppuMode];
@@ -95,82 +94,6 @@ bool PPU::init()
 	SDL_RenderCopy(renderer, texture, NULL, NULL);
 	SDL_RenderPresent(renderer);
 	return true;
-}
-
-// Poll Events to check for inputs
-// And process them
-bool PPU::pollEvents()
-{
-	while (SDL_PollEvent(event))
-	{
-		if (event->key.type == SDL_KEYDOWN)
-		{
-			switch (event->key.keysym.sym)
-			{
-			case SDLK_LEFT:
-				*(mMap->joyPadState) &= 0xFD;
-				break;
-			case SDLK_RIGHT:
-				*(mMap->joyPadState) &= 0xFE;
-				break;
-			case SDLK_UP:
-				*(mMap->joyPadState) &= 0xFB;
-				break;
-			case SDLK_DOWN:
-				*(mMap->joyPadState) &= 0xF7;
-				break;
-			case SDLK_a:
-				*(mMap->joyPadState) &= 0xEF;
-				break;
-			case SDLK_s:
-				*(mMap->joyPadState) &= 0xDF;
-				break;
-			case SDLK_LSHIFT:
-				*(mMap->joyPadState) &= 0xBF;
-				break;
-			case SDLK_SPACE:
-				*(mMap->joyPadState) &= 0x7F;
-				break;
-			case SDLK_ESCAPE:
-				exit(0);
-			default:
-				break;
-			}
-		}
-		else if (event->key.type == SDL_KEYUP)
-		{
-			switch (event->key.keysym.sym)
-			{
-			case SDLK_LEFT:
-				*(mMap->joyPadState) |= 0x02;
-				break;
-			case SDLK_RIGHT:
-				*(mMap->joyPadState) |= 0x01;
-				break;
-			case SDLK_UP:
-				*(mMap->joyPadState) |= 0x04;
-				break;
-			case SDLK_DOWN:
-				*(mMap->joyPadState) |= 0x08;
-				break;
-			case SDLK_a:
-				*(mMap->joyPadState) |= 0x10;
-				break;
-			case SDLK_s:
-				*(mMap->joyPadState) |= 0x20;
-				break;
-			case SDLK_LSHIFT:
-				*(mMap->joyPadState) |= 0x40;
-				break;
-			case SDLK_SPACE:
-				*(mMap->joyPadState) |= 0x80;
-				break;
-			default:
-				break;
-			}
-		}
-	}
-	return false;
 }
 
 void PPU::renderScanline(Byte line)

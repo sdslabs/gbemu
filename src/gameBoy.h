@@ -17,6 +17,7 @@ private:
 	// Will upgrade it later for RGB colors of GBC and GBA
 	// Using Byte for now
 
+	bool debug_mode;
 	Byte screenData[160][144];
 
 	// Pointer to CPU
@@ -34,6 +35,9 @@ private:
 	// File pointer for game ROM
 	FILE* gameROM;
 
+	// Placeholder event for input handling
+	SDL_Event* event;
+
 	// Update function of the GBE
 	// Will be called every frame
 	// GB has 59.73 frames per second
@@ -47,11 +51,20 @@ private:
 	// execute it and then remove it
 	void executeBootROM();
 
+	// Debug intterupt handler
+	void debug_int();
+
+	// Poll Inputs
+	bool pollEvents();
+
+	// Get Value of Registers 
+	void getValueOfRegister(char registerName);
+
 public:
 	// Constructor
 	// Initializes the CPU
 	GBE();
 
 	// Returns the CPU
-	CPU* getCPU() { return gbe_cpu; };
+	CPU* getCPU() { return gbe_cpu; }
 };
