@@ -197,7 +197,8 @@ void GBE::debug_int()
 					// enter d for rdx
 					// enter c for rcx
 					// enter b for rbx
-					// enter E for E
+					// enter e for E
+					// enter p to print the stack
 					// enter e to exit info mode
 					while (infoMode)
 					{
@@ -236,7 +237,10 @@ void GBE::debug_int()
 									break;
 								case SDLK_l:
 									getValueOfRegister('L');
-									break;	
+									break;
+								case SDLK_p:
+									gbe_cpu->printStack();
+									break;		
 								case SDLK_x:
 									infoMode = false;
 									break;

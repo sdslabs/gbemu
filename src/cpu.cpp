@@ -3244,7 +3244,8 @@ int CPU::JP_u16()
 // CALL NZ, u16
 // Call subroutine at address u16 if zero flag is not set.
 int CPU::CALL_NZ_u16()
-{
+{	
+	pushAddress(reg_PC.dat);
 	if (!GET_ZERO_FLAG)
 	{
 		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) >> 8);
@@ -3298,6 +3299,7 @@ int CPU::ADD_A_u8()
 // Call subroutine at address 0x0000.
 int CPU::RST_00H()
 {
+	pushAddress(reg_PC.dat);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0000;
@@ -3366,6 +3368,7 @@ int CPU::PREFIX_CB()
 // Call subroutine at address u16 if zero flag is set.
 int CPU::CALL_Z_u16()
 {
+	pushAddress(reg_PC.dat);
 	if (GET_ZERO_FLAG)
 	{
 		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) >> 8);
@@ -3385,7 +3388,8 @@ int CPU::CALL_Z_u16()
 // CALL u16
 // Call subroutine at address u16.
 int CPU::CALL_u16()
-{
+{	
+	pushAddress(reg_PC.dat);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) & 0xFF);
 	reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
@@ -3420,6 +3424,7 @@ int CPU::ADC_A_u8()
 // Call subroutine at address 0x0008.
 int CPU::RST_08H()
 {
+	pushAddress(reg_PC.dat);	
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0008;
@@ -3486,6 +3491,7 @@ int CPU::UNKNOWN()
 // Call subroutine at address u16 if carry flag is not set.
 int CPU::NC_u16()
 {
+	pushAddress(reg_PC.dat);	
 	if (!GET_CARRY_FLAG)
 	{
 		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) >> 8);
@@ -3540,6 +3546,7 @@ int CPU::SUB_u8()
 // Call subroutine at address 0x0010.
 int CPU::RST_10H()
 {
+	pushAddress(reg_PC.dat);	
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0010;
@@ -3604,6 +3611,7 @@ int CPU::JP_C_u16()
 // Call subroutine at address u16 if carry flag is set.
 int CPU::CALL_C_u16()
 {
+	pushAddress(reg_PC.dat);	
 	if (GET_CARRY_FLAG)
 	{
 		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) >> 8);
@@ -3649,6 +3657,7 @@ int CPU::SBC_A_u8()
 // Call subroutine at address 0x0018.
 int CPU::RST_18H()
 {
+	pushAddress(reg_PC.dat);	
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0018;
@@ -3715,6 +3724,7 @@ int CPU::AND_A_u8()
 // Call subroutine at address 0x0020.
 int CPU::RST_20H()
 {
+	pushAddress(reg_PC.dat);	
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0020;
@@ -3787,6 +3797,7 @@ int CPU::XOR_A_u8()
 // Call subroutine at address 0x0028.
 int CPU::RST_28H()
 {
+	pushAddress(reg_PC.dat);	
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0028;
@@ -3873,6 +3884,7 @@ int CPU::OR_A_u8()
 // Call subroutine at address 0x0030.
 int CPU::RST_30H()
 {
+	pushAddress(reg_PC.dat);	
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0030;
@@ -3954,6 +3966,7 @@ int CPU::CP_u8()
 // Call subroutine at address 0x0038.
 int CPU::RST_38H()
 {
+	pushAddress(reg_PC.dat);	
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0038;
@@ -7878,5 +7891,21 @@ void CPU::updateTimers(int cycles)
 
 		// Write reg_TIMA value by calculting from our counter
 		mMap->setRegTIMA(timer_counter.tima / freq);
+	}
+}
+
+void CPU::pushAddress(Word address) {
+	callerAddresses.push((int)address);
+}
+
+// print elements of calleraddresses stack
+void CPU::printStack() {
+	// Create a copy of the original stack
+	std::stack<int> tempStack = callerAddresses;
+
+	// Print elements of the stack without emptying it
+	while (!tempStack.empty()) {
+		printf("%d\n", tempStack.top());
+		tempStack.pop();
 	}
 }
