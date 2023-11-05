@@ -8,3 +8,4 @@ typedef char SByte;
 typedef unsigned short Word;
 typedef signed short SWord;
 typedef unsigned int color;
+enum Channel { Pulse1 ,Pulse2, Wave, Noise }
