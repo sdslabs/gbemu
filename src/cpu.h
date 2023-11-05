@@ -27,9 +27,6 @@ class CPU
 
 private:
 
-	// Create a stack of caller addresses
-    std::stack<int> callerAddresses;
-
 	// Accumulator and Flags
 	Register reg_AF;
 
@@ -1201,9 +1198,5 @@ public:
 	// update the timers
 	void updateTimers(int cycles);
 
-	// add elements to calleraddresses stack 
-	void pushAddress(Word address);
-
-	// print elements of calleraddresses stack
 	void printStack();
 };
