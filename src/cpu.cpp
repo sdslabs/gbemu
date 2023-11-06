@@ -7883,6 +7883,7 @@ void CPU::updateTimers(int cycles)
 
 // print elements of calleraddresses stack
 void CPU::printStack() {
-	for(Word i = reg_SP.dat ; i < 0xCFFF ; i++)
-		printf("%hu",(*mMap)[i]);
+	printf("Printing Stack....");
+	for(Word i = reg_SP.dat ; i <= 0xCFFF ; i++)
+		printf("Address at stack_pointer %hu is %hu ", i, (*mMap)[i]);
 }
