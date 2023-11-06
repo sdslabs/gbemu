@@ -7885,5 +7885,5 @@ void CPU::updateTimers(int cycles)
 void CPU::printStack() {
 	printf("Printing Stack....");
 	for(Word i = reg_SP.dat ; i <= 0xCFFF ; i++)
-		printf("Address at stack_pointer %hu is %hu ", i, (*mMap)[i]);
+		printf("Address at stack_pointer %hu is %hu \n", i, (*mMap)[i]);
 }

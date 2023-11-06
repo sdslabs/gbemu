@@ -189,7 +189,7 @@ void GBE::debug_int()
 					shouldAdv = true;
 					break;
 				case SDLK_i:
-					printf("Info Mode:- ");
+					printf("Info Mode:- \n");
 					infoMode = true;
 					shouldAdv = true;
 					// Press r to print all registers
