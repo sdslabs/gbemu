@@ -1,10 +1,10 @@
-#include "types.h"
+#include "common/types.h"
 #include "graphics.h"
 
 PPU::PPU()
 {
 	// Initialize members
-	window = nullptr;
+//	window = nullptr;
 	renderer = nullptr;
 	texture = nullptr;
 	isEnabled = false;
@@ -48,12 +48,12 @@ bool PPU::init()
 		return false;
 	}
 
-	// Set hint for VSync
-	if (!SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1"))
-	{
-		printf("VSync not enabled! SDL_Error: %s\n", SDL_GetError());
-		return false;
-	}
+//	// Set hint for VSync
+//	if (!SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1"))
+//	{
+//		printf("VSync not enabled! SDL_Error: %s\n", SDL_GetError());
+//		return false;
+//	}
 
 	// Create window and renderer
 	if (!(window = SDL_CreateWindow("GameBoy Emulator", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, SDL_WINDOW_SHOWN)))
@@ -93,7 +93,7 @@ bool PPU::init()
 	SDL_UpdateTexture(texture, NULL, renderArray, 160 * 4);
 	SDL_RenderClear(renderer);
 	SDL_RenderCopy(renderer, texture, NULL, NULL);
-	SDL_RenderPresent(renderer);
+//	SDL_RenderPresent(renderer);
 	return true;
 }
 

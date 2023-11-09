@@ -1,4 +1,4 @@
-#include "types.h"
+#include "common/types.h"
 #include "cpu.h"
 #include <stdio.h>
 #ifndef DEBUG

@@ -1,8 +1,10 @@
-#include "types.h"
+#include "common/types.h"
 #include "cpu.h"
 #include "gameBoy.h"
 
 int GBE::s_Cycles;
+
+static int i = 0;
 
 GBE::GBE()
 {
@@ -27,11 +29,11 @@ GBE::GBE()
 	gbe_graphics->init();
 
 	// Open the Boot ROM
-	if ((bootROM = fopen("../src/dmg_boot.gb", "rb")) == NULL)
+	if ((bootROM = fopen("./roms/dmg_boot.gb", "rb")) == NULL)
 		printf("boot rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/Tetris.gb", "rb")) == NULL)
+	if ((gameROM = fopen("./roms/Tetris.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Set the Boot ROM
@@ -102,15 +104,18 @@ GBE::GBE()
 	update();
 }
 
-void GBE::update()
+int GBE::update()
 {
+//	printf("Updating\n");
 	// Update function of the GBE
 	// Will be called every frame
 	// GB has 59.73 frames per second
-	while (true)
+//	while (true)
+	int cycle = 0;
 	{
 		// Execute the next instruction
 		s_Cycles += gbe_cpu->executeNextInstruction();
+		cycle += s_Cycles;
 
 		// update the DIV and TIMA timers
 		gbe_cpu->updateTimers(s_Cycles);
@@ -118,7 +123,10 @@ void GBE::update()
 		s_Cycles = 0;
 		s_Cycles += gbe_cpu->performInterrupt();
 		gbe_graphics->pollEvents();
+		i++;
+//		printf("%d\n", i);
 	}
+	return cycle;
 }
 
 void GBE::executeBootROM()

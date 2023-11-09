@@ -1,5 +1,5 @@
 #pragma once
-#include "types.h"
+#include "common/types.h"
 #include "cpu.h"
 #include "mmap.h"
 #include "graphics.h"
@@ -34,11 +34,6 @@ private:
 	// File pointer for game ROM
 	FILE* gameROM;
 
-	// Update function of the GBE
-	// Will be called every frame
-	// GB has 59.73 frames per second
-	void update();
-
 	// cycle counter of the gameboy
 	// used by CPU, PPU, APU so declared here
 	static int s_Cycles;
@@ -52,6 +47,14 @@ public:
 	// Initializes the CPU
 	GBE();
 
+	// Update function of the GBE
+	// Will be called every frame
+	// GB has 59.73 frames per second
+	int update();
+
 	// Returns the CPU
 	CPU* getCPU() { return gbe_cpu; };
+	color* getRenderArray() const { return gbe_graphics->getRenderArray(); }
+
+	SDL_Texture* getSDLTexture() const { return gbe_graphics->getSDLTexture(); }
 };

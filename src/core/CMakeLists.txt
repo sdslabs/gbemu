@@ -1,30 +1,23 @@
-#add_subdirectory(core)
-
-add_executable(${PROJECT_NAME} main.cpp)
-
-add_subdirectory(gui)
 set(SOURCES
         # -------
         # Source Files
-        core/cpu.cpp
-        core/gameBoy.cpp
-        core/mmap.cpp
-        core/graphics.cpp
+        cpu.cpp
+        gameBoy.cpp
+        mmap.cpp
+        graphics.cpp
         # -------
         # Header Files
-        core/cpu.h
-        core/gameBoy.h
-        core/mmap.h
-        common/types.h
-        core/graphics.h
+        cpu.h
+        gameBoy.h
+        mmap.h
+        ../common/types.h
+        graphics.h
         )
 
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
-
-file(COPY ../roms DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
 if (MSVC)
     set_target_properties(

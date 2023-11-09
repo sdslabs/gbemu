@@ -4,4 +4,4 @@ build/
 cmake-build-debug/
 .idea/
 src/.vscode/
-src/dmg_boot.gb
+roms/*

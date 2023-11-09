@@ -1,5 +1,5 @@
 #pragma once
-#include "types.h"
+#include "common/types.h"
 #include "mmap.h"
 #include <stdio.h>
 #include <algorithm>
@@ -122,4 +122,7 @@ public:
 	void setMemoryMap(MemoryMap* m) { mMap = m; }
 	void executePPU(int cycles);
 	Byte getPPUMode() { return ppuMode; }
+
+	color* getRenderArray() { return renderArray; }
+	SDL_Texture* getSDLTexture() { return texture; }
 };
