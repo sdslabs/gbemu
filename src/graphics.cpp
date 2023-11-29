@@ -10,7 +10,7 @@ PPU::PPU()
 	isEnabled = false;
 	showBGWin = false;
 	showWindow = false;
-	//renderWindow = false;
+	// renderWindow = false;
 	mMap = nullptr;
 	bgTileDataAddr = 0x0000;
 	bgTileMapAddr = 0x0000;
@@ -21,6 +21,10 @@ PPU::PPU()
 	currentLine = 0x00;
 	hiddenWindowLineCounter = 0x00;
 	ppuMode = 0x02;
+	// Initialize debugger members
+	debugWindow = nullptr;
+	debugRenderer = nullptr;
+	debugTexture = nullptr;
 
 	ppuMode = 0;
 	currentClock = modeClocks[ppuMode];
@@ -28,6 +32,8 @@ PPU::PPU()
 	frameRendered = false;
 
 	// Fill renderArray initially with white (lightest color in palette)
+	std::fill(renderSprites, renderSprites + (160 * 144), bg_colors[0]);
+	std::fill(renderTiles, renderTiles + (160 * 144), bg_colors[0]);
 	std::fill(renderArray, renderArray + (160 * 144), bg_colors[0]);
 }
 
@@ -96,11 +102,105 @@ bool PPU::init()
 	return true;
 }
 
+bool PPU::debuggerInit()
+{
+	// Initialize SDL
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	{
+		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+		return false;
+	}
+
+	// Set hint to use hardware acceleration
+	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
+	{
+		printf("Hardware Acceleration not enabled! SDL_Error: %s\n", SDL_GetError());
+		return false;
+	}
+
+	// Set hint for VSync
+	if (!SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1"))
+	{
+		printf("VSync not enabled! SDL_Error: %s\n", SDL_GetError());
+		return false;
+	}
+
+	// Create window and renderer
+	if (!(debugWindow = SDL_CreateWindow("GameBoy Debugger", 0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, SDL_WINDOW_SHOWN)))
+	{
+		printf("Debugger Window could not be created! SDL_Error: %s\n", SDL_GetError());
+		return false;
+	}
+
+	if (!(debugRenderer = SDL_CreateRenderer(debugWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)))
+	{
+		printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
+		return false;
+	}
+	// Create a placeholder debugTexture
+	// 512x512 to have 4 copies of tilemap
+	debugTexture = SDL_CreateTexture(debugRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 160, 144);
+
+	listTiles();
+	// Render the debugTexture
+	SDL_UpdateTexture(debugTexture, NULL, renderTiles, 160 * 4);
+	SDL_RenderClear(debugRenderer);
+	SDL_RenderCopy(debugRenderer, debugTexture, NULL, NULL);
+	SDL_RenderPresent(debugRenderer);
+	return true;
+}
+
+void PPU::listBgMap()
+{
+	SDL_UpdateTexture(debugTexture, NULL, renderBGMap, 160 * 4);
+	SDL_RenderClear(debugRenderer);
+	SDL_RenderCopy(debugRenderer, debugTexture, NULL, NULL);
+	SDL_RenderPresent(debugRenderer);
+}
+
+void PPU::listSprites()
+{
+	if (!scanlineRendered)
+	{
+		renderScanline(mMap->getRegLY());
+		scanlineRendered = true;
+	}
+	SDL_UpdateTexture(debugTexture, NULL, renderSprites, 160 * 4);
+	SDL_RenderClear(debugRenderer);
+	SDL_RenderCopy(debugRenderer, debugTexture, NULL, NULL);
+	SDL_RenderPresent(debugRenderer);
+}
+
+// We are reading values from 0x8000 to 0x8fff
+// Outer loop increments for every new tile to be rendered
+// Middle loop increments for every line of tile
+// Inner loop increments for every pixel of line of tile.
+// We are printing 14 tiles in a row with gap of 2 between each tile { (tileNumber % 14) * 10) + j + 8) }
+void PPU::listTiles()
+{
+	int tileNumber = 0;
+	Byte pixel_col;
+	for (Word tileAddr = 0x8000; tileAddr < 0x8FFF; tileAddr += 0x10)
+	{
+		if ((*mMap)[tileAddr] == 0)
+			continue;
+		for (int i = 0; i < 8; i++)
+		{
+			for (int j = 0; j < 8; j++)
+			{
+				pixel_col = ((*mMap)[(tileAddr + 0x2 * (Word)i)] >> (7 - j) & 0x1) + (((*mMap)[(tileAddr + 0x2 * (Word)i) + 1] >> (7 - j) & 0x1) * 2);
+				renderTiles[((static_cast<int>(tileNumber / 14) * 10) + i) * 160 + (((tileNumber % 14) * 10) + j + 8)] = bg_colors[(bgPalette >> (pixel_col * 2)) & 0x3];
+			}
+		}
+		tileNumber += 1;
+	}
+}
+
 void PPU::renderScanline(Byte line)
 {
 	// Evaluate LCDC register
 	Byte LCDC = mMap->getRegLCDC();
-
+	int spriteCount = 0;
 	isEnabled = (LCDC & 0x80);
 	showBGWin = (LCDC & 0x1);
 	showWindow = (LCDC & 0x20);
@@ -169,9 +269,17 @@ void PPU::renderScanline(Byte line)
 		}
 
 		if (showBGWin)
+		{
 			renderArray[(line * 160) + j] = bg_colors[(bgPalette >> (bg_pixel_col * 2)) & 0x3];
+			renderSprites[(line * 160) + j] = bg_colors[0];
+			renderBGMap[(line * 160) + j] = bg_colors[(bgPalette >> (bg_pixel_col * 2)) & 0x3];
+		}
 		else
+		{
 			renderArray[(line * 160) + j] = bg_colors[0];
+			renderSprites[(line * 160) + j] = bg_colors[0];
+			renderBGMap[(line * 160) + j] = bg_colors[0];
+		}
 
 		// Window rendering
 		if (showBGWin && showWindow && ((win_y <= line) && (win_y < 144)) && (win_x < 160) && (hiddenWindowLineCounter < 144) && (j >= win_x))
@@ -199,6 +307,7 @@ void PPU::renderScanline(Byte line)
 	// Sprite rendering
 	if (showSprites)
 	{
+
 		sprites.clear();
 		for (Word i = 0xFE00; i < 0xFEA0; i += 4)
 		{
@@ -218,10 +327,12 @@ void PPU::renderScanline(Byte line)
 		}
 
 		if (sprites.size())
-			std::sort(sprites.begin(), sprites.end(), [](Sprite& a, Sprite& b) { return (((a.x == b.x) && (a.address > b.address)) || (a.x > b.x)); });
-
+			std::sort(sprites.begin(), sprites.end(), [](Sprite& a, Sprite& b)
+			    { return (((a.x == b.x) && (a.address > b.address)) || (a.x > b.x)); });
+		spriteCount = 0;
 		for (auto it = sprites.begin(); it != sprites.end(); ++it)
 		{
+
 			sprite_palette = (it->flags & 0x10) ? objPalette1 : objPalette0;
 			for (int i = 0; i < 8; i++)
 			{
@@ -248,9 +359,15 @@ void PPU::renderScanline(Byte line)
 				if (sprite_pixel_col != 0)
 				{
 					if (((it->x + i - 8) < 160) && (!(it->flags & 0x80) || (renderArray[(line * 160) + (it->x + i - 8)] == bg_colors[0])))
+					{
 						renderArray[(line * 160) + (it->x + i - 8)] = bg_colors[(sprite_palette >> (sprite_pixel_col * 2)) & 0x3];
+						renderSprites[(line * 160) + ((spriteCount * 10) + i + 8)] = bg_colors[(sprite_palette >> (sprite_pixel_col * 2)) & 0x3];
+						// renderSprites[((120+(static_cast<int>(spriteCount/20)*2)) * 160) + ((spriteCount%20)*2 + i - 8)] = bg_colors[(sprite_palette >> (sprite_pixel_col * 2)) & 0x3];
+						// renderSprites[(80+((static_cast<int>(spriteCount/20))) * 160) + (it->x + i - 8)] = bg_colors[(sprite_palette >> (sprite_pixel_col * 2)) & 0x3];
+					}
 				}
 			}
+			spriteCount++;
 		}
 	}
 }
@@ -392,17 +509,41 @@ void PPU::executePPU(int cycles)
 	}
 }
 
-void PPU::close()
+// void PPU::debuggerRender()
+// {
+// 	if (!scanlineRendered)
+// 	{
+// 		renderScanline(mMap->getRegLY());
+// 		scanlineRendered = true;
+// 	}
+// }
+//  if debug == true; it will vanish "Gameboy Debugger" screen.
+//  if debug == false; it will vanish "Gameboy Emulator" screen.
+void PPU::close(bool debug)
 {
-	// Destroy texture
-	SDL_DestroyTexture(texture);
+	if (debug)
+	{
+		// Destroy texture
+		SDL_DestroyTexture(debugTexture);
 
-	// Destroy renderer
-	SDL_DestroyRenderer(renderer);
+		// Destroy renderer
+		SDL_DestroyRenderer(debugRenderer);
 
-	// Destroy window
-	SDL_DestroyWindow(window);
+		// Destroy window
+		SDL_DestroyWindow(debugWindow);
+	}
+	else
+	{
+		// Destroy texture
+		SDL_DestroyTexture(texture);
 
-	// Quit SDL subsystems
-	SDL_Quit();
+		// Destroy renderer
+		SDL_DestroyRenderer(renderer);
+
+		// Destroy window
+		SDL_DestroyWindow(window);
+
+		// Quit SDL subsystems
+		SDL_Quit();
+	}
 }

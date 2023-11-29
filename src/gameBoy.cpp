@@ -171,6 +171,7 @@ void GBE::debug_int()
 	printf("\nEntered debug mode\n");
 	bool shouldAdv = false;
 	bool infoMode;
+	bool debuggerMode = false;
 	while (!shouldAdv)
 	{
 		while (SDL_PollEvent(event))
@@ -188,16 +189,54 @@ void GBE::debug_int()
 					printf("pressed d\n");
 					shouldAdv = true;
 					break;
+				// Left control to open Debugger window
+				// b for bgMap
+				// t to show current tiles on screen 
+				// s to show sprites on screen
+				case SDLK_LCTRL:
+					gbe_graphics->debuggerInit();
+					debuggerMode = true;
+					while (debuggerMode)
+					{
+						while (SDL_PollEvent(event))
+						{	
+							if (event->key.type == SDL_KEYUP)
+							{	
+								switch (event->key.keysym.sym)
+								{
+								case SDLK_b:
+									gbe_graphics->listBgMap();
+									break;
+								case SDLK_s:
+									gbe_graphics->listSprites();
+									break;
+								case SDLK_t:
+									gbe_graphics->listTiles();
+									break;	
+								case SDLK_ESCAPE:
+									gbe_graphics->close(true);
+									debuggerMode = false;
+									break;	
+								default:
+									break;
+								}
+							}
+						}
+					}
+					break;	
 				case SDLK_i:
 					printf("Info Mode:- \n");
 					infoMode = true;
 					shouldAdv = true;
 					// Press r to print all registers
-					// enter a for rax
-					// enter d for rdx
-					// enter c for rcx
-					// enter b for rbx
+					// enter a for A
+					// enter d for D
+					// enter c for C
+					// enter b for B
 					// enter e for E
+					// enter h for H
+					// enter l for L
+					// press left ctrl to open V-Ram debugger window
 					// enter p to print the stack
 					// enter e to exit info mode
 					while (infoMode)
@@ -243,7 +282,7 @@ void GBE::debug_int()
 									break;		
 								case SDLK_x:
 									infoMode = false;
-									break;
+									break;	
 								default:
 									break;
 								}
@@ -311,6 +350,7 @@ bool GBE::pollEvents()
 				debug_mode = !debug_mode;
 				break;
 			case SDLK_ESCAPE:
+				gbe_graphics->close(false);
 				exit(0);
 			default:
 				break;

@@ -27,9 +27,16 @@ private:
 	SDL_Renderer* renderer;
 	SDL_Texture* texture;
 
+	SDL_Window* debugWindow;
+	SDL_Renderer* debugRenderer;
+	SDL_Texture* debugTexture;
+
 	// renderArray to be converted to texture
 	// stores 4 copies of texture for wrapping of screen
 	color renderArray[160 * 144];
+	color renderBGMap[160 * 144];
+	color renderTiles[160 * 144];
+	color renderSprites[160 * 144];
 
 	MemoryMap* mMap;
 
@@ -115,9 +122,13 @@ private:
 public:
 	PPU();
 	bool init();
+	bool debuggerInit();
+	void listBgMap();
+	void listTiles();
+	void listSprites();
 	bool pollEvents();
 	void renderScanline(Byte line);
-	void close();
+	void close(bool debug);
 	void setMemoryMap(MemoryMap* m) { mMap = m; }
 	void executePPU(int cycles);
 	Byte getPPUMode() { return ppuMode; }

@@ -15,7 +15,7 @@ private:
 	// Pulled from https://gbdev.io/pandocs/Specifications.html
 	// We might use an enum for the colors
 	// Will upgrade it later for RGB colors of GBC and GBA
-	// Using Byte for now
+	// Using Byte gbe_graphicsfor now
 
 	bool debug_mode;
 	Byte screenData[160][144];

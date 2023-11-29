@@ -7883,7 +7883,24 @@ void CPU::updateTimers(int cycles)
 
 // print elements of calleraddresses stack
 void CPU::printStack() {
+	int count = 0;
 	printf("Printing Stack....");
-	for(Word i = reg_SP.dat ; i <= 0xCFFF ; i++)
-		printf("Address at stack_pointer %hu is %hu \n", i, (*mMap)[i]);
+	for(Word i = reg_SP.dat ; i <= 0xFFFE ; i++)
+	{	printf("Address at stack_pointer %hu is %hu \n", i, (*mMap)[i]);
+		count++;
+		if(count == 100){
+			char choice;
+			printf("Hit q to show next 100 addresses and x to exit\n");
+			scanf("%c", &choice);
+			printf("%c",choice);
+			if(choice == 'q'){
+				count = 0;
+				continue;
+			}
+			else {
+				printf("Exiting Stack\n");
+				break;
+			}
+		}
+	}
 }
