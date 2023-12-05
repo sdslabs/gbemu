@@ -6,3 +6,4 @@ cmake-build-debug/
 .idea/
 src/.vscode/
 CMakeSettings.json
+run.sh

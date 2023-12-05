@@ -13,7 +13,7 @@ private:
     Word regAddr = 0;
 
     // NRx0, NRx1, NRx2, NRx3, NRx4
-	Byte NR[5];
+	Word NR[5];
 
     MemoryMap* mMap;
 
@@ -26,7 +26,6 @@ private:
     // NRx0 
     Byte sweepPace;
     Byte sweepPaceClock;
-    bool swwepDirection;
     Byte sweepChange;
     Byte sweepSlope;
 
@@ -83,50 +82,51 @@ class WaveChannel
 {
 private:
 
-    Byte NR[5];
+    Word NR[5];
     Word registerAddress=0xFF1A;
 
-    MemoryMap* mMap;
-    //FF1A — NR30: Channel 3 DAC enable
+    MemoryMap* mMap; 
+    Byte index;
+    Byte volume;
+    Byte outVolume;
+    // NRx0
     bool enable;
 
-    // FF1B — NR31: Channel 3 length timer [write-only]
+    // NRx1
     Byte lengthTimer;
 
-    // FF1C — NR32: Channel 3 output level
+    // NRx2
     Byte outputLevel;
 
-    // FF1D — NR33: Channel 3 period low [write-only]
-    // needs 11 bits - 3 lower bits from NRX4 + 8 bits from NRx3  
-    Word periodValue;
-    double sampleRate;
-    double toneFrequency;
+    // Nrx3
+    // needs 11 bits - 3 bits from NRX4 + 8 bits from NRx3  
+    Word periodValue; 
 
-    //FF1E — NR34: Channel 3 period high & control
+    // NRx4
+
     bool trigger;
     bool soundLengthEnable;
 
-    //FF30–FF3F — Wave pattern RAM
+    // Wave RAM
     Word waveRAM_Address = 0xFF30;
     Byte waveRAM[16];
     Byte waveSamples[32];
 
 public:
+    // bool trigger;
     WaveChannel();
-    void init();
-    void run(Byte rateDIV);
+    void setMemoryMap(MemoryMap* m){ mMap = m; }
     void enableAndLoad();
-    void setMemoryMap(MemoryMap* m){  mMap = m;}
-    // bool checkTrigger();
-    // void takeSample();
-    // Byte getVolume();
-    bool getEnable();
-    void setEnable(bool enable);
-    void writeLengthTimer(Byte timer);
-    Byte getOutputLevel();
-    Word getPeriodValue();
-    void triggerChannel(); //implement this
-    void readWaveRAM();
+    void readWaveRam();
+    bool checkEnable();
+    void readEnable();
+    bool checkTrigger();
+    bool checkLengthEnable();
+    void run(Byte rateDiv);
+    void takeSample();
+    Byte getVolume();
+    void readOutputLevel();
+    void readSoundLengthEnable();
 };
 
 class NoiseChannel
@@ -149,24 +149,13 @@ private:
     bool trigger;
     bool soundLengthEnable;
 
-
-
-public:
-    NoiseChannel();
-    bool init();
-    void run(Byte rateDIV);
-    void enableAndLoad();
-    void setMemoryMap(MemoryMap* m){  mMap = m;}
-    bool checkTrigger();
-    void takeSample();
-    bool checkEnable();
-    Byte getVolume();
 };
 
 
 class APU
 {
 private:
+    Byte preDiv;
     // SDL Audio
     // https://documentation.help/SDL/guideaudioexamples.html
     SDL_AudioSpec wanted, obtained;
@@ -195,10 +184,8 @@ private:
     int sampleRateTimer; 
 
     // Audio Controllers
-    //FF26 — NR52: Audio master control
     bool enableOutput;
     bool channelEnable[4];
-
 
     Byte soundPann;
 
@@ -223,10 +210,5 @@ public:
     void executeAPU();
     void setMemoryMap(MemoryMap* m){ mMap = m; }
     void test();
-    bool checkEnable();
-    bool checkChannelEnable(Channel channel)
-    bool triggerAPU();
-    bool checkPann(Channel channel, bool direction) // direction:1 => left
-    void setPann(Channel channel, bool direction) // direction:1 => left
-    Byte getMasterVolume(bool direction) // direction:1 => left
+
 };
