@@ -160,15 +160,56 @@ void PPU::listBgMap()
 
 void PPU::listSprites()
 {
+	// init_ttl(debugRenderer);
 	if (!scanlineRendered)
 	{
 		renderScanline(mMap->getRegLY());
 		scanlineRendered = true;
 	}
-	SDL_UpdateTexture(debugTexture, NULL, renderSprites, 160 * 4);
-	SDL_RenderClear(debugRenderer);
-	SDL_RenderCopy(debugRenderer, debugTexture, NULL, NULL);
-	SDL_RenderPresent(debugRenderer);
+	// SDL_UpdateTexture(debugTexture, NULL, renderSprites, 160 * 4);
+	// SDL_RenderClear(debugRenderer);
+	// SDL_RenderCopy(debugRenderer, debugTexture, NULL, NULL);
+	// SDL_RenderPresent(debugRenderer);
+}
+
+void PPU::init_ttl()
+{	
+	SDL_Init( SDL_INIT_EVERYTHING );
+	if ( TTF_Init() < 0)
+	{
+		printf("Error intializing SDL_ttf: %s\n", TTF_GetError());
+	}
+	// char* font_path;
+	// font_path = "lazy.ttf";
+	TTF_Font* font = TTF_OpenFont("lazy.ttf", 24);
+	if (!font)
+	{
+		printf("Error loading font:  %s\n", TTF_GetError());
+	}
+	int text_width;
+	int text_height;
+	SDL_Rect dest;
+	SDL_Color textColor = { 255, 255, 255 };
+	// char* input;
+	// input = "Hey sexyyy";
+
+	SDL_Surface* text_surf = TTF_RenderText_Solid(font,  "Hey sexyyy", textColor);
+	SDL_Texture *text = SDL_CreateTextureFromSurface(debugRenderer, text_surf);
+
+		dest.x = 160 - (text_surf->w / 2.0f);
+		dest.y = 140;
+		dest.w = text_surf->w;
+		dest.h = text_surf->h;
+		SDL_RenderCopy(debugRenderer, text, NULL, &dest);
+
+		SDL_DestroyTexture(text);
+		SDL_FreeSurface(text_surf);
+
+		SDL_RenderPresent( debugRenderer );
+	// SDL_RenderClear(debugRenderer);
+	// SDL_RenderCopy(debugRenderer, debugTexture, NULL, NULL);
+	// SDL_RenderPresent(debugRenderer);
+	// surface = TTF_RenderText_Solid(font, text, textColor);
 }
 
 // We are reading values from 0x8000 to 0x8fff
@@ -361,9 +402,7 @@ void PPU::renderScanline(Byte line)
 					if (((it->x + i - 8) < 160) && (!(it->flags & 0x80) || (renderArray[(line * 160) + (it->x + i - 8)] == bg_colors[0])))
 					{
 						renderArray[(line * 160) + (it->x + i - 8)] = bg_colors[(sprite_palette >> (sprite_pixel_col * 2)) & 0x3];
-						renderSprites[(line * 160) + ((spriteCount * 10) + i + 8)] = bg_colors[(sprite_palette >> (sprite_pixel_col * 2)) & 0x3];
-						// renderSprites[((120+(static_cast<int>(spriteCount/20)*2)) * 160) + ((spriteCount%20)*2 + i - 8)] = bg_colors[(sprite_palette >> (sprite_pixel_col * 2)) & 0x3];
-						// renderSprites[(80+((static_cast<int>(spriteCount/20))) * 160) + (it->x + i - 8)] = bg_colors[(sprite_palette >> (sprite_pixel_col * 2)) & 0x3];
+						renderSprites[(line * 160) + ((spriteCount * 40) + i + 8)] = bg_colors[(sprite_palette >> (sprite_pixel_col * 2)) & 0x3];
 					}
 				}
 			}

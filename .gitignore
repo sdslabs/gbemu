@@ -1,8 +1,12 @@
 .vs/
+.vscode/
+CMakeFiles/
 build/
 *.DS_Store
 cmake-build-debug/
 .idea/
 src/.vscode/
+src/CMakeFiles/
+src/Makefile
 src/dmg_boot.gb
 tests/Tetris.gb

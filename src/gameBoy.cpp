@@ -208,7 +208,7 @@ void GBE::debug_int()
 									gbe_graphics->listBgMap();
 									break;
 								case SDLK_s:
-									gbe_graphics->listSprites();
+									gbe_graphics->init_ttl();
 									break;
 								case SDLK_t:
 									gbe_graphics->listTiles();

@@ -7,8 +7,10 @@
 
 #ifdef __linux__
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #else
 #include <SDL.h>
+#include <SDL_ttf.h>
 #endif
 
 struct Sprite
@@ -123,6 +125,7 @@ public:
 	PPU();
 	bool init();
 	bool debuggerInit();
+	void init_ttl();
 	void listBgMap();
 	void listTiles();
 	void listSprites();
