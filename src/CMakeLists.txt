@@ -27,6 +27,6 @@ if (MSVC)
 endif ()
 
 message(STATUS "SDL2_LIBRARIES: ${SDL2_LIBRARIES}")
-target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES};SDL2::SDL2_ttf)
 
 set(SDL2_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/include")
