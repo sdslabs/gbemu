@@ -30,3 +30,4 @@ target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES};${SDL2_ttf_LIBRARIES})
 
 set(SDL2_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/include")
 set(SDL2_ttf_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/../include")
+set(SDL2_ttf_DIR "${CMAKE_CURRENT_LIST_DIR}/../cmake")
