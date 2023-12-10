@@ -18,7 +18,6 @@ target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_ttf REQUIRED)
-message(STATUS "SDL2_ttf_INCLUDE: ${SDL2_ttf_INCLUDE_DIRS}")
 include_directories(${SDL2_INCLUDE_DIRS};${SDL2_ttf_INCLUDE_DIRS})
 
 if (MSVC)
@@ -27,7 +26,7 @@ if (MSVC)
             VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/")
 endif ()
 
-message(STATUS "SDL2_LIBRARIES: ${SDL2_LIBRARIES}")
 target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES};${SDL2_ttf_LIBRARIES})
 
 set(SDL2_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/include")
+set(SDL2_ttf_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/../include")
