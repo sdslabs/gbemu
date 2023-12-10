@@ -18,6 +18,7 @@ target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_ttf REQUIRED)
+message(STATUS "incdir: ${SDL2_INCLUDE_DIRS}")
 include_directories(${SDL2_INCLUDE_DIRS};${SDL2_ttf_INCLUDE_DIRS})
 
 if (MSVC)
