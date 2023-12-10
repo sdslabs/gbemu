@@ -26,6 +26,7 @@ if (MSVC)
             VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/")
 endif ()
 
+message(STATUS "SDL2_LIBRARIES: ${SDL2_LIBRARIES}")
 target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES})
 
 set(SDL2_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/include")
