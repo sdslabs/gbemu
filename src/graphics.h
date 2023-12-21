@@ -125,10 +125,11 @@ public:
 	PPU();
 	bool init();
 	bool debuggerInit();
-	void init_ttl();
+	void render_ttl();
 	void listBgMap();
 	void listTiles();
 	void listSprites();
+	void renderOAM();
 	bool pollEvents();
 	void renderScanline(Byte line);
 	void close(bool debug);

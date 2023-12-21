@@ -160,28 +160,103 @@ void PPU::listBgMap()
 
 void PPU::listSprites()
 {
-	// init_ttl(debugRenderer);
+
 	if (!scanlineRendered)
 	{
 		renderScanline(mMap->getRegLY());
 		scanlineRendered = true;
 	}
+	renderOAM();
+
 	// SDL_UpdateTexture(debugTexture, NULL, renderSprites, 160 * 4);
 	// SDL_RenderClear(debugRenderer);
 	// SDL_RenderCopy(debugRenderer, debugTexture, NULL, NULL);
 	// SDL_RenderPresent(debugRenderer);
+
+	// render_ttl();
 }
 
-void PPU::init_ttl()
-{	
-	SDL_Init( SDL_INIT_EVERYTHING );
-	if ( TTF_Init() < 0)
+// We are reading values from 0xFE00-0xFE9F
+// Outer loop increments for every new tile to be rendered
+// Middle loop increments for every line of tile
+// Inner loop increments for every pixel of line of tile.
+// We are printing 4 tiles in a row with gap of 2 between each tile { (tileNumber % 4) * 10) + j + 8) }
+void PPU::renderOAM()
+{
+	if (!scanlineRendered)
+	{
+		renderScanline(mMap->getRegLY());
+		scanlineRendered = true;
+	}
+	Byte sprite_y, sprite_pixel_col, sprite_palette;
+
+	// sprites.clear();
+	Byte sprite_height = 8;
+	for (Word i = 0xFE00; i < 0xFEA0; i += 4)
+	{
+		if (sprites.size() >= 40)
+			break;
+		sprite_y = (*mMap)[i];
+		// if ((line < (sprite_y - 16) || line > (sprite_y - 16 + sprite_height - 1)))
+		if (sprite_y < 16 || sprite_y > 152)
+			continue;
+
+		Sprite* sprite = new Sprite();
+		sprite->address = i;
+		sprite->y = sprite_y;
+		sprite->x = (*mMap)[i + 1];
+		sprite->tile = (*mMap)[i + 2];
+		sprite->flags = (*mMap)[i + 3];
+		sprites.push_back(*sprite);
+
+		// printf("sprite_y = ",sprite_y);
+	}
+
+	// printf("\n%d\n", sprites.size());
+
+	// if (sprites.size())
+	// 	std::sort(sprites.begin(), sprites.end(), [](Sprite& a, Sprite& b)
+	// 	    { return (((a.x == b.x) && (a.address > b.address)) || (a.x > b.x)); });
+	int sprite_count = 0;
+	for (auto it = sprites.begin(); it != sprites.end(); ++it)
+	{
+
+		sprite_palette = (it->flags & 0x10) ? objPalette1 : objPalette0;
+		for (int i = 0; i < 8; i++)
+		{
+			for (int j = 0; j < 8; j++)
+			{
+				sprite_pixel_col = ((*mMap)[0x8000 + (it->tile * 0x10) + ((i - (it->y - 16)) * 2)] >> (7 - j) & 0x1) + (((*mMap)[0x8000 + (it->tile * 0x10) + ((i - (it->y - 16)) * 2) + 1] >> (7 - j) & 0x1) * 2);
+				if (sprite_pixel_col != 0)
+				{
+					renderSprites[((static_cast<int>(sprite_count / 4) * 20) + i + 20) * 160 + (((sprite_count % 4) * 20) + j + 8)] = bg_colors[(bgPalette >> (sprite_pixel_col * 2)) & 0x3];
+				}
+			}
+		}
+		sprite_count++;
+	}
+	SDL_UpdateTexture(debugTexture, NULL, renderSprites, 160 * 4);
+	SDL_RenderClear(debugRenderer);
+	SDL_RenderCopy(debugRenderer, debugTexture, NULL, NULL);
+	SDL_RenderPresent(debugRenderer);
+}
+
+void PPU::render_ttl()
+{
+	// Initialize SDL
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	{
+		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+		return;
+	}
+
+	if (TTF_Init() < 0)
 	{
 		printf("Error intializing SDL_ttf: %s\n", TTF_GetError());
+		return;
 	}
-	// char* font_path;
-	// font_path = "lazy.ttf";
-	TTF_Font* font = TTF_OpenFont("lazy.ttf", 24);
+
+	TTF_Font* font = TTF_OpenFont("../lazy.ttf", 24);
 	if (!font)
 	{
 		printf("Error loading font:  %s\n", TTF_GetError());
@@ -189,23 +264,21 @@ void PPU::init_ttl()
 	int text_width;
 	int text_height;
 	SDL_Rect dest;
-	SDL_Color textColor = { 255, 255, 255 };
-	// char* input;
-	// input = "Hey sexyyy";
+	SDL_Color textColor = { 0, 0, 0 };
 
-	SDL_Surface* text_surf = TTF_RenderText_Solid(font,  "Hey sexyyy", textColor);
-	SDL_Texture *text = SDL_CreateTextureFromSurface(debugRenderer, text_surf);
+	SDL_Surface* text_surf = TTF_RenderText_Solid_Wrapped(font, "Hey\nWorld", textColor, 150);
+	SDL_Texture* text = SDL_CreateTextureFromSurface(debugRenderer, text_surf);
 
-		dest.x = 160 - (text_surf->w / 2.0f);
-		dest.y = 140;
-		dest.w = text_surf->w;
-		dest.h = text_surf->h;
-		SDL_RenderCopy(debugRenderer, text, NULL, &dest);
+	dest.x = 160 - (text_surf->w / 9.0f);
+	dest.y = 140;
+	dest.w = text_surf->w;
+	dest.h = text_surf->h;
+	SDL_RenderCopy(debugRenderer, text, NULL, &dest);
 
-		SDL_DestroyTexture(text);
-		SDL_FreeSurface(text_surf);
+	SDL_DestroyTexture(text);
+	SDL_FreeSurface(text_surf);
 
-		SDL_RenderPresent( debugRenderer );
+	SDL_RenderPresent(debugRenderer);
 	// SDL_RenderClear(debugRenderer);
 	// SDL_RenderCopy(debugRenderer, debugTexture, NULL, NULL);
 	// SDL_RenderPresent(debugRenderer);
@@ -235,13 +308,18 @@ void PPU::listTiles()
 		}
 		tileNumber += 1;
 	}
+
+	SDL_UpdateTexture(debugTexture, NULL, renderTiles, 160 * 4);
+	SDL_RenderClear(debugRenderer);
+	SDL_RenderCopy(debugRenderer, debugTexture, NULL, NULL);
+	SDL_RenderPresent(debugRenderer);
 }
 
 void PPU::renderScanline(Byte line)
 {
 	// Evaluate LCDC register
 	Byte LCDC = mMap->getRegLCDC();
-	int spriteCount = 0;
+	int sprite_count = 0;
 	isEnabled = (LCDC & 0x80);
 	showBGWin = (LCDC & 0x1);
 	showWindow = (LCDC & 0x20);
@@ -370,13 +448,14 @@ void PPU::renderScanline(Byte line)
 		if (sprites.size())
 			std::sort(sprites.begin(), sprites.end(), [](Sprite& a, Sprite& b)
 			    { return (((a.x == b.x) && (a.address > b.address)) || (a.x > b.x)); });
-		spriteCount = 0;
+		sprite_count = 0;
 		for (auto it = sprites.begin(); it != sprites.end(); ++it)
 		{
 
 			sprite_palette = (it->flags & 0x10) ? objPalette1 : objPalette0;
 			for (int i = 0; i < 8; i++)
 			{
+
 				if (sprite_height == 16)
 					it->tile &= 0xFE;
 				switch (it->flags & 0x60)
@@ -399,20 +478,26 @@ void PPU::renderScanline(Byte line)
 
 				if (sprite_pixel_col != 0)
 				{
+					// printf("%hu , %hu\n", it->y, line);
 					if (((it->x + i - 8) < 160) && (!(it->flags & 0x80) || (renderArray[(line * 160) + (it->x + i - 8)] == bg_colors[0])))
 					{
+						int newLine = (it->y - line) + 80;
 						renderArray[(line * 160) + (it->x + i - 8)] = bg_colors[(sprite_palette >> (sprite_pixel_col * 2)) & 0x3];
-						renderSprites[(line * 160) + ((spriteCount * 40) + i + 8)] = bg_colors[(sprite_palette >> (sprite_pixel_col * 2)) & 0x3];
+						// renderSprites[(newLine * 160) + ((sprite_count * 40) + i + 8)] = bg_colors[(sprite_palette >> (sprite_pixel_col * 2)) & 0x3];
 					}
 				}
 			}
-			spriteCount++;
+			sprite_count++;
 		}
 	}
 }
 
 void PPU::executePPU(int cycles)
 {
+	// =================
+	sprites.clear();
+	// printf("Sprites\n");
+	// =================
 	currentClock -= cycles;
 	switch (ppuMode)
 	{

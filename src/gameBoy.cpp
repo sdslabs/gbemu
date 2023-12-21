@@ -195,6 +195,7 @@ void GBE::debug_int()
 				// s to show sprites on screen
 				case SDLK_LCTRL:
 					gbe_graphics->debuggerInit();
+					// gbe_graphics->render_ttl();
 					debuggerMode = true;
 					while (debuggerMode)
 					{
@@ -208,7 +209,7 @@ void GBE::debug_int()
 									gbe_graphics->listBgMap();
 									break;
 								case SDLK_s:
-									gbe_graphics->init_ttl();
+									gbe_graphics->listSprites();
 									break;
 								case SDLK_t:
 									gbe_graphics->listTiles();
