@@ -1,20 +1,27 @@
 #include "sound.h"
 #include "types.h"
+#include <chrono>
 
+auto start = std::chrono::high_resolution_clock::now();
 
 APU::APU()
 {     
-	preDiv=0;
-    mMap = nullptr;
-	
 	SDL_zero(wanted);
 	SDL_zero(obtained);
 	audioDeviceID = 0;
+
+    mMap = nullptr;
+
+	// counter variables
+	sampleCounter = 0;
+	frameSequencerCounter = 0;
+	frameSequencer = 0; 
+
     // Audio Controllers
     enableOutput = 0;
     channelEnable[4] = {false};
 
-	rateDIV = 0;
+	frameSequencer = 0;
 
     soundPann = 0;
 	sampleRate = 32;
@@ -29,7 +36,6 @@ APU::APU()
     //Audio Channels
     channel1 = new PulseChannel();
 	channel2 = new PulseChannel();
-
     channel3 = new WaveChannel();
     channel4 = new NoiseChannel();
 }
@@ -57,107 +63,82 @@ bool APU::init(){
 	channel1->setMemoryMap(mMap);
 	channel2->setMemoryMap(mMap);
 	channel3->setMemoryMap(mMap);
-	
+	channel4->setMemoryMap(mMap);
+
 	channel1->init(1);
 	channel2->init(2);
 	channel3->readEnable();
+
 	return true;
 }
 
 
+void APU::stepAPU(int cycles){
+	sampleCounter+=cycles;
+	frameSequencerCounter+=cycles;
 
-void APU::test()
-{
-	// printf("------------------------ \n");
-    // for (int i = 0; i < 0x20; i++)
-    // {
-	// 	int temp= mMap->readMemory(0xff10 + i) ;
-	// 	if (temp){
-    // printf("------------------------ at register FF%x: %d\n\n", i, temp );
-	// 	}
+	if(frameSequencerCounter>=8192){
+		//update envelope clocks and length timers
 		
-    // }
+		channel1->run(frameSequencer);
+		channel2->run(frameSequencer);
+		channel3->run(frameSequencer);
+		channel4->run(frameSequencer);
 
-	// printf("WaveRam:");
-	// for (int i = 0; i < 16; i++)
-	// {
-	// 	printf(" %x",mMap->readMemory(0xff30 + i));
-	// }	
-    
-}
+		frameSequencerCounter-=8192;
+		frameSequencer = (frameSequencer + 1) % 8;
+	}
 
-void APU::executeAPU()
-{	
-	if(channel1->checkEnable()){
-		channel1->takeSample();
-	}
-	if(channel2->checkEnable()){
-		channel2->takeSample();
-	}
-	// if(channel3->checkTrigger()){
-	// 	printf("channel3->checkEnable: %d\n",channel3->checkEnable() );
-	// 	channel3->readEnable();
-	// 	printf("channel3->checkEnable: %d\n\n",channel3->checkEnable() );
-	// }
-	// channel3->readEnable();
-	// bool yoyo=false;
-	if(channel3->checkEnable()){
-		channel3->takeSample();
-		// if(channel3->getVolume()) yoyo=true;
-	}
-	// printf("channel3->checkTrigger: %d\n",channel3->checkTrigger() );
-	// if(channel3->checkEnable()){
-	// 	channel3->takeSample();
-	// }
-	// printf("volume from channel 1: %d\n", channel1->getVolume());
+	// increment individual frequency timers of channels
+	channel1->step(cycles);
+	channel2->step(cycles);
+	channel3->step(cycles);
+	channel4->step(cycles);
 
-	// if(yoyo){
-	// printf("\n\tStill here\n\n");
-	// }
-	// printf("sampleRateTimer: %d\n", sampleRateTimer);
-	if(((mMap->getRegDIV() & 0b1000) >> 3 ) == 1){
-		rateDIV = (rateDIV + 1) % 8;
+	if(sampleCounter>=95){
+		//get a new sample
+		sampleCounter-=95;
 
-		channel1->run(rateDIV);
-		channel2->run(rateDIV);
-		channel3->run(rateDIV);
-	}
-	if( sampleRateTimer == 0 ){
-		// if(yoyo) printf("this works\n");
-		// printf("yo\n\n");
-		// if(channel3->getVolume() ){
-		// printf("volume from channel 1 in: %d\n", channel1->getVolume());
-		// printf("volume from channel 2 in: %d\n", channel2->getVolume());
-		// printf("volume from channel 3 in: %d\n\n", channel3->getVolume());
-		// }
-		
 		float vol = 0;
 		float vol1 = (float)channel1->getVolume() / 100;
 		float vol2 = (float)channel2->getVolume() / 100;
 		float vol3 = (float)channel3->getVolume() / 100;
-		if(vol1) printf("vol1: %f\n", vol1);
-		if(vol2) printf("vol2: %f\n", vol2);
-		if(vol3) printf("vol3: %f\n", vol3);
-		SDL_MixAudioFormat((Uint8*)&vol, (Uint8*)&vol1, AUDIO_F32SYS, sizeof(float), SDL_MIX_MAXVOLUME);
-		SDL_MixAudioFormat((Uint8*)&vol, (Uint8*)&vol2, AUDIO_F32SYS, sizeof(float), SDL_MIX_MAXVOLUME);
-		SDL_MixAudioFormat((Uint8*)&vol, (Uint8*)&vol3, AUDIO_F32SYS, sizeof(float), SDL_MIX_MAXVOLUME);
+		float vol4 = (float)channel4->getVolume() / 100;
+		
+ 		vol= vol1+vol2+vol3+vol4;
+		vol /= 4.0;
+		// printf("vol1: %f, vol2: %f, vol3: %f, vol4: %f\n", vol1, vol2, vol3, vol4);
+		// if(vol4) printf("\n\tvol4: %f\n", vol4);
+		// SDL_MixAudioFormat((Uint8*)&vol, (Uint8*)&vol1, AUDIO_F32SYS, sizeof(float), SDL_MIX_MAXVOLUME);
+		// SDL_MixAudioFormat((Uint8*)&vol, (Uint8*)&vol2, AUDIO_F32SYS, sizeof(float), SDL_MIX_MAXVOLUME);
+		// SDL_MixAudioFormat((Uint8*)&vol, (Uint8*)&vol3, AUDIO_F32SYS, sizeof(float), SDL_MIX_MAXVOLUME);
 		buffer[bufferIndex] = vol;
 		buffer[bufferIndex + 1] = vol;
 		bufferIndex += 2;
-	}
-	sampleRateTimer = (sampleRateTimer + 1) % sampleRate;
 
-	if(bufferIndex >= bufferSize){
-		bufferIndex = 0;
+		if(bufferIndex >= bufferSize){
+			bufferIndex = 0;
 
-		while(SDL_GetQueuedAudioSize(audioDeviceID) > bufferSize * sizeof(float)){
-			SDL_Delay(1);
+			while(SDL_GetQueuedAudioSize(audioDeviceID) > bufferSize * sizeof(float)){
+				SDL_Delay(1);
+			}
+
+			SDL_QueueAudio(audioDeviceID, buffer, bufferSize * sizeof(float) );
 		}
-
-		SDL_QueueAudio(audioDeviceID, buffer, bufferSize * sizeof(float) );
 	}
 }
 
+
+void APU::test(int cycles)
+{
+	a+=cycles;
+	if(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start).count() >1){
+		printf("%d\n",a);
+		a=0;
+		start = std::chrono::high_resolution_clock::now();
+	}
+
+}
 
 
 // ------------ Pulse Channel ------------
@@ -169,6 +150,7 @@ PulseChannel::PulseChannel()
 	sweepPresent = 0;
 
 	enable = 0;
+	frequencyTimer = 0;
 
 	sweepPace = 0;
 	sweepPaceClock = 0;
@@ -219,21 +201,21 @@ bool PulseChannel::init(Byte channelNum)
 	return 1;
 }
 
-void PulseChannel::run(Byte rateDIV)
+void PulseChannel::run(Byte frameSequencer)
 {
 	// 256 Hz
 	// sound length 
-	if(soundLengthEnable && rateDIV % 2 == 0){
-		if(lengthTimer >= 64){
+	if(soundLengthEnable && frameSequencer % 2 == 0){
+		lengthTimer++;
+		if(lengthTimer >= 63){
 			enable = 0;
 			lengthTimer = 0;
 		}
-		lengthTimer++;
 	}
 
 	// 128 Hz
 	// CH1 freq sweep
-	if( sweepPresent && sweepPace > 0 && rateDIV % 4 == 0){
+	if( sweepPresent && sweepPace > 0 && frameSequencer % 4 == 0){
 		if(sweepPaceClock == 0 ){
 			// calculate 11 bits from (higher 3 bits) NRx4 + (lower 8 bits) NRx3
 			periodValue = ( mMap->readMemory(NR[4]) & 0b00000111 ) << 8 | ( mMap->readMemory(NR[3]) & 0b11111111 );
@@ -258,7 +240,7 @@ void PulseChannel::run(Byte rateDIV)
 
 	// 64 Hz
 	// Envelope sweep
-	if(rateDIV % 8 == 0){
+	if(frameSequencer % 8 == 0){
 
 		if(envelopeVolume == 0 && envelopeDirection == 0){
 			enable = 0;
@@ -320,21 +302,33 @@ Byte PulseChannel::getVolume()
 void PulseChannel::takeSample()
 {	
 	if ( enable == 1){
-		if( periodValueClock == 0){
+		// if( periodValueClock == 0){
 			volume = envelopeVolume;
 
 			if(waveDutyTab[waveDuty][WaveDutyCounter] == 0 ){
 				volume = 0;
 			}
 			WaveDutyCounter = (WaveDutyCounter + 1) % 8;
-		}
+		// }
 		// TODO: Properly Implement this
 		// takes sample with frequency 1048576/ (2048 - periodValue) Hz
 		// This only works for max period frequency = 400000 Hz
 		// To be safe we only allow 1048576/4 Hz
-		periodValueClock = (periodValueClock + 1) % ( (0x800 - periodValue) > 4 ? 0x800 - periodValue : 4 );
+		// periodValueClock = (periodValueClock + 1) % ( (0x800 - periodValue) > 4 ? 0x800 - periodValue : 4 );
 	}else{
 		volume = 0;
+	}
+}
+
+void PulseChannel::step(int cycles){
+	frequencyTimer -= cycles;
+	if(frequencyTimer <= 0){
+		readPeriodValue();
+		frequencyTimer += (2048 - periodValue);
+		// if(sweepPresent) printf("\tCH1: periodValue: %d\n", periodValue);
+		if(enable){
+			takeSample();
+		}
 	}
 }
 
@@ -347,6 +341,13 @@ bool PulseChannel::checkEnable()
 {
 	return enable; 
 }
+
+void PulseChannel::readPeriodValue(){
+	periodValue = ( mMap->readMemory(NR[4]) & 0b00000111 ) << 8 | ( mMap->readMemory(NR[3]) & 0b11111111 ); 
+}
+
+
+// ------------ Wave Channel ------------
 
 WaveChannel::WaveChannel(){
 	for (Byte i = 0; i < 5; i++)
@@ -422,16 +423,19 @@ void WaveChannel::enableAndLoad(){
 	soundLengthEnable  = ( mMap->readMemory(NR[2]) & 0b01000000 ) >> 6;   // bit 6 
 }
 
-void WaveChannel::run(Byte rateDIV){
+void WaveChannel::readPeriodValue(){
+	periodValue = ( mMap->readMemory(NR[4]) & 0b00000111 ) << 8 | ( mMap->readMemory(NR[3]) & 0b11111111 ); 
+}
+
+void WaveChannel::run(Byte frameSequencer){
 	// 256 Hz
 	// sound length 
-	if(soundLengthEnable && rateDIV % 2 == 0){
-	printf("here");
-		if(lengthTimer >= 256){
+	if(soundLengthEnable && frameSequencer % 2 == 0){
+		lengthTimer++;
+		if(lengthTimer >= 255){
 			enable = 0;
 			lengthTimer = 0;
 		}
-		lengthTimer++;
 	// printf("lengthTimer: %d\n", lengthTimer);
 	}
 }
@@ -453,12 +457,12 @@ void WaveChannel::takeSample(){
 			if(outputLevel){
 			// printf("Index: %d\n", index);
 			// printf("waveSamples[index]: %d\n", waveSamples[index]);
-			// printf("outputLevel: %d\n", outputLevel);
+			// if(outputLevel>1) printf("outputLevel: %d\n", outputLevel);
 			outVolume = waveSamples[index] >> (outputLevel - 1);
 			// printf("outVolume: %d\n\n", outVolume);
 			// getVolume();
 			}else{
-				// outVolume = 0; 
+				outVolume = 0; 
 			}
 			index += 1;
 		} else {
@@ -471,7 +475,7 @@ void WaveChannel::takeSample(){
 			takeSample();
 		}
 	} else {
-		// outVolume = 0;
+		outVolume = 0;
 	}
 }
 
@@ -499,4 +503,198 @@ void WaveChannel::readOutputLevel(){
 void WaveChannel::readSoundLengthEnable(){
 	// printf("NR[2]: %x\n", mMap->readMemory(NR[2]));
 	soundLengthEnable  = ( mMap->readMemory(NR[2]) & 0b01000000 ) >> 6;   // bit 6 
+}
+
+void WaveChannel::step(int cycles){
+	frequencyTimer -= cycles;
+	if(frequencyTimer <= 0){
+		readPeriodValue();
+		frequencyTimer += (2048 - periodValue) << 1;
+		// printf("\tperiodValue: %d\n", periodValue);
+		if(enable){
+			takeSample();
+		}
+	}
+	// printf("frequencyTimer: %d\n", frequencyTimer);
+}
+
+
+// ------------ Noise Channel ------------
+
+NoiseChannel::NoiseChannel(){
+	for (Byte i = 0; i < 5; i++)
+		NR[i] = registerAddress + i;
+
+	volume = 0;
+	frequencyTimer = 0;
+    // NRx0
+    enable = 0;
+
+    // NRx1
+    lengthTimer = 0;
+
+    // NRx2
+    envelopeVolume = 0;
+    envelopeDirection = 0;
+    envelopeSweepPace = 0;
+	envelopeSweepPaceClock = 0;
+
+    // NRx3
+    clockShift = 0;
+    LFSRWidth = 0;
+    clockDivider = 0;
+	LFSR = 0x7FFF;
+
+    trigger = 0;
+    soundLengthEnable = 0;
+
+}
+
+bool NoiseChannel::checkEnable(){
+	return enable;
+}
+
+bool NoiseChannel::checkTrigger(){
+	trigger = mMap->readMemory(NR[4]) >> 7; 
+	return trigger;
+}
+
+bool NoiseChannel::checkLengthEnable(){
+	return soundLengthEnable;
+}
+
+void NoiseChannel::enableAndLoad(){
+	// printf("\n\tyo\n\n");
+	enable = 1;
+
+	lengthTimer = mMap->readMemory(NR[1]);   // bits 7-0
+
+	envelopeVolume     = ( mMap->readMemory(NR[2]) & 0b11110000 ) >> 4;   // bits 7-4
+	envelopeDirection  = ( mMap->readMemory(NR[2]) & 0b00001000 ) >> 3;   // bits 3
+	envelopeSweepPace  = ( mMap->readMemory(NR[2]) & 0b00000111 ) >> 0;   // bits 2-0
+
+	clockShift		= ( mMap->readMemory(NR[2]) & 0b11110000 ) >> 4;   // bits 7-4
+	LFSRWidth		= ( mMap->readMemory(NR[2]) & 0b00001000 ) >> 3;   // bits 3
+	clockDivider	= ( mMap->readMemory(NR[2]) & 0b00000111 ) >> 0;   // bits 2-0
+	LFSR 			= 0x7FFF; 
+	
+	soundLengthEnable  = ( mMap->readMemory(NR[2]) & 0b01000000 ) >> 6;   // bit 6 
+}
+
+void NoiseChannel::run(Byte frameSequencer){
+	// printf("frameSequencer: %d\n", frameSequencer);
+	// 256 Hz
+	// sound length 
+	readSoundLengthEnable();
+	if(soundLengthEnable && frameSequencer % 2 == 0){
+		// printf("here\n");
+		lengthTimer++;
+		if(lengthTimer >= 63){
+			enable = 0;
+			lengthTimer = 0;
+		}
+	// printf("lengthTimer: %d\n", lengthTimer);
+	}
+
+	// 64 Hz
+	// Envelope sweep
+	if(frameSequencer % 8 == 0){
+	// printf("\there too \n");
+
+		if(envelopeVolume == 0 && envelopeDirection == 0){
+			enable = 0;
+		}
+		
+		if( envelopeSweepPace != 0 ){
+			if(envelopeSweepPaceClock == 0){
+				if(envelopeDirection == 0){
+					if( envelopeVolume > 0) envelopeVolume--;
+				}
+				else {
+					if ( envelopeVolume < 0xF) envelopeVolume++;
+				}
+			}
+			envelopeSweepPaceClock = (envelopeSweepPaceClock + 1) % envelopeSweepPace;
+		}
+	}
+}
+
+void NoiseChannel::takeSample(){
+
+	if ( enable == 1){
+		Word temp = LFSR;
+		LFSR = LFSR & 0x7FFF;
+		bool result = (LFSR & 0b01) ^ ((LFSR > 1) & 0b01);
+		LFSR = (LFSR >> 1) | (result << 14);
+
+		if (LFSRWidth == 1) {
+			LFSR &= 0b0111111110111111;
+			LFSR |= result << 6;
+		}
+		if(temp != LFSR){
+		// printf("\nAYO LFSR before: %x\n", temp);
+		// printf("xor_result: %x\n", result);
+		// printf("LFSRWidth: %d\n", LFSRWidth);
+		// printf("(temp >> 1) | (result << 14) : %x  \n", (temp >> 1) | (result << 14) );
+		// temp=(temp >> 1) | (result << 14);
+		// printf("temp: %x\n", temp);
+		// printf("temp & !(1 << 6): %x \n", temp & 0b0111111110111111);
+		// printf("LFSR after: %x\n", LFSR);
+		// temp = (temp >> 1) | (result << 14);
+		// temp &= !(1 << 6);
+		// printf("temp: %d  ", temp );
+		// temp |= result << 6;
+		// printf("temp: %d  ", temp );
+		// if(envelopeVolume) printf("envelope volume: %d\n", envelopeVolume);
+		}
+		
+		if (enable && (LFSR & 1) == 0)
+            volume = envelopeVolume;
+        else
+            volume = 0;
+	}else{
+		volume = 0;
+	}
+
+	// printf("envelopeVolume: %d\n\n", envelopeVolume);
+
+	
+}
+
+Byte NoiseChannel::getVolume(){
+	// printf("here");
+	// if(outVolume) printf("outVolume: %d\n", outVolume);
+
+	if(enable == 0){
+		if(checkTrigger()){
+			enableAndLoad();			
+		}
+		return 0;
+	}else{
+		// printf("yo: %d \n", outVolume);
+		return volume;
+	}
+}
+
+void NoiseChannel::readSoundLengthEnable(){
+	// printf("NR[2]: %x\n", mMap->readMemory(NR[2]));
+	soundLengthEnable  = ( mMap->readMemory(NR[2]) & 0b01000000 ) >> 6;   // bit 6 
+}
+
+void NoiseChannel::step(int cycles){
+	frequencyTimer -=cycles;
+
+	if(frequencyTimer <= 0){
+		readPolynomialRegister();
+		frequencyTimer += dividerTable[clockDivider] << clockShift;
+
+		takeSample();
+	}
+}
+
+// reads NR43 register
+void NoiseChannel::readPolynomialRegister(){
+	clockShift		= ( mMap->readMemory(NR[2]) & 0b11110000 ) >> 4;   // bits 7-4
+	LFSRWidth		= ( mMap->readMemory(NR[2]) & 0b00001000 ) >> 3;   // bits 3
+	clockDivider	= ( mMap->readMemory(NR[2]) & 0b00000111 ) >> 0;   // bits 2-0
 }

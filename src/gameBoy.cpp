@@ -2,6 +2,8 @@
 #include "cpu.h"
 #include "gameBoy.h"
 
+#include <chrono>
+
 int GBE::s_Cycles;
 
 GBE::GBE()
@@ -36,14 +38,13 @@ GBE::GBE()
 	gbe_graphics->init();
 
 	gbe_sound->init();
-	gbe_sound->test();
 
 	// Open the Boot ROM
 	if ((bootROM = fopen("../src/dmg_boot.gb", "rb")) == NULL)
 		printf("boot rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/tetris.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../tests/drmario.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Set the Boot ROM
@@ -122,18 +123,20 @@ void GBE::update()
 	{
 		// Execute the next instruction
 		s_Cycles += gbe_cpu->executeNextInstruction();
-
 		// update the DIV and TIMA timers
 		gbe_cpu->updateTimers(s_Cycles);
 		gbe_graphics->executePPU(s_Cycles);
 		// this runs at a freq of around 27 * freq(DIV) = 442368 Hz
 		// this is probably enough to implement APU
-		gbe_sound->executeAPU();
-		gbe_sound->test();
+		gbe_sound->stepAPU(s_Cycles);
+		// gbe_sound->test(s_Cycles);
 		s_Cycles = 0;
 		s_Cycles += gbe_cpu->performInterrupt();
+		// printf("s_Cycles after: %d\n\n", s_Cycles);
 		gbe_graphics->pollEvents();
 	}
+
+	// printf("a: %lld\n", a);
 }
 
 void GBE::executeBootROM()

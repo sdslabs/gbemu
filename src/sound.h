@@ -22,6 +22,7 @@ private:
     bool enable;
 
     Byte volume;
+    int frequencyTimer;
 
     // NRx0 
     Byte sweepPace;
@@ -69,13 +70,14 @@ public:
     PulseChannel();
     bool init(Byte channelNum);
     void run(Byte rateDIV);
+    void step(int cycles);
     void enableAndLoad();
     void setMemoryMap(MemoryMap* m){  mMap = m;}
     bool checkTrigger();
     void takeSample();
     Byte getVolume();
     bool checkEnable();
-
+    void readPeriodValue();
 };
 
 class WaveChannel
@@ -89,6 +91,8 @@ private:
     Byte index;
     Byte volume;
     Byte outVolume;
+    int frequencyTimer;
+
     // NRx0
     bool enable;
 
@@ -123,39 +127,70 @@ public:
     bool checkTrigger();
     bool checkLengthEnable();
     void run(Byte rateDiv);
+    void step(int cycles);
     void takeSample();
     Byte getVolume();
     void readOutputLevel();
     void readSoundLengthEnable();
+    void readPeriodValue();
 };
 
 class NoiseChannel
 {
 private:
+    Word NR[5];
+    Word registerAddress=0xFF1f;
+    // Registers NR4x are from FF20 to FF23
+    // NR[0] is not needed 
+
+    MemoryMap* mMap;
+    Byte volume;
+    bool enable;
+    int frequencyTimer;
+
     // NRx1
+    // max value = 64
     Byte lengthTimer;
 
     // NRx2
     Byte envelopeVolume;
     Byte envelopeDirection;
     Byte envelopeSweepPace;
+    Byte envelopeSweepPaceClock;
+
 
     // NRx3
     Byte clockShift;
     Byte LFSRWidth;
     Byte clockDivider;
+    Word LFSR;
+
+    Byte dividerTable[8] = {8, 16, 32, 48, 64, 80, 96, 112};
 
     // NRx4
     bool trigger;
     bool soundLengthEnable;
 
+public:
+    NoiseChannel();
+    void setMemoryMap(MemoryMap* m){ mMap = m; }
+    void enableAndLoad();
+    bool checkEnable();
+    bool checkTrigger();
+    bool checkLengthEnable();
+    void run(Byte rateDiv);
+    void step(int cycles);
+    void takeSample();
+    Byte getVolume();
+    void readSoundLengthEnable();
+    void readPolynomialRegister();
 };
 
 
 class APU
 {
 private:
-    Byte preDiv;
+    int a=0;
     // SDL Audio
     // https://documentation.help/SDL/guideaudioexamples.html
     SDL_AudioSpec wanted, obtained;
@@ -167,7 +202,13 @@ private:
 
     // memory map     
     MemoryMap* mMap;
-
+    // Gets an audio sample every 95 clock cycles. 
+    // clockSpeed/sampleRate ~ 95
+    int sampleCounter;
+    // This updates the frame sequencer at 512Hz.
+    // Must be reset after every 8192 clock cycles.
+    int frameSequencerCounter;
+    int frameSequencer;
     // DIV-APU Counter
     // https://gbdev.io/pandocs/Audio_details.html#div-apu
     // increases every 512Hz
@@ -198,9 +239,7 @@ private:
     //Audio Channels
     PulseChannel* channel1;
     PulseChannel* channel2;
-
     WaveChannel* channel3;
-    
     NoiseChannel* channel4;
 
 
@@ -209,6 +248,6 @@ public:
     bool init();
     void executeAPU();
     void setMemoryMap(MemoryMap* m){ mMap = m; }
-    void test();
-
+    void test(int cycles);
+    void stepAPU(int cycles);
 };
