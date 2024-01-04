@@ -1638,7 +1638,7 @@ int CPU::HALT()
 	// The interrupt is handled, but returned back to HALT
 	// so HALT gets called twice
 
-	if ((!IMEReg) && (mMap->getRegIE() & mMap->getRegIF()))
+	if ((!IMEReg) && ((mMap->getRegIE() & mMap->getRegIF()) & 0x1F))
 	{
 		// Check if EI executed just before HALT
 		// Pass through without a PC increment if true
@@ -7791,7 +7791,7 @@ int CPU::performInterrupt()
 	// don't perform interrupt
 	if (!IMEReg)
 	{
-		if (isHalted && (mMap->getRegIE() & mMap->getRegIF()))
+		if (isHalted && ((mMap->getRegIE() & mMap->getRegIF()) & 0x1F))
 		{
 			isHalted = false;
 			reg_PC.dat += 1;

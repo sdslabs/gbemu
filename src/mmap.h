@@ -207,7 +207,7 @@ public:
 	Byte getRegTIMA() { return *reg_TIMA; }
 
 	// gets the reg_IF
-	Byte getRegIF() { return *reg_IF; }
+	Byte getRegIF() { return 0xE0 + (*reg_IF & 0x1F); }
 
 	// gets the reg_IE
 	Byte getRegIE() { return *interruptEnableRegister; }
