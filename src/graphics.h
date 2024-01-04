@@ -128,7 +128,6 @@ public:
 	void render_ttl();
 	void listBgMap();
 	void listTiles();
-	void listSprites();
 	void renderOAM();
 	bool pollEvents();
 	void renderScanline(Byte line);

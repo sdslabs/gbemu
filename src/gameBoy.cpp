@@ -138,29 +138,29 @@ void GBE::getValueOfRegister(char registerName)
 
 	switch (registerName)
 	{
-		case 'A':
-			value = gbe_cpu->get_reg_A();
-			break;
-		case 'B':
-			value = gbe_cpu->get_reg_B();
-			break;
-		case 'C':
-			value = gbe_cpu->get_reg_C();
-			break;
-		case 'D':
-			value = gbe_cpu->get_reg_D();
-			break;
-		case 'E':
-			value = gbe_cpu->get_reg_E();
-			break;
-		case 'H':
-			value = gbe_cpu->get_reg_H();
-			break;
-		case 'L':
-			value = gbe_cpu->get_reg_L();
-			break;	
-		default:
-			break;						
+	case 'A':
+		value = gbe_cpu->get_reg_A();
+		break;
+	case 'B':
+		value = gbe_cpu->get_reg_B();
+		break;
+	case 'C':
+		value = gbe_cpu->get_reg_C();
+		break;
+	case 'D':
+		value = gbe_cpu->get_reg_D();
+		break;
+	case 'E':
+		value = gbe_cpu->get_reg_E();
+		break;
+	case 'H':
+		value = gbe_cpu->get_reg_H();
+		break;
+	case 'L':
+		value = gbe_cpu->get_reg_L();
+		break;
+	default:
+		break;
 	}
 	// printf(value);
 	printf("%hu\n", value);
@@ -191,7 +191,7 @@ void GBE::debug_int()
 					break;
 				// Left control to open Debugger window
 				// b for bgMap
-				// t to show current tiles on screen 
+				// t to show current tiles on screen
 				// s to show sprites on screen
 				case SDLK_LCTRL:
 					gbe_graphics->debuggerInit();
@@ -200,31 +200,31 @@ void GBE::debug_int()
 					while (debuggerMode)
 					{
 						while (SDL_PollEvent(event))
-						{	
+						{
 							if (event->key.type == SDL_KEYUP)
-							{	
+							{
 								switch (event->key.keysym.sym)
 								{
 								case SDLK_b:
 									gbe_graphics->listBgMap();
 									break;
 								case SDLK_s:
-									gbe_graphics->listSprites();
+									gbe_graphics->renderOAM();
 									break;
 								case SDLK_t:
 									gbe_graphics->listTiles();
-									break;	
+									break;
 								case SDLK_ESCAPE:
 									gbe_graphics->close(true);
 									debuggerMode = false;
-									break;	
+									break;
 								default:
 									break;
 								}
 							}
 						}
 					}
-					break;	
+					break;
 				case SDLK_i:
 					printf("Info Mode:- \n");
 					infoMode = true;
@@ -243,9 +243,9 @@ void GBE::debug_int()
 					while (infoMode)
 					{
 						while (SDL_PollEvent(event))
-						{	
+						{
 							if (event->key.type == SDL_KEYUP)
-							{	
+							{
 								switch (event->key.keysym.sym)
 								{
 								case SDLK_r:
@@ -280,10 +280,10 @@ void GBE::debug_int()
 									break;
 								case SDLK_p:
 									gbe_cpu->printStack();
-									break;		
+									break;
 								case SDLK_x:
 									infoMode = false;
-									break;	
+									break;
 								default:
 									break;
 								}

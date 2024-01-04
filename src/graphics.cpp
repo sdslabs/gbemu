@@ -158,24 +158,6 @@ void PPU::listBgMap()
 	SDL_RenderPresent(debugRenderer);
 }
 
-void PPU::listSprites()
-{
-
-	if (!scanlineRendered)
-	{
-		renderScanline(mMap->getRegLY());
-		scanlineRendered = true;
-	}
-	renderOAM();
-
-	// SDL_UpdateTexture(debugTexture, NULL, renderSprites, 160 * 4);
-	// SDL_RenderClear(debugRenderer);
-	// SDL_RenderCopy(debugRenderer, debugTexture, NULL, NULL);
-	// SDL_RenderPresent(debugRenderer);
-
-	// render_ttl();
-}
-
 // We are reading values from 0xFE00-0xFE9F
 // Outer loop increments for every new tile to be rendered
 // Middle loop increments for every line of tile
@@ -183,21 +165,14 @@ void PPU::listSprites()
 // We are printing 4 tiles in a row with gap of 2 between each tile { (tileNumber % 4) * 10) + j + 8) }
 void PPU::renderOAM()
 {
-	if (!scanlineRendered)
-	{
-		renderScanline(mMap->getRegLY());
-		scanlineRendered = true;
-	}
 	Byte sprite_y, sprite_pixel_col, sprite_palette;
 
-	// sprites.clear();
 	Byte sprite_height = 8;
 	for (Word i = 0xFE00; i < 0xFEA0; i += 4)
 	{
 		if (sprites.size() >= 40)
 			break;
 		sprite_y = (*mMap)[i];
-		// if ((line < (sprite_y - 16) || line > (sprite_y - 16 + sprite_height - 1)))
 		if (sprite_y < 16 || sprite_y > 152)
 			continue;
 
@@ -208,25 +183,17 @@ void PPU::renderOAM()
 		sprite->tile = (*mMap)[i + 2];
 		sprite->flags = (*mMap)[i + 3];
 		sprites.push_back(*sprite);
-
-		// printf("sprite_y = ",sprite_y);
 	}
 
-	// printf("\n%d\n", sprites.size());
-
-	// if (sprites.size())
-	// 	std::sort(sprites.begin(), sprites.end(), [](Sprite& a, Sprite& b)
-	// 	    { return (((a.x == b.x) && (a.address > b.address)) || (a.x > b.x)); });
 	int sprite_count = 0;
 	for (auto it = sprites.begin(); it != sprites.end(); ++it)
 	{
-
 		sprite_palette = (it->flags & 0x10) ? objPalette1 : objPalette0;
 		for (int i = 0; i < 8; i++)
 		{
 			for (int j = 0; j < 8; j++)
 			{
-				sprite_pixel_col = ((*mMap)[0x8000 + (it->tile * 0x10) + ((i - (it->y - 16)) * 2)] >> (7 - j) & 0x1) + (((*mMap)[0x8000 + (it->tile * 0x10) + ((i - (it->y - 16)) * 2) + 1] >> (7 - j) & 0x1) * 2);
+				sprite_pixel_col = (((*mMap)[0x8000 + (it->tile * 0x10) + (i * 2)] >> (7 - j)) & 0x1) + ((((*mMap)[0x8000 + (it->tile * 0x10) + (i * 2) + 1] >> (7 - j)) & 0x1) * 2);
 				if (sprite_pixel_col != 0)
 				{
 					renderSprites[((static_cast<int>(sprite_count / 4) * 20) + i + 20) * 160 + (((sprite_count % 4) * 20) + j + 8)] = bg_colors[(bgPalette >> (sprite_pixel_col * 2)) & 0x3];
@@ -446,8 +413,7 @@ void PPU::renderScanline(Byte line)
 		}
 
 		if (sprites.size())
-			std::sort(sprites.begin(), sprites.end(), [](Sprite& a, Sprite& b)
-			    { return (((a.x == b.x) && (a.address > b.address)) || (a.x > b.x)); });
+			std::sort(sprites.begin(), sprites.end(), [](Sprite& a, Sprite& b) { return (((a.x == b.x) && (a.address > b.address)) || (a.x > b.x)); });
 		sprite_count = 0;
 		for (auto it = sprites.begin(); it != sprites.end(); ++it)
 		{
@@ -481,9 +447,7 @@ void PPU::renderScanline(Byte line)
 					// printf("%hu , %hu\n", it->y, line);
 					if (((it->x + i - 8) < 160) && (!(it->flags & 0x80) || (renderArray[(line * 160) + (it->x + i - 8)] == bg_colors[0])))
 					{
-						int newLine = (it->y - line) + 80;
 						renderArray[(line * 160) + (it->x + i - 8)] = bg_colors[(sprite_palette >> (sprite_pixel_col * 2)) & 0x3];
-						// renderSprites[(newLine * 160) + ((sprite_count * 40) + i + 8)] = bg_colors[(sprite_palette >> (sprite_pixel_col * 2)) & 0x3];
 					}
 				}
 			}
