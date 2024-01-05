@@ -9,17 +9,9 @@ MemoryMap::MemoryMap()
 	romBank0 = new Byte[0x4000];
 	memset(romBank0, 0x00, 0x4000);
 
-	// 16kb ROM bank 1
-	romBank1 = new Byte[0x4000];
-	memset(romBank1, 0x00, 0x4000);
-
-	// 8kb Video RAM
+	// 8kb External RAM
 	videoRam = new Byte[0x2000];
 	memset(videoRam, 0x00, 0x2000);
-
-	// 8kb External RAM
-	externalRam = new Byte[0x2000];
-	memset(externalRam, 0x00, 0x2000);
 
 	// 8kb Work RAM
 	workRam = new Byte[0x2000];
@@ -43,6 +35,21 @@ MemoryMap::MemoryMap()
 	// 127 bytes High RAM
 	highRam = new Byte[0x007F];
 	memset(highRam, 0x00, 0x007F);
+
+	// MBC mode
+	romMBCMode = 0x0;
+
+	// ROM Bank Number
+	romBankNumber = 0x1;
+
+	// RAM Bank Number
+	ramBankNumber = 0x0;
+
+	// Enable RAM Flag
+	enableRAM = 0x0;
+
+	// ROM/RAM Mode Select
+	romRAMModeSelect = 0x0;
 
 	// 1 byte Interrupt Enable Register
 	interruptEnableRegister = new Byte;
@@ -103,17 +110,62 @@ MemoryMap::MemoryMap()
 
 	bootRomFile = nullptr;
 	romFile = nullptr;
+}
 
-	mbcMode = 0x0;
+// Check writes to ROM
+void MemoryMap::checkRomWrite(Word address, Byte value)
+{
+	switch (romMBCMode)
+	{
+	case MBC0:
+		printf("Writing to ROM is not allowed! Write attempted at %04X", address);
+		break;
+	case MBC1:
+	{
+		if (address < 0x2000)
+		{
+			// Enable/Disable RAM
+			if ((value & 0x1F) == 0x0A)
+				enableRAM = 0xFF;
+			else
+				enableRAM = 0x00;
+		}
+		else if (address < 0x4000)
+		{
+			romBankNumber &= 0x60;
+			romBankNumber |= (value & 0x1F);
+		}
+		else if (address < 0x6000)
+		{
+			if (romRAMModeSelect)
+			{
+				ramBankNumber = value & 0x03;
+				romBankNumber &= 0x1F;
+				romBankNumber |= ((value & 0x03) << 5);
+			}
+		}
+		else if (address < 0x8000)
+		{
+			romRAMModeSelect = value & 0x01;
+		}
+		else
+		{
+			printf("Invalid address");
+		}
+		break;
+	}
+	default:
+		printf("Invalid MBC mode");
+		break;
+	}
 }
 
 // Write to memory
-// TODO: Make emulation memory secure
 bool MemoryMap::writeMemory(Word address, Byte value)
 {
 	if (address < 0x8000)
 	{
-		printf("Writing to ROM is not allowed! Write attempted at %04X", address);
+		checkRomWrite(address, value);
 		return false;
 	}
 	else if (address < 0xA000)
@@ -124,7 +176,19 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 	else if (address < 0xC000)
 	{
 		// Write to External RAM
-		externalRam[address - 0xA000] = value;
+		switch (romMBCMode)
+		{
+		case MBC0:
+			externalRam[address - 0xA000] = value;
+			break;
+		case MBC1:
+			if (enableRAM)
+				externalRam[address - 0xA000 + (ramBankNumber * 0x2000)] = value;
+			break;
+		default:
+			externalRam[address - 0xA000] = value;
+			break;
+		}
 	}
 	else if (address < 0xE000)
 	{
@@ -206,12 +270,34 @@ Byte MemoryMap::readMemory(Word address)
 	if (address < 0x4000)
 	{
 		// Read from ROM bank 0
-		return romBank0[address];
+		switch (romMBCMode)
+		{
+		case MBC0:
+			return romBank0[address];
+		case MBC1:
+			if (!(romBankNumber & 0x60))
+				return romBank0[address];
+			else
+				return romBank1[address + (((romBankNumber & 0x60) - 1) * 0x4000)];
+		default:
+			return romBank0[address];
+		}
 	}
 	else if (address < 0x8000)
 	{
 		// Read from ROM bank 1
-		return romBank1[address - 0x4000];
+		switch (romMBCMode)
+		{
+		case MBC0:
+			return romBank1[address - 0x4000];
+		case MBC1:
+			if (!(romBankNumber & 0x1F))
+				return romBank1[(address - 0x4000) + (romBankNumber * 0x4000)];
+			else
+				return romBank1[(address - 0x4000) + ((romBankNumber - 1) * 0x4000)];
+		default:
+			return romBank1[address - 0x4000];
+		}
 	}
 	else if (address < 0xA000)
 	{
@@ -221,7 +307,18 @@ Byte MemoryMap::readMemory(Word address)
 	else if (address < 0xC000)
 	{
 		// Read from External RAM
-		return externalRam[address - 0xA000];
+		switch (romMBCMode)
+		{
+		case MBC0:
+			return externalRam[address - 0xA000];
+		case MBC1:
+			if (enableRAM)
+				return externalRam[address - 0xA000 + (ramBankNumber * 0x2000)];
+			else
+				return 0xFF;
+		default:
+			return externalRam[address - 0xA000];
+		}
 	}
 	else if (address < 0xE000)
 	{
@@ -310,10 +407,40 @@ void MemoryMap::mapRom()
 	fseek(romFile, 0x100, SEEK_SET);
 
 	fread(romBank0 + 0x100, 1, 16128, romFile);
-	fread(romBank1, 1, 16384, romFile);
+
+	// Find the size of the ROM
+	fseek(romFile, 0, SEEK_END);
+	int romSize = ftell(romFile);
+
+	// Allocate memory for ROM Bank 1
+	romBank1 = new Byte[romSize - 0x4000];
+
+	// Load the ROM Bank 1
+	fseek(romFile, 0x4000, SEEK_SET);
+	fread(romBank1, 1, romSize - 0x4000, romFile);
 
 	// Check 0x147 for MBC mode
-	mbcMode = romBank0[0x147];
+	romMBCMode = romBank0[0x147];
+	switch (romMBCMode)
+	{
+	case 0x00:
+		// No MBC
+		romMBCMode = MBC0;
+		externalRam = new Byte[0x2000];
+		memset(externalRam, 0x00, 0x2000);
+		break;
+	case 0x01:
+	case 0x02:
+	case 0x03:
+		// MBC1
+		romMBCMode = MBC1;
+		externalRam = new Byte[0x8000];
+		memset(externalRam, 0x00, 0x8000);
+		break;
+	default:
+		printf("Invalid MBC mode");
+		break;
+	}
 }
 
 void MemoryMap::unloadBootRom()

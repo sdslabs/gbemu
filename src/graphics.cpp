@@ -21,7 +21,6 @@ PPU::PPU()
 	currentLine = 0x00;
 	hiddenWindowLineCounter = 0x00;
 	ppuMode = 0x02;
-	event = new SDL_Event();
 
 	ppuMode = 0;
 	currentClock = modeClocks[ppuMode];
@@ -101,11 +100,11 @@ bool PPU::init()
 // And process them
 bool PPU::pollEvents()
 {
-	while (SDL_PollEvent(event))
+	while (SDL_PollEvent(&event))
 	{
-		if (event->key.type == SDL_KEYDOWN)
+		if (event.key.type == SDL_KEYDOWN)
 		{
-			switch (event->key.keysym.sym)
+			switch (event.key.keysym.sym)
 			{
 			case SDLK_LEFT:
 				*(mMap->joyPadState) &= 0xFD;
@@ -137,9 +136,9 @@ bool PPU::pollEvents()
 				break;
 			}
 		}
-		else if (event->key.type == SDL_KEYUP)
+		else if (event.key.type == SDL_KEYUP)
 		{
-			switch (event->key.keysym.sym)
+			switch (event.key.keysym.sym)
 			{
 			case SDLK_LEFT:
 				*(mMap->joyPadState) |= 0x02;

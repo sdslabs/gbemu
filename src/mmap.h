@@ -8,10 +8,30 @@
 class MemoryMap
 {
 private:
-	Byte mbcMode;
-
 	FILE* bootRomFile;
 	FILE* romFile;
+
+	// MBC Mode Enum
+	enum MBC
+	{
+		MBC0,
+		MBC1
+	};
+
+	// ROM MBC Mode
+	Byte romMBCMode;
+
+	// ROM Bank Number
+	Byte romBankNumber;
+
+	// RAM Bank Number
+	Byte ramBankNumber;
+
+	// Enable RAM Flag
+	Byte enableRAM;
+
+	// ROM/RAM Mode Select
+	Byte romRAMModeSelect;
 
 	// First ROM Bank
 	// 16 KB 0x0000 - 0x3FFF
@@ -136,6 +156,9 @@ private:
 	// The WX Register
 	// Stays in the I/O Ports at 0xFF4B
 	Byte* reg_WX;
+
+	// set the rom bank offset
+	void checkRomWrite(Word address, Byte value);
 
 public:
 	Byte* joyPadState;
