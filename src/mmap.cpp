@@ -128,7 +128,7 @@ void MemoryMap::checkRomWrite(Word address, Byte value)
 		if (address < 0x2000)
 		{
 			// Enable/Disable RAM
-			if ((value & 0x1F) == 0x0A)
+			if ((value & 0x0F) == 0x0A)
 				enableRAM = 0xFF;
 			else
 				enableRAM = 0x00;
@@ -278,7 +278,7 @@ Byte MemoryMap::readMemory(Word address)
 		case MBC0:
 			return romBank0[address];
 		case MBC1:
-			if ((romBankNumber & 0x60) && ((romBankNumber * 0x4000) < romSize) && !(romBankNumber & 0x1f))
+			if ((romBankNumber & 0x60) && ((romBankNumber * 0x4000) < romSize) && !(romBankNumber & 0x1F))
 				return romBank1[address + (((romBankNumber & 0x60) - 1) * 0x4000)];
 			else
 				return romBank0[address];
@@ -299,7 +299,7 @@ Byte MemoryMap::readMemory(Word address)
 			else if ((romBankNumber * 0x4000) < romSize)
 				return romBank1[(address - 0x4000) + ((romBankNumber - 1) * 0x4000)];
 			else
-				return romBank1[(address - 0x4000) + (((romBankNumber & 0x1f) - 1) * 0x4000)];
+				return romBank1[(address - 0x4000) + (((romBankNumber & 0x1F) - 1) * 0x4000)];
 		default:
 			return romBank1[address - 0x4000];
 		}
@@ -317,8 +317,12 @@ Byte MemoryMap::readMemory(Word address)
 		case MBC0:
 			return externalRam[address - 0xA000];
 		case MBC1:
-			if (enableRAM)
-				return externalRam[address - 0xA000 + (ramBankNumber * 0x2000)];
+			if (enableRAM) {
+				if (ramBankNumber * 0x2000 < ramSize)
+					return externalRam[address - 0xA000 + (ramBankNumber * 0x2000)];
+				else
+					return externalRam[address - 0xA000];
+			}
 			else
 				return 0xFF;
 		default:
@@ -460,8 +464,8 @@ void MemoryMap::mapRom()
 	case 0x03:
 		// MBC1
 		romMBCMode = MBC1;
-		externalRam = new Byte[0x8000];
-		memset(externalRam, 0x00, 0x8000);
+		externalRam = new Byte[ramSize];
+		memset(externalRam, 0x00, ramSize);
 		break;
 	default:
 		printf("Invalid MBC mode");
