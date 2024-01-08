@@ -44,7 +44,7 @@ GBE::GBE()
 		printf("boot rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/drmario.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../tests/dmg_sound/rom_singles/01-registers.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Set the Boot ROM
@@ -129,7 +129,7 @@ void GBE::update()
 		// this runs at a freq of around 27 * freq(DIV) = 442368 Hz
 		// this is probably enough to implement APU
 		gbe_sound->stepAPU(s_Cycles);
-		// gbe_sound->test(s_Cycles);
+		gbe_sound->test(s_Cycles);
 		s_Cycles = 0;
 		s_Cycles += gbe_cpu->performInterrupt();
 		// printf("s_Cycles after: %d\n\n", s_Cycles);

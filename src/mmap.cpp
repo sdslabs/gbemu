@@ -44,6 +44,9 @@ MemoryMap::MemoryMap()
 	highRam = new Byte[0x007F];
 	memset(highRam, 0x00, 0x007F);
 
+	waveRam = new Byte[0x0010];
+	memset(waveRam, 0x00, 0x0010 );
+
 	// 1 byte Interrupt Enable Register
 	interruptEnableRegister = new Byte;
 
@@ -97,6 +100,8 @@ MemoryMap::MemoryMap()
 
 	// WX at 0xFF4B
 	reg_WX = ioPorts + 0x4B;
+
+	audioReg = ioPorts + 0x10;
 
 	joyPadState = new Byte;
 	*joyPadState = 0xFF;
@@ -222,8 +227,40 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 		{
 			readInput(value);
 		}
-		//if (value != 0xFF)
-		//printf("0x%02x\n", ioPorts[0]);}
+		
+		// Write to Audio Registers
+		else if (address >= 0xFF10 && address <=0xFF26){
+			// NR52
+			// only 7th bit is read/write
+			// others are read only
+			if (address == 0xFF26 ){
+				printf("value: %x\n NR52 before: %x\n", value, *(audioReg+NR52));
+				value = value >> 7;
+				*(audioReg + NR52) = (*(audioReg + NR52) & 0b0111111) | (value << 7);
+				printf("NR52 after: %x\n", *(ioPorts+0x10+NR52));
+				printf("NR52 after: %x\n\n", *(audioReg+NR52));
+				enableAPU = value;
+
+			}
+
+			if(enableAPU){
+				// ioPorts
+				// NR20 && NR40
+				// if( address == 0xFF15 || address == 0xFF1F)
+			}else {
+				for( int i= NR10; i <= NR52 ; i++ ){
+					*(audioReg+i) = 0x00;
+				}
+			}
+		}
+
+		// Write to Wave 
+		else if (address >= 0xFF30 && address <= 0xFF3F){
+			if(enableAPU){
+
+			}
+		}
+
 		else
 			ioPorts[address - 0xFF00] = value;
 	}

@@ -133,9 +133,16 @@ void APU::test(int cycles)
 {
 	a+=cycles;
 	if(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start).count() >1){
-		printf("%d\n",a);
+		// printf("%d\n",a);
 		a=0;
 		start = std::chrono::high_resolution_clock::now();
+		Byte* ptr = mMap->getIoPorts();
+		// for (Byte i = 0; i < 128; i++)
+		// {
+
+		// 	printf("\t%x: %p\n", *ptr, ptr);
+		// 	ptr++;
+		// }
 	}
 
 }

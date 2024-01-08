@@ -191,6 +191,19 @@ private:
 	// Tells the number of bits of RAM Bank Number that are useful for RAM
 	Byte ramBankNumberMaskForRam;
 
+
+	// APU enable
+	bool enableAPU;
+
+	// Audio Registers
+	// NR10 - NR52
+	// FF10 - FF26 
+	Byte* audioReg;
+
+	// FF30–FF3F — Wave pattern RAM
+	// 16 Bytes
+	Byte* waveRam;
+
 public:
 	Byte* joyPadState;
 
@@ -328,4 +341,8 @@ public:
 
 	// Change RAM Banking according to the set registers
 	void bankRam();
+
+	Byte getAudioReg(int regId);
+
+	Byte* getWaveRam() { return waveRam; }
 };

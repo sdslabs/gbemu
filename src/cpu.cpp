@@ -61,17 +61,17 @@ CPU::CPU()
 	// TODO: check the initial state of IME
 	IMEFlag = -1;
 
-	IMEReg = false;
-}
+		IMEReg = false;
+	}
 
-// NOP just adds 4 cycles
-// Does nothing
-int CPU::NOP()
-{
-	reg_PC.dat += 1;
-	debugPrint("NOP\n");
-	return 4;
-}
+	// NOP just adds 4 cycles
+	// Does nothing
+	int CPU::NOP()
+	{
+		reg_PC.dat += 1;
+		debugPrint("NOP\n");
+		return 4;
+	}
 
 // LD BC, u16
 // Loads a 16 bit immediate value into BC
