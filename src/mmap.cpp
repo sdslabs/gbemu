@@ -4,6 +4,9 @@
 // Constructor
 MemoryMap::MemoryMap()
 {
+	romSize = 0x8000;
+	ramSize = 0x2000;
+
 	// Initialize the memory map
 	// 16kb ROM bank 0
 	romBank0 = new Byte[0x4000];
@@ -275,10 +278,10 @@ Byte MemoryMap::readMemory(Word address)
 		case MBC0:
 			return romBank0[address];
 		case MBC1:
-			if (!(romBankNumber & 0x60))
-				return romBank0[address];
-			else
+			if ((romBankNumber & 0x60) && ((romBankNumber * 0x4000) < romSize) && !(romBankNumber & 0x1f))
 				return romBank1[address + (((romBankNumber & 0x60) - 1) * 0x4000)];
+			else
+				return romBank0[address];
 		default:
 			return romBank0[address];
 		}
@@ -293,8 +296,10 @@ Byte MemoryMap::readMemory(Word address)
 		case MBC1:
 			if (!(romBankNumber & 0x1F))
 				return romBank1[(address - 0x4000) + (romBankNumber * 0x4000)];
-			else
+			else if ((romBankNumber * 0x4000) < romSize)
 				return romBank1[(address - 0x4000) + ((romBankNumber - 1) * 0x4000)];
+			else
+				return romBank1[(address - 0x4000) + (((romBankNumber & 0x1f) - 1) * 0x4000)];
 		default:
 			return romBank1[address - 0x4000];
 		}
@@ -408,9 +413,30 @@ void MemoryMap::mapRom()
 
 	fread(romBank0 + 0x100, 1, 16128, romFile);
 
-	// Find the size of the ROM
-	fseek(romFile, 0, SEEK_END);
-	int romSize = ftell(romFile);
+	// Find the size of the ROM and RAM
+	// https://gbdev.io/pandocs/The_Cartridge_Header.html#0148--rom-size
+	romSize = 0x8000 * (1 << romBank0[0x148]);
+	switch (romBank0[0x149])
+	{
+	case 0x0:
+		ramSize = 0x0;
+		break;
+	case 0x1:
+		ramSize = 0x800;
+		break;
+	case 0x2:
+		ramSize = 0x2000;
+		break;
+	case 0x3:
+		ramSize = 0x8000;
+		break;
+	case 0x4:
+		ramSize = 0x20000;
+		break;
+	case 0x5:
+		ramSize = 0x10000;
+		break;
+	}
 
 	// Allocate memory for ROM Bank 1
 	romBank1 = new Byte[romSize - 0x4000];

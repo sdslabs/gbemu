@@ -31,7 +31,7 @@ GBE::GBE()
 		printf("boot rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/hugo.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../tests/mbc1/bits_bank2.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Set the Boot ROM

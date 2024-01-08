@@ -18,6 +18,9 @@ private:
 		MBC1
 	};
 
+	int romSize;
+	int ramSize;
+
 	// ROM MBC Mode
 	Byte romMBCMode;
 
