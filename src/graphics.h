@@ -22,6 +22,13 @@ struct Sprite
 	Byte flags;
 };
 
+struct SpriteMetaData
+{
+	char const *data;
+	int xCord;
+	int yCord;
+};
+
 class PPU
 {
 private:
@@ -120,6 +127,7 @@ private:
 	};
 
 	std::vector<Sprite> sprites;
+	std::vector<SpriteMetaData *> metadatas;
 
 public:
 	PPU();

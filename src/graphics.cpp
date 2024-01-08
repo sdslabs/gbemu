@@ -32,8 +32,6 @@ PPU::PPU()
 	frameRendered = false;
 
 	// Fill renderArray initially with white (lightest color in palette)
-	std::fill(renderSprites, renderSprites + (160 * 144), bg_colors[0]);
-	std::fill(renderTiles, renderTiles + (160 * 144), bg_colors[0]);
 	std::fill(renderArray, renderArray + (160 * 144), bg_colors[0]);
 }
 
@@ -162,11 +160,12 @@ void PPU::listBgMap()
 // Outer loop increments for every new tile to be rendered
 // Middle loop increments for every line of tile
 // Inner loop increments for every pixel of line of tile.
-// We are printing 4 tiles in a row with gap of 2 between each tile { (tileNumber % 4) * 10) + j + 8) }
+// We are printing 2 tiles in a row with gap of 2 between each tile { (tileNumber % 2) * 10) + j + 8) }
 void PPU::renderOAM()
 {
 	Byte sprite_y, sprite_pixel_col, sprite_palette;
-
+	std::fill(renderSprites, renderSprites + (160 * 144), bg_colors[0]);
+	sprites.clear();
 	Byte sprite_height = 8;
 	for (Word i = 0xFE00; i < 0xFEA0; i += 4)
 	{
@@ -186,6 +185,7 @@ void PPU::renderOAM()
 	}
 
 	int sprite_count = 0;
+	metadatas.clear();	
 	for (auto it = sprites.begin(); it != sprites.end(); ++it)
 	{
 		sprite_palette = (it->flags & 0x10) ? objPalette1 : objPalette0;
@@ -196,21 +196,47 @@ void PPU::renderOAM()
 				sprite_pixel_col = (((*mMap)[0x8000 + (it->tile * 0x10) + (i * 2)] >> (7 - j)) & 0x1) + ((((*mMap)[0x8000 + (it->tile * 0x10) + (i * 2) + 1] >> (7 - j)) & 0x1) * 2);
 				if (sprite_pixel_col != 0)
 				{
-					renderSprites[((static_cast<int>(sprite_count / 4) * 20) + i + 20) * 160 + (((sprite_count % 4) * 20) + j + 8)] = bg_colors[(bgPalette >> (sprite_pixel_col * 2)) & 0x3];
+					renderSprites[((static_cast<int>(sprite_count / 2) * 30) + i + 20) * 160 + (((sprite_count % 2) * 60) + j + 8)] = bg_colors[(bgPalette >> (sprite_pixel_col * 2)) & 0x3];
 				}
 			}
 		}
+		char *data = new char[100];
+		char const *flipFlag;
+		SpriteMetaData* spriteData = new SpriteMetaData();
+		spriteData->xCord = (((sprite_count % 2) * 120) + 40);		// X coord of box containing metadata
+		spriteData->yCord = ((static_cast<int>(sprite_count / 2) * 65) + 30);	// Y coord of box containing metadata
+
+		switch (it->flags & 0x60)
+		{
+		case 0x00: // Normal
+			flipFlag = "NO FLIP";
+			break;
+		case 0x20: // Flip X
+			flipFlag = "X FLIP";			
+			break;
+		case 0x40: // Flip Y
+			flipFlag = "Y FLIP";
+			break;
+		case 0x60: // Flip X and Y
+			flipFlag = "X AND Y \nFLIP";
+			break;
+		default:
+			break;
+		}
+		sprintf(data, "X: %hu \n\n Y: %hu \n\n %hu\n\n %s", it->x, it->y, it->tile, flipFlag);
+		spriteData->data = data;
+		metadatas.push_back(spriteData);
 		sprite_count++;
 	}
 	SDL_UpdateTexture(debugTexture, NULL, renderSprites, 160 * 4);
-	SDL_RenderClear(debugRenderer);
 	SDL_RenderCopy(debugRenderer, debugTexture, NULL, NULL);
 	SDL_RenderPresent(debugRenderer);
+
+	render_ttl();
 }
 
 void PPU::render_ttl()
 {
-	// Initialize SDL
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
 		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
@@ -223,7 +249,7 @@ void PPU::render_ttl()
 		return;
 	}
 
-	TTF_Font* font = TTF_OpenFont("../lazy.ttf", 24);
+	TTF_Font* font = TTF_OpenFont("../timesRoman.ttf", 18u);
 	if (!font)
 	{
 		printf("Error loading font:  %s\n", TTF_GetError());
@@ -233,23 +259,20 @@ void PPU::render_ttl()
 	SDL_Rect dest;
 	SDL_Color textColor = { 0, 0, 0 };
 
-	SDL_Surface* text_surf = TTF_RenderText_Solid_Wrapped(font, "Hey\nWorld", textColor, 150);
-	SDL_Texture* text = SDL_CreateTextureFromSurface(debugRenderer, text_surf);
+	for (auto spriteData : metadatas)
+	{	
+		char const *data = spriteData->data;
+		SDL_Surface* text_surf = TTF_RenderText_Solid_Wrapped(font, data, textColor, 100);
+		SDL_Texture* text = SDL_CreateTextureFromSurface(debugRenderer, text_surf);
 
-	dest.x = 160 - (text_surf->w / 9.0f);
-	dest.y = 140;
-	dest.w = text_surf->w;
-	dest.h = text_surf->h;
-	SDL_RenderCopy(debugRenderer, text, NULL, &dest);
+		dest.x = spriteData->xCord;
+		dest.y = spriteData->yCord;
+		dest.w = text_surf->w*3/5;
+		dest.h = text_surf->h*4/5;
+		SDL_RenderCopy(debugRenderer, text, NULL, &dest);
 
-	SDL_DestroyTexture(text);
-	SDL_FreeSurface(text_surf);
-
-	SDL_RenderPresent(debugRenderer);
-	// SDL_RenderClear(debugRenderer);
-	// SDL_RenderCopy(debugRenderer, debugTexture, NULL, NULL);
-	// SDL_RenderPresent(debugRenderer);
-	// surface = TTF_RenderText_Solid(font, text, textColor);
+		SDL_RenderPresent(debugRenderer);
+	}
 }
 
 // We are reading values from 0x8000 to 0x8fff
@@ -259,6 +282,7 @@ void PPU::render_ttl()
 // We are printing 14 tiles in a row with gap of 2 between each tile { (tileNumber % 14) * 10) + j + 8) }
 void PPU::listTiles()
 {
+	std::fill(renderTiles, renderTiles + (160 * 144), bg_colors[0]);
 	int tileNumber = 0;
 	Byte pixel_col;
 	for (Word tileAddr = 0x8000; tileAddr < 0x8FFF; tileAddr += 0x10)
