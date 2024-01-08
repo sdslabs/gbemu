@@ -185,7 +185,7 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 			externalRam[address - 0xA000] = value;
 			break;
 		case MBC1:
-			if (enableRAM && ((ramBankNumber * 0x2000) < ramSize))
+			if (enableRAM && romRAMModeSelect && ((ramBankNumber * 0x2000) < ramSize))
 				externalRam[address - 0xA000 + (ramBankNumber * 0x2000)] = value;
 			else if (enableRAM)
 				externalRam[address - 0xA000] = value;
@@ -280,7 +280,7 @@ Byte MemoryMap::readMemory(Word address)
 		case MBC0:
 			return romBank0[address];
 		case MBC1:
-			if ((romBankNumber & 0x60) && ((romBankNumber * 0x4000) < romSize) && !(romBankNumber & 0x1F))
+			if (romRAMModeSelect && (romBankNumber & 0x60) && ((romBankNumber * 0x4000) < romSize) && !(romBankNumber & 0x1F))
 				return romBank1[address + (((romBankNumber & 0x60) - 1) * 0x4000)];
 			else
 				return romBank0[address];
@@ -320,7 +320,7 @@ Byte MemoryMap::readMemory(Word address)
 			return externalRam[address - 0xA000];
 		case MBC1:
 			if (enableRAM) {
-				if ((ramBankNumber * 0x2000) < ramSize)
+				if (romRAMModeSelect && ((ramBankNumber * 0x2000) < ramSize))
 					return externalRam[address - 0xA000 + (ramBankNumber * 0x2000)];
 				else
 					return externalRam[address - 0xA000];
