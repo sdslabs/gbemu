@@ -201,6 +201,11 @@ void MemoryMap::debugWriteMemory(Word address, Byte value)
 	romBank0[address] = value;
 }
 
+void MemoryMap::writeRomBank1(Word address, Byte value)
+{
+	romBank1[address] = value;
+}
+
 Byte MemoryMap::readMemory(Word address)
 {
 	if (address < 0x4000)

@@ -7920,13 +7920,22 @@ void CPU::writeToMemory()
 	Byte value;
 	printf("Address: ");
 	scanf("%hx", &address);
-	if (address >= 0x8000)
+	printf("Value: ");
+	scanf("%hhx", &value);
+	if (address >= 0x0000 && address <= 0x3FFF)
 	{
-		printf("Value: ");
-		scanf("%hhx", &value);
-		mMap->writeMemory(address, value);
-	} else {
-		printf("Can't Write to Addresses less than 0x8000\n");
+		mMap->debugWriteMemory(address, value);
 	}
-
+	else if (address >= 0x4000 && address <= 0x7FFF)
+	{
+		mMap->writeRomBank1(address, value);
+	}
+	else if (address >= 0x8000)
+	{
+		mMap->writeMemory(address, value);
+	}
+	else
+	{
+		printf("Can't Write to specified addresses \n");
+	}
 }

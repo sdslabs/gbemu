@@ -181,7 +181,11 @@ public:
 
 	// Writes a byte to the memory address
 	bool writeMemory(Word address, Byte value);
+
 	void debugWriteMemory(Word address, Byte value);
+
+	//  write to RomBank1
+	void writeRomBank1(Word address, Byte value);
 
 	// Reads a byte from the memory address
 	Byte readMemory(Word address);
