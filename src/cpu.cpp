@@ -3244,7 +3244,7 @@ int CPU::JP_u16()
 // CALL NZ, u16
 // Call subroutine at address u16 if zero flag is not set.
 int CPU::CALL_NZ_u16()
-{	
+{
 	if (!GET_ZERO_FLAG)
 	{
 		mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) >> 8);
@@ -3385,7 +3385,7 @@ int CPU::CALL_Z_u16()
 // CALL u16
 // Call subroutine at address u16.
 int CPU::CALL_u16()
-{	
+{
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 3) & 0xFF);
 	reg_PC.dat = (*mMap)[reg_PC.dat + 1] | ((*mMap)[reg_PC.dat + 2] << 8);
@@ -3714,7 +3714,7 @@ int CPU::AND_A_u8()
 // RST 20H
 // Call subroutine at address 0x0020.
 int CPU::RST_20H()
-{	
+{
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0020;
@@ -3953,7 +3953,7 @@ int CPU::CP_u8()
 // RST 38H
 // Call subroutine at address 0x0038.
 int CPU::RST_38H()
-{	
+{
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) >> 8);
 	mMap->writeMemory(--reg_SP.dat, (reg_PC.dat + 1) & 0xFF);
 	reg_PC.dat = 0x0038;
@@ -7882,24 +7882,31 @@ void CPU::updateTimers(int cycles)
 }
 
 // print elements of calleraddresses stack
-void CPU::printStack() {
+void CPU::printStack()
+{
 	int count = 0;
 	printf("Printing Stack....");
-	for(Word i = reg_SP.dat ; i <= 0xFFFE ; i++)
-	{	printf("Address at stack_pointer %hu is %hu \n", i, (*mMap)[i]);
+	for (Word i = reg_SP.dat; i <= 0xFFFE; i++)
+	{
+		printf("Address at stack_pointer 0x%hx is %hu \n", i, (*mMap)[i]);
 		count++;
-		if(count == 100){
+		if (count == 100)
+		{
 			char choice;
-			printf("Hit q to show next 100 addresses and x to exit\n");
-			scanf("%c", &choice);
-			printf("%c",choice);
-			if(choice == 'q'){
-				count = 0;
-				continue;
-			}
-			else {
+			do
+			{
+				printf("Hit q to show next 100 addresses and x to exit\n");
+				scanf("%c", &choice);
+			} while (choice != 'q' && choice != 'x');
+
+			
+			if (choice == 'x')
+			{ 
 				printf("Exiting Stack\n");
 				break;
+			} else{
+				count = 0;	
+				continue;
 			}
 		}
 	}
