@@ -7899,15 +7899,34 @@ void CPU::printStack()
 				scanf("%c", &choice);
 			} while (choice != 'q' && choice != 'x');
 
-			
 			if (choice == 'x')
-			{ 
+			{
 				printf("Exiting Stack\n");
 				break;
-			} else{
-				count = 0;	
+			}
+			else
+			{
+				count = 0;
 				continue;
 			}
 		}
 	}
+}
+
+// Write to memory specified in debugger
+void CPU::writeToMemory()
+{
+	Word address;
+	Byte value;
+	printf("Address: ");
+	scanf("%hx", &address);
+	if (address >= 0x8000)
+	{
+		printf("Value: ");
+		scanf("%hhx", &value);
+		mMap->writeMemory(address, value);
+	} else {
+		printf("Can't Write to Addresses less than 0x8000\n");
+	}
+
 }

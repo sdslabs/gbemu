@@ -26,7 +26,6 @@ class CPU
 {
 
 private:
-
 	// Accumulator and Flags
 	Register reg_AF;
 
@@ -1163,7 +1162,7 @@ public:
 	// Register reg_DE;
 
 	// get value of A
-	Byte get_reg_A(){ return reg_AF.hi; }
+	Byte get_reg_A() { return reg_AF.hi; }
 
 	// get register B
 	Byte get_reg_B() { return reg_BC.hi; }
@@ -1198,5 +1197,9 @@ public:
 	// update the timers
 	void updateTimers(int cycles);
 
+	// Read memory
 	void printStack();
+
+	// Write to memory
+	void writeToMemory();
 };

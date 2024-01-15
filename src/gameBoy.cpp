@@ -239,7 +239,8 @@ void GBE::debug_int()
 					// enter l for L
 					// press left ctrl to open V-Ram debugger window
 					// enter p to print the stack
-					// enter e to exit info mode
+					// enter w to write to memory
+					// enter x to exit info mode
 					while (infoMode)
 					{
 						while (SDL_PollEvent(event))
@@ -280,6 +281,9 @@ void GBE::debug_int()
 									break;
 								case SDLK_p:
 									gbe_cpu->printStack();
+									break;
+								case SDLK_w:
+									gbe_cpu->writeToMemory();
 									break;
 								case SDLK_x:
 									infoMode = false;
