@@ -7880,3 +7880,62 @@ void CPU::updateTimers(int cycles)
 		mMap->setRegTIMA(timer_counter.tima / freq);
 	}
 }
+
+// print elements of calleraddresses stack
+void CPU::printStack()
+{
+	int count = 0;
+	printf("Printing Stack....");
+	for (Word i = reg_SP.dat; i <= 0xFFFE; i++)
+	{
+		printf("Address at stack_pointer 0x%hx is %hu \n", i, (*mMap)[i]);
+		count++;
+		if (count == 100)
+		{
+			char choice;
+			do
+			{
+				printf("Hit q to show next 100 addresses and x to exit\n");
+				scanf("%c", &choice);
+			} while (choice != 'q' && choice != 'x');
+
+			if (choice == 'x')
+			{
+				printf("Exiting Stack\n");
+				break;
+			}
+			else
+			{
+				count = 0;
+				continue;
+			}
+		}
+	}
+}
+
+// Write to memory specified in debugger
+void CPU::writeToMemory()
+{
+	Word address;
+	Byte value;
+	printf("Address: ");
+	scanf("%hx", &address);
+	printf("Value: ");
+	scanf("%hhx", &value);
+	if (address >= 0x0000 && address <= 0x3FFF)
+	{
+		mMap->debugWriteMemory(address, value);
+	}
+	else if (address >= 0x4000 && address <= 0x7FFF)
+	{
+		mMap->writeRomBank1(address, value);
+	}
+	else if (address >= 0x8000)
+	{
+		mMap->writeMemory(address, value);
+	}
+	else
+	{
+		printf("Can't Write to specified addresses \n");
+	}
+}

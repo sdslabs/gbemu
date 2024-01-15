@@ -7,8 +7,10 @@
 
 #ifdef __linux__
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #else
 #include <SDL.h>
+#include <SDL_ttf.h>
 #endif
 
 struct Sprite
@@ -20,17 +22,30 @@ struct Sprite
 	Byte flags;
 };
 
+struct SpriteMetaData
+{
+	char const *data;
+	int xCord;
+	int yCord;
+};
+
 class PPU
 {
 private:
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 	SDL_Texture* texture;
-	SDL_Event* event;
+
+	SDL_Window* debugWindow;
+	SDL_Renderer* debugRenderer;
+	SDL_Texture* debugTexture;
 
 	// renderArray to be converted to texture
 	// stores 4 copies of texture for wrapping of screen
 	color renderArray[160 * 144];
+	color renderBGMap[160 * 144];
+	color renderTiles[160 * 144];
+	color renderSprites[160 * 144];
 
 	MemoryMap* mMap;
 
@@ -112,13 +127,19 @@ private:
 	};
 
 	std::vector<Sprite> sprites;
+	std::vector<SpriteMetaData *> metadatas;
 
 public:
 	PPU();
 	bool init();
+	bool debuggerInit();
+	void render_ttl();
+	void listBgMap();
+	void listTiles();
+	void renderOAM();
 	bool pollEvents();
 	void renderScanline(Byte line);
-	void close();
+	void close(bool debug);
 	void setMemoryMap(MemoryMap* m) { mMap = m; }
 	void executePPU(int cycles);
 	Byte getPPUMode() { return ppuMode; }

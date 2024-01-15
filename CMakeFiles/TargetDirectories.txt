@@ -1,0 +1,5 @@
+/home/death/Desktop/linux backup/sdsLabs/gbemu/CMakeFiles/gbemu.dir
+/home/death/Desktop/linux backup/sdsLabs/gbemu/CMakeFiles/edit_cache.dir
+/home/death/Desktop/linux backup/sdsLabs/gbemu/CMakeFiles/rebuild_cache.dir
+/home/death/Desktop/linux backup/sdsLabs/gbemu/src/CMakeFiles/edit_cache.dir
+/home/death/Desktop/linux backup/sdsLabs/gbemu/src/CMakeFiles/rebuild_cache.dir
