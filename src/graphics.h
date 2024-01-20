@@ -26,7 +26,7 @@ private:
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 	SDL_Texture* texture;
-	SDL_Event* event;
+	SDL_Event event;
 
 	// renderArray to be converted to texture
 	// stores 4 copies of texture for wrapping of screen
