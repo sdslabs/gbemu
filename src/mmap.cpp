@@ -319,7 +319,8 @@ Byte MemoryMap::readMemory(Word address)
 		case MBC0:
 			return externalRam[address - 0xA000];
 		case MBC1:
-			if (enableRAM) {
+			if (enableRAM)
+			{
 				if (romRAMModeSelect && ((ramBankNumber * 0x2000) < ramSize))
 					return externalRam[address - 0xA000 + (ramBankNumber * 0x2000)];
 				else
