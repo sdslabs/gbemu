@@ -37,14 +37,18 @@ GBE::GBE()
 	// Don't change ordering of gbe_graphics and gbe_sound
 	gbe_graphics->init();
 
-	gbe_sound->init();
+	// gbe_sound->init();
 
 	// Open the Boot ROM
 	if ((bootROM = fopen("../src/dmg_boot.gb", "rb")) == NULL)
 		printf("boot rom file not opened");
 
+//	 // Open the Game ROM
+//	 if ((gameROM = fopen("../tests/pacman.gb", "rb")) == NULL)
+//	 	printf("game rom file not opened");
+
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/dmg_sound/rom_singles/01-registers.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../tests/dmg_sound/rom_singles/02-len ctr.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Set the Boot ROM
@@ -129,7 +133,7 @@ void GBE::update()
 		// this runs at a freq of around 27 * freq(DIV) = 442368 Hz
 		// this is probably enough to implement APU
 		gbe_sound->stepAPU(s_Cycles);
-		gbe_sound->test(s_Cycles);
+//		gbe_sound->test(s_Cycles);
 		s_Cycles = 0;
 		s_Cycles += gbe_cpu->performInterrupt();
 		// printf("s_Cycles after: %d\n\n", s_Cycles);
@@ -149,6 +153,8 @@ void GBE::executeBootROM()
 		s_Cycles = 0;
 		s_Cycles += gbe_cpu->performInterrupt();
 	}
+
+//	printf("Value of NR52 after BootROM: %x\n", gbe_mMap->readMemory(0xFF26));
 
 	gbe_mMap->unloadBootRom();
 }

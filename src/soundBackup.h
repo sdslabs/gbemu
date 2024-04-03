@@ -9,8 +9,7 @@ class PulseChannel
 private:
 	// https://gbdev.io/pandocs/Audio_Registers.html
 
-	// The address of register NRx1; x can be 1 or 2
-	Word regAddr = 0;
+	int channelNumber;
 
 	// NRx0, NRx1, NRx2, NRx3, NRx4
 	Word NR[5];
@@ -78,8 +77,6 @@ public:
 	Byte getVolume();
 	bool checkEnable();
 	void readPeriodValue();
-	void read_registers();
-	void writeback_registers();
 };
 
 class WaveChannel
@@ -135,8 +132,6 @@ public:
 	void readOutputLevel();
 	void readSoundLengthEnable();
 	void readPeriodValue();
-	void read_registers();
-	void writeback_registers();
 };
 
 class NoiseChannel
@@ -188,8 +183,6 @@ public:
 	Byte getVolume();
 	void readSoundLengthEnable();
 	void readPolynomialRegister();
-	void read_registers();
-	void writeback_registers();
 };
 
 
@@ -241,7 +234,7 @@ private:
 
 	Byte volumeLeft;
 	Byte volumeRight;
-
+    
 	//Audio Channels
 	PulseChannel* channel1;
 	PulseChannel* channel2;
@@ -253,8 +246,6 @@ public:
 	APU();
 	bool init();
 	void executeAPU();
-	void read_registers();
-	void writeback_registers();
 	void setMemoryMap(MemoryMap* m){ mMap = m; }
 	void test(int cycles);
 	void stepAPU(int cycles);

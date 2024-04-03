@@ -195,14 +195,45 @@ private:
 	// APU enable
 	bool enableAPU;
 
+	// APU trigger 
+	// Empty all audio Registers and Wave Ram
+	bool triggerAPU;
+
 	// Audio Registers
 	// NR10 - NR52
 	// FF10 - FF26 
 	Byte* audioReg;
 
-	// FF30–FF3F — Wave pattern RAM
-	// 16 Bytes
-	Byte* waveRam;
+	// Channel Enables
+	bool* channelEnable;
+
+	int default_Audio_Values[0x17] = {
+		0x80, // NR10
+		0x3F, // NR11
+		0x00, // NR12
+		0xFF, // NR13
+		0xBF, // NR14
+		0xFF, // 0x05 FF15 Invalid Register
+		0x3F, // NR21
+		0x00, // NR22
+		0xFF, // NR23
+		0xBF, // NR24
+		0x7F, // NR30
+		0xFF, // NR31
+		0x9F, // NR32
+		0xFF, // NR33
+		0xBF, // NR34
+		0xFF, // 0x15, FF1F Invalid Register
+		0xFF, // NR41
+		0x00, // NR42
+		0x00, // NR43
+		0xBF, // NR44
+		0x00, // NR50
+		0x00, // NR51
+		0x70  // NR52
+	};
+
+	void clear_APU_Registers();
 
 public:
 	Byte* joyPadState;
@@ -344,5 +375,4 @@ public:
 
 	Byte getAudioReg(int regId);
 
-	Byte* getWaveRam() { return waveRam; }
 };

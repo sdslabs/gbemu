@@ -44,8 +44,8 @@ MemoryMap::MemoryMap()
 	highRam = new Byte[0x007F];
 	memset(highRam, 0x00, 0x007F);
 
-	waveRam = new Byte[0x0010];
-	memset(waveRam, 0x00, 0x0010 );
+	channelEnable = new bool[0x004];
+	memset(channelEnable, 0x00, 0x04);
 
 	// 1 byte Interrupt Enable Register
 	interruptEnableRegister = new Byte;
@@ -130,6 +130,9 @@ MemoryMap::MemoryMap()
 	ramBankNumberMaskForRom = 0;
 
 	ramBankNumberMaskForRam = 0;
+
+	enableAPU = 0;
+	triggerAPU = 0;
 }
 
 // Write to memory
@@ -227,42 +230,49 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 		{
 			readInput(value);
 		}
-		
-		// Write to Audio Registers
-		else if (address >= 0xFF10 && address <=0xFF26){
-			// NR52
-			// only 7th bit is read/write
-			// others are read only
-			if (address == 0xFF26 ){
-				printf("value: %x\n NR52 before: %x\n", value, *(audioReg+NR52));
-				value = value >> 7;
-				*(audioReg + NR52) = (*(audioReg + NR52) & 0b0111111) | (value << 7);
-				printf("NR52 after: %x\n", *(ioPorts+0x10+NR52));
-				printf("NR52 after: %x\n\n", *(audioReg+NR52));
-				enableAPU = value;
-
-			}
-
-			if(enableAPU){
-				// ioPorts
-				// NR20 && NR40
-				// if( address == 0xFF15 || address == 0xFF1F)
-			}else {
-				for( int i= NR10; i <= NR52 ; i++ ){
-					*(audioReg+i) = 0x00;
-				}
+		// NR52 Master Audio
+		else if(address == 0xFF26)
+		{
+			int audio_control_bit = value >> 7;
+			enableAPU = audio_control_bit;
+			ioPorts[address - 0xFF00] = (audio_control_bit << 7) | 0x70 | (ioPorts[address - 0xFF00] & 0x0F);
+			if (!enableAPU) {
+				clear_APU_Registers();
+				return true;
 			}
 		}
-
-		// Write to Wave 
-		else if (address >= 0xFF30 && address <= 0xFF3F){
-			if(enableAPU){
-
-			}
-		}
-
 		else
-			ioPorts[address - 0xFF00] = value;
+		{
+			if(address >= 0xFF10 && address <= 0xFF26){
+				if(!enableAPU) return true;
+				if(address == 0xFF14){
+					printf("NR14\n");
+					printf("value|bit7: %d\n",value & BIT7);
+					printf("value: %x\n", value);
+				}
+				if(address == 0xFF23){
+					printf("NR44\n");
+					printf("value|bit7: %d\n",value & BIT7);
+					printf("value: %x\n", value);
+				}
+				if(address == 0xFF19){
+					printf("NR24\n");
+					printf("value|bit7: %d\n",value & BIT7);
+					printf("value: %x\n", value);
+				}
+				if(address == 0xFF1E){
+					printf("NR34\n");
+					printf("value|bit7: %d\n",value & BIT7);
+					printf("value: %x\n", value);
+				}
+				ioPorts[address - 0xFF00] = value | default_Audio_Values[address - 0xFF10];
+			}
+			else
+			{
+				ioPorts[address - 0xFF00] = value;
+			}
+		}
+
 	}
 	else if (address < 0xFFFF)
 	{
@@ -333,6 +343,11 @@ Byte MemoryMap::readMemory(Word address)
 	}
 	else if (address < 0xFF80)
 	{
+		// Return 0xFF for these addresses
+		if(address >= 0xFF27 && address < 0xFF30){
+			return 0xFF;
+		}
+
 		// Read from I/O Ports
 		return ioPorts[address - 0xFF00];
 	}
@@ -511,5 +526,13 @@ void MemoryMap::bankRam()
 	if (ramExistenceMask)
 	{
 		externalRam = ramBankList[(ramBankNumber & ramBankNumberMaskForRam) & (bankingModeSelect * 0b11)];
+	}
+}
+
+void MemoryMap::clear_APU_Registers()
+{
+	for (int i = 0x00; i <= 0x16 ; ++i)
+	{
+		*(audioReg + i) = default_Audio_Values[i];
 	}
 }
