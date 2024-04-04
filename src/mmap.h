@@ -1,6 +1,7 @@
 #pragma once
 #include "types.h"
 #include <stdio.h>
+#include "audio.h"
 
 // The Memory Map for GBE
 // Pulled from https://gbdev.io/pandocs/Memory_Map.html
@@ -138,8 +139,12 @@ private:
 	Byte* reg_WX;
 
 public:
+	// Audio Unit
+	// I know this is not the best way to do it
+	// But I am not sure how to do it better
+	APU* audio;
+	
 	Byte* joyPadState;
-
 	// Constructor
 	MemoryMap();
 

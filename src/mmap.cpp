@@ -104,6 +104,8 @@ MemoryMap::MemoryMap()
 	bootRomFile = nullptr;
 	romFile = nullptr;
 
+	audio = new APU();
+
 	mbcMode = 0x0;
 }
 
@@ -172,8 +174,11 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 		{
 			readInput(value);
 		}
-		//if (value != 0xFF)
-		//printf("0x%02x\n", ioPorts[0]);}
+		// Write to Audio Registers
+		else if (address >= 0xFF10 && address <= 0xFF3F)
+		{	
+			audio->writeByte(address, value);
+		}
 		else
 			ioPorts[address - 0xFF00] = value;
 	}
@@ -246,8 +251,14 @@ Byte MemoryMap::readMemory(Word address)
 	}
 	else if (address < 0xFF80)
 	{
+		// Read from Audio Registers
+		if (address >= 0xFF10 && address <= 0xFF3F)
+		{
+			return audio->readByte(address);
+		}
 		// Read from I/O Ports
-		return ioPorts[address - 0xFF00];
+		else
+			return ioPorts[address - 0xFF00];
 	}
 	else if (address < 0xFFFF)
 	{

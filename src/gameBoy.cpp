@@ -15,6 +15,9 @@ GBE::GBE()
 	// Initialize the Graphics
 	gbe_graphics = new PPU();
 
+	// audio = new Audio();
+	// APU = new APU();
+
 	// Unify the CPU and MemoryMap
 	gbe_cpu->setMemory(gbe_mMap);
 
@@ -30,8 +33,12 @@ GBE::GBE()
 	if ((bootROM = fopen("../src/dmg_boot.gb", "rb")) == NULL)
 		printf("boot rom file not opened");
 
+	// // Open the Game ROM
+	// if ((gameROM = fopen("../tests/tetris.gb", "rb")) == NULL)
+	// 	printf("game rom file not opened");
+
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/halt_bug.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../tests/dmg_sound/rom_singles/02-len ctr.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Set the Boot ROM
@@ -115,6 +122,7 @@ void GBE::update()
 		// update the DIV and TIMA timers
 		gbe_cpu->updateTimers(s_Cycles);
 		gbe_graphics->executePPU(s_Cycles);
+		// gbe_mMap->audio->stepAPU(s_Cycles);
 		s_Cycles = 0;
 		s_Cycles += gbe_cpu->performInterrupt();
 		gbe_graphics->pollEvents();
