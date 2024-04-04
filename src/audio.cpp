@@ -57,7 +57,7 @@ void APU::test()
 
 void APU::writeByte(Word address, Byte value)
 {
-	// printf("APU Address: %X, Value: %X\n", address, value);
+	printf("APU Address: %X, Value: %X\n", address, value);
 	if (address == 0xFF26)
 	{
 		bool enable = (value & 0x80) >> 7;
@@ -147,7 +147,7 @@ Byte APU::readByte(Word address)
 		return channel3->readByte(address);
 	}
 
-    Byte val = 0;
+	Byte val = 0;
 	switch (address)
 	{
 	case 0xFF24:
@@ -157,8 +157,9 @@ Byte APU::readByte(Word address)
 		return soundPann;
 
 	case 0xFF26:
-        val = (enabled ? 0x80 : 0) | (channel1->isEnabled() ? 0x01 : 0) | (channel2->isEnabled() ? 0x02 : 0) | (channel3->isEnabled() ? 0x04 : 0) | (channel4->isEnabled() ? 0x08 : 0) | 0x70;
-       	return val;
+		val = (enabled ? 0x80 : 0) | (channel1->isEnabled() ? 0x01 : 0) | (channel2->isEnabled() ? 0x02 : 0) | (channel3->isEnabled() ? 0x04 : 0) | (channel4->isEnabled() ? 0x08 : 0) | 0x70;
+		printf("APU Read 0xFF26: %X\n", val);
+		return val;
 
 	default:
 		break;
@@ -251,7 +252,7 @@ void PulseChannel::writeByte(Word address, Byte value)
 		// NR12
 		// Volume Envelope
 		dacEnabled = (value & 0xF8) != 0;
-		 enabled &= dacEnabled;
+		enabled &= dacEnabled;
 
 		envelopeInitialVolume = (value & 0xF0) >> 4;
 		envelopeIncrease = (value & 0x08) >> 3;
@@ -269,6 +270,10 @@ void PulseChannel::writeByte(Word address, Byte value)
 		// Frequency hi
 		frequency = (frequency & 0x00FF) | ((value & 0x07) << 8);
 		set_NRx4(value);
+		if (soundLengthEnable && lengthTimer == 0)
+		{
+			enabled = 0;
+		}
 		if (value & 0x80)
 		{
 			trigger();
@@ -309,7 +314,7 @@ Byte PulseChannel::readByte(Word address)
 
 bool PulseChannel::isEnabled()
 {
-	return enabled;
+	return enabled && dacEnabled;
 }
 
 void PulseChannel::powerOff()
@@ -355,9 +360,10 @@ void PulseChannel::set_NRx4(Byte value)
 		{
 			if (enable && frameSequencer & 1)
 			{
-				lengthTimer = maxLengthTimer - 1;
+				lengthTimer = maxLengthTimer - 1; // clock this
 			}
-			lengthTimer = maxLengthTimer;
+			else
+				lengthTimer = maxLengthTimer;
 		}
 	}
 	else if (enable)
@@ -365,9 +371,9 @@ void PulseChannel::set_NRx4(Byte value)
 		if (frameSequencer & 1)
 		{
 			if (lengthTimer > 0)
-				lengthTimer--;
-			else
-				lengthTimer = maxLengthTimer - 1;
+				lengthTimer--; // clock this
+			else if (trigger_bit && lengthTimer == 0)
+				lengthTimer = maxLengthTimer - 1; // clock this
 		}
 	}
 	else
@@ -419,7 +425,7 @@ void WaveChannel::writeByte(Word address, Byte value)
 		// NR30
 		// Sound on/off
 		dacEnabled = (value & 0x80) >> 7;
-		 enabled &= dacEnabled;
+		enabled &= dacEnabled;
 		return;
 	case 0xFF1B:
 		// NR31
@@ -441,6 +447,10 @@ void WaveChannel::writeByte(Word address, Byte value)
 		// Frequency hi
 		frequency = (frequency & 0x00FF) | ((value & 0x07) << 8);
 		set_NRx4(value);
+		if (soundLengthEnable && lengthTimer == 0)
+		{
+			enabled = 0;
+		}
 		if (value & 0x80)
 		{
 			trigger();
@@ -482,7 +492,7 @@ Byte WaveChannel::readByte(Word address)
 
 bool WaveChannel::isEnabled()
 {
-	return enabled;
+	return enabled && dacEnabled;
 }
 
 void WaveChannel::powerOff()
@@ -508,7 +518,8 @@ void WaveChannel::set_NRx4(Byte value)
 			{
 				lengthTimer = maxLengthTimer - 1;
 			}
-			lengthTimer = maxLengthTimer;
+			else
+				lengthTimer = maxLengthTimer;
 		}
 	}
 	else if (enable)
@@ -517,7 +528,7 @@ void WaveChannel::set_NRx4(Byte value)
 		{
 			if (lengthTimer > 0)
 				lengthTimer--;
-			else
+			else if (trigger_bit && lengthTimer == 0)
 				lengthTimer = maxLengthTimer - 1;
 		}
 	}
@@ -601,6 +612,10 @@ void NoiseChannel::writeByte(Word address, Byte value)
 		// NR44
 		// Counter/consecutive; initial
 		set_NRx4(value);
+		if (soundLengthEnable && lengthTimer == 0)
+		{
+			enabled = 0;
+		}
 		if (value & 0x80)
 		{
 			trigger();
@@ -634,7 +649,7 @@ Byte NoiseChannel::readByte(Word address)
 
 bool NoiseChannel::isEnabled()
 {
-	return enabled;
+	return enabled && dacEnabled;
 }
 
 void NoiseChannel::powerOff()
@@ -664,7 +679,8 @@ void NoiseChannel::set_NRx4(Byte value)
 			{
 				lengthTimer = maxLengthTimer - 1;
 			}
-			lengthTimer = maxLengthTimer;
+			else
+				lengthTimer = maxLengthTimer;
 		}
 	}
 	else if (enable)
@@ -673,7 +689,7 @@ void NoiseChannel::set_NRx4(Byte value)
 		{
 			if (lengthTimer > 0)
 				lengthTimer--;
-			else
+			else if (trigger_bit && lengthTimer == 0)
 				lengthTimer = maxLengthTimer - 1;
 		}
 	}

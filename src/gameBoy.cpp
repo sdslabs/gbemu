@@ -38,7 +38,7 @@ GBE::GBE()
 	// 	printf("game rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/dmg_sound/rom_singles/02-len ctr.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../tests/dmg_sound/rom_singles/03-trigger.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Set the Boot ROM
