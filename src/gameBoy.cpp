@@ -122,7 +122,7 @@ void GBE::update()
 		// update the DIV and TIMA timers
 		gbe_cpu->updateTimers(s_Cycles);
 		gbe_graphics->executePPU(s_Cycles);
-		// gbe_mMap->audio->stepAPU(s_Cycles);
+		gbe_mMap->audio->stepAPU(s_Cycles);
 		s_Cycles = 0;
 		s_Cycles += gbe_cpu->performInterrupt();
 		gbe_graphics->pollEvents();

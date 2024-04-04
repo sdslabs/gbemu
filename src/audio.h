@@ -17,6 +17,7 @@ private:
 	Channel channel;
     bool enabled;
     bool dacEnabled;
+    int frameSequencer;
 
 	Byte sweepPeriod;
 	bool sweepNegate;
@@ -25,6 +26,7 @@ private:
 	// NRx1
 	Byte waveDuty;
 	int lengthTimer;
+    int maxLengthTimer = 64;
 
 	Byte envelopeInitialVolume;
 	bool envelopeIncrease;
@@ -41,6 +43,10 @@ public:
 	Byte readByte(Word address);
     bool isEnabled();
     void powerOff();
+    void run();
+    void set_NRx4(Byte value);
+    void setFrameSequencer(int frameSequencer);
+    void trigger();
 };
 
 class WaveChannel
@@ -52,7 +58,8 @@ private:
 	bool enabled;
 
 	int lengthTimer;
-	int maxLengthTimer;
+	int maxLengthTimer = 256;
+    int frameSequencer;
 
 	Byte outputLevel;
 
@@ -68,6 +75,9 @@ public:
 	void trigger();
     bool isEnabled();
     void powerOff();
+    void set_NRx4(Byte value);
+    void run();
+    void setFrameSequencer(int frameSequencer);
 };
 
 class NoiseChannel
@@ -75,8 +85,10 @@ class NoiseChannel
 private:
     bool enabled;
     bool dacEnabled;
+
 	int lengthTimer;
-	int maxLengthTimer;
+	int maxLengthTimer = 64;
+    int frameSequencer;
 
 	Byte envelopeInitialVolume;
 	bool envelopeIncrease;
@@ -102,6 +114,9 @@ public:
 	void trigger();
     bool isEnabled();
     void powerOff();
+    void set_NRx4(Byte value);
+    void run();
+    void setFrameSequencer(int frameSequencer);
 };
 
 class APU
@@ -116,6 +131,8 @@ private:
 	static Uint32 audio_len;
 	static Uint8* audio_pos;
 
+	bool enabled;
+
 	// Gets an audio sample every 95 clock cycles.
 	// clockSpeed/sampleRate ~ 95
 	int sampleCounter;
@@ -129,8 +146,6 @@ private:
 	unsigned int bufferSize = 4096;
 	unsigned int bufferIndex = 0;
 	float buffer[4096] = { 0 };
-
-	bool enabled;
 
 	Byte soundPann;
 
@@ -148,6 +163,7 @@ private:
 public:
 	APU();
 	void test();
+    bool init();
 	void writeByte(Word address, Byte value);
 	Byte readByte(Word address);
 	void stepAPU(int cycles);
