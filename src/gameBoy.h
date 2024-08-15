@@ -28,6 +28,9 @@ private:
 	// Pointer to the Graphics
 	PPU* gbe_graphics;
 
+	// Pointer to the Audio
+	APU* gbe_audio;
+
 	// File pointer for Boot ROM
 	FILE* bootROM;
 

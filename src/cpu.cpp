@@ -5,7 +5,7 @@
 #define debugPrint(...)
 #endif
 #ifdef DEBUG
-#define debugPrint(...) printf(__VA_ARGS__)
+#define debugPrint(...) printf(__V _ARGS__)
 #endif
 
 // Setters of Flags
@@ -32,6 +32,16 @@
 #define GET_SUBTRACT_FLAG ((reg_AF.lo & FLAG_SUBTRACT_n) >> 6)
 #define GET_HALF_CARRY_FLAG ((reg_AF.lo & FLAG_HALF_CARRY_h) >> 5)
 #define GET_CARRY_FLAG ((reg_AF.lo & FLAG_CARRY_c) >> 4)
+
+static void CPU::audioUpdate(Word address)
+{
+	bool isAudioRegion = (address >= 0xFF10) & (address <= 0xFF3F);
+	if (isAudioRegion)
+	{
+		mMap->setAudioWriteFlag(isAudioRegion);
+		mMap->setAudioWriteAddress(address);
+	}
+}
 
 CPU::CPU()
 {
@@ -93,6 +103,7 @@ int CPU::LD_BC_A()
 {
 	// Write the contents of A into the memory address pointed to by BC
 	mMap->writeMemory(reg_BC.dat, reg_AF.hi);
+	CPU::audioUpdate(reg_BC.dat);
 
 	// Increment the program counter
 	reg_PC.dat += 1;
@@ -194,7 +205,7 @@ int CPU::LD_u16_SP()
 	// Write the contents of SP into the memory address pointed to by the next 2 bytes
 	mMap->writeMemory(address, reg_SP.lo);
 	mMap->writeMemory(address + 1, reg_SP.hi);
-
+	CPU::audioUpdate(address);
 	// Increment the program counter
 	reg_PC.dat += 3;
 
@@ -345,6 +356,7 @@ int CPU::LD_DE_u16()
 int CPU::LD_DE_A()
 {
 	mMap->writeMemory(reg_DE.dat, reg_AF.hi);
+	CPU::audioUpdate(reg_DE.dat);
 	reg_PC.dat += 1;
 	debugPrint("LD (DE), A\n");
 	return 8;
@@ -597,6 +609,7 @@ int CPU::LD_HL_u16()
 int CPU::LD_HLp_A()
 {
 	mMap->writeMemory(reg_HL.dat, reg_AF.hi);
+	CPU::audioUpdate(reg_HL.dat);
 	reg_HL.dat += 1;
 	reg_PC.dat += 1;
 	debugPrint("LD (HL+), A\n");
@@ -859,6 +872,7 @@ int CPU::LD_SP_u16()
 int CPU::LD_HLm_A()
 {
 	mMap->writeMemory(reg_HL.dat, reg_AF.hi);
+	CPU::audioUpdate(reg_HL.dat);
 	reg_HL.dat -= 1;
 	reg_PC.dat += 1;
 	debugPrint("LD (HL-), A\n");
@@ -892,6 +906,7 @@ int CPU::INC_HLp()
 	((*mMap)[reg_HL.dat] & 0x0F) == 0x0F ? SET_HALF_CARRY_FLAG : UNSET_HALF_CARRY_FLAG;
 
 	mMap->writeMemory(reg_HL.dat, temp);
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("INC (HL)\n");
 	return 12;
@@ -915,6 +930,7 @@ int CPU::DEC_HLp()
 	SET_SUBTRACT_FLAG;
 
 	mMap->writeMemory(reg_HL.dat, temp);
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("DEC (HL)\n");
 	return 12;
@@ -925,6 +941,7 @@ int CPU::DEC_HLp()
 int CPU::LD_HLp_u8()
 {
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_PC.dat + 1]);
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 2;
 	debugPrint("LD (HL), u8\n");
 	return 12;
@@ -1557,6 +1574,7 @@ int CPU::LD_L_A()
 int CPU::LD_HLp_B()
 {
 	mMap->writeMemory(reg_HL.dat, reg_BC.hi);
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("LD (HL), B\n");
 	return 8;
@@ -1567,6 +1585,7 @@ int CPU::LD_HLp_B()
 int CPU::LD_HLp_C()
 {
 	mMap->writeMemory(reg_HL.dat, reg_BC.lo);
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("LD (HL), C\n");
 	return 8;
@@ -1577,6 +1596,7 @@ int CPU::LD_HLp_C()
 int CPU::LD_HLp_D()
 {
 	mMap->writeMemory(reg_HL.dat, reg_DE.hi);
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("LD (HL), D\n");
 	return 8;
@@ -1587,6 +1607,7 @@ int CPU::LD_HLp_D()
 int CPU::LD_HLp_E()
 {
 	mMap->writeMemory(reg_HL.dat, reg_DE.lo);
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("LD (HL), E\n");
 	return 8;
@@ -1597,6 +1618,7 @@ int CPU::LD_HLp_E()
 int CPU::LD_HLp_H()
 {
 	mMap->writeMemory(reg_HL.dat, reg_HL.hi);
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("LD (HL), H\n");
 	return 8;
@@ -1607,6 +1629,7 @@ int CPU::LD_HLp_H()
 int CPU::LD_HLp_L()
 {
 	mMap->writeMemory(reg_HL.dat, reg_HL.lo);
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("LD (HL), L\n");
 	return 8;
@@ -1661,6 +1684,7 @@ int CPU::HALT()
 int CPU::LD_HLA()
 {
 	mMap->writeMemory(reg_HL.dat, reg_AF.hi);
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("LD (HL), A\n");
 	return 8;
@@ -3660,6 +3684,7 @@ int CPU::RST_18H()
 int CPU::LDH_a8_A()
 {
 	mMap->writeMemory(0xFF00 + (*mMap)[reg_PC.dat + 1], reg_AF.hi);
+	CPU::audioUpdate(0xFF00 + (*mMap)[reg_PC.dat + 1]);
 	reg_PC.dat += 2;
 	debugPrint("LDH (%02X), A\n", (*mMap)[reg_PC.dat + 1]);
 	return 12;
@@ -3681,6 +3706,7 @@ int CPU::POP_HL()
 int CPU::LDH_C_A()
 {
 	mMap->writeMemory(0xFF00 + reg_BC.lo, reg_AF.hi);
+	CPU::audioUpdate(0xFF00 + reg_BC.lo);
 	reg_PC.dat += 1;
 	debugPrint("LD (C), A\n");
 	return 8;
@@ -3757,6 +3783,7 @@ int CPU::LD_u16_A()
 	// u16 is ((*mMap)[reg_PC.dat + 1] << 8) | (*mMap)[reg_PC.dat + 2]
 	// Writing the value of A into the (u16)
 	mMap->writeMemory((*mMap)[reg_PC.dat + 2] << 8 | (*mMap)[reg_PC.dat + 1], reg_AF.hi);
+	CPU::audioUpdate((*mMap)[reg_PC.dat + 2] << 8 | (*mMap)[reg_PC.dat + 1]);
 	reg_PC.dat += 3;
 	debugPrint("LD (u16), A\n");
 	return 16;
@@ -4112,7 +4139,7 @@ int CPU::RLC_HLp()
 
 	// Rotate the value at memory address pointed to by HL left by 1
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] << 1) | ((*mMap)[reg_HL.dat] >> 7));
-
+	CPU::audioUpdate(reg_HL.dat);
 	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
@@ -4272,7 +4299,7 @@ int CPU::RRC_HLp()
 
 	// Rotate the value at memory address pointed to by HL right by 1
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] >> 1) | ((*mMap)[reg_HL.dat] << 7));
-
+	CPU::audioUpdate(reg_HL.dat);
 	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
@@ -4441,7 +4468,7 @@ int CPU::RL_HLp()
 
 	// Rotate the value at memory address pointed to by HL left by 1
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] << 1) | ((*mMap)[reg_HL.dat] >> 7));
-
+	CPU::audioUpdate(reg_HL.dat);
 	// swap the values of 0th bit of the value at memory address pointed to by HL and the carry flag
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] ^ GET_CARRY_FLAG);
 	GET_CARRY_FLAG ^ ((*mMap)[reg_HL.dat] & 1) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
@@ -4617,7 +4644,7 @@ int CPU::RR_HLp()
 
 	// Rotate the value at memory address pointed to by HL right by 1
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] >> 1) | ((*mMap)[reg_HL.dat] << 7));
-
+	CPU::audioUpdate(reg_HL.dat);
 	// swap the values of 7th bit of the value at memory address pointed to by HL and the carry flag
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] ^ GET_CARRY_FLAG << 7);
 	GET_CARRY_FLAG ^ ((*mMap)[reg_HL.dat] >> 7) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
@@ -4784,7 +4811,7 @@ int CPU::SLA_HLp()
 
 	// Shift the value at memory address pointed to by HL left by 1
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] << 1));
-
+	CPU::audioUpdate(reg_HL.dat);
 	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
@@ -4944,7 +4971,7 @@ int CPU::SRA_HLp()
 
 	// Shift the value at memory address pointed to by HL right by 1 while leaving 7th bit unchanged
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] >> 1) | ((*mMap)[reg_HL.dat] & 0x80));
-
+	CPU::audioUpdate(reg_HL.dat);
 	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
@@ -5090,7 +5117,7 @@ int CPU::SWAP_HLp()
 
 	// swap the upper and lower nibbles
 	mMap->writeMemory(reg_HL.dat, ((((*mMap)[reg_HL.dat] & 0x0F) << 4) | (((*mMap)[reg_HL.dat] & 0xF0) >> 4)));
-
+	CPU::audioUpdate(reg_HL.dat);
 	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
@@ -5248,7 +5275,7 @@ int CPU::SRL_HLp()
 
 	// Shift the value at memory address pointed to by HL right by 1
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] >> 1));
-
+	CPU::audioUpdate(reg_HL.dat);
 	(*mMap)[reg_HL.dat] & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
@@ -6314,7 +6341,7 @@ int CPU::RES_0_HLp()
 {
 	// unset the 0th bit
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 0))));
-
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("RES 0, (HL)\n");
 	return 12;
@@ -6410,7 +6437,7 @@ int CPU::RES_1_HLp()
 {
 	// unset the 1st bit
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 1))));
-
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("RES 1, (HL)\n");
 	return 12;
@@ -6506,7 +6533,7 @@ int CPU::RES_2_HLp()
 {
 	// unset the 2nd bit
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 2))));
-
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("RES 2, (HL)\n");
 	return 12;
@@ -6602,7 +6629,7 @@ int CPU::RES_3_HLp()
 {
 	// unset the 3rd bit
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 3))));
-
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("RES 3, (HL)\n");
 	return 12;
@@ -6698,7 +6725,7 @@ int CPU::RES_4_HLp()
 {
 	// unset the 4th bit
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 4))));
-
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("RES 4, (HL)\n");
 	return 12;
@@ -6794,7 +6821,7 @@ int CPU::RES_5_HLp()
 {
 	// unset the 5th bit
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 5))));
-
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("RES 5, (HL)\n");
 	return 12;
@@ -6890,7 +6917,7 @@ int CPU::RES_6_HLp()
 {
 	// unset the 6th bit
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 6))));
-
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("RES 6, (HL)\n");
 	return 12;
@@ -6986,7 +7013,7 @@ int CPU::RES_7_HLp()
 {
 	// unset the 7th bit
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 7))));
-
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("RES 7, (HL)\n");
 	return 12;
@@ -7082,7 +7109,7 @@ int CPU::SET_0_HLp()
 {
 	// set the 0th bit
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 0));
-
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("SET 0, (HL)\n");
 	return 12;
@@ -7178,7 +7205,7 @@ int CPU::SET_1_HLp()
 {
 	// set the 1st bit
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 1));
-
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("SET 1, (HL)\n");
 	return 12;
@@ -7274,7 +7301,7 @@ int CPU::SET_2_HLp()
 {
 	// set the 2nd bit
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 2));
-
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("SET 2, (HL)\n");
 	return 12;
@@ -7370,7 +7397,7 @@ int CPU::SET_3_HLp()
 {
 	// set the 3rd bit
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 3));
-
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("SET 3, (HL)\n");
 	return 12;
@@ -7466,7 +7493,7 @@ int CPU::SET_4_HLp()
 {
 	// set the 4th bit
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 4));
-
+	CPU::audioUpdate(reg_HL.dat);
 	reg_PC.dat += 1;
 	debugPrint("SET 4, (HL)\n");
 	return 12;
@@ -7562,6 +7589,7 @@ int CPU::SET_5_HLp()
 {
 	// set the 5th bit
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 5));
+	CPU::audioUpdate(reg_HL.dat);
 
 	reg_PC.dat += 1;
 	debugPrint("SET 5, (HL)\n");
@@ -7658,6 +7686,7 @@ int CPU::SET_6_HLp()
 {
 	// set the 6th bit
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 6));
+	CPU::audioUpdate(reg_HL.dat);
 
 	reg_PC.dat += 1;
 	debugPrint("SET 6, (HL)\n");
@@ -7754,6 +7783,7 @@ int CPU::SET_7_HLp()
 {
 	// set the 7th bit
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 7));
+	CPU::audioUpdate(reg_HL.dat);
 
 	reg_PC.dat += 1;
 	debugPrint("SET 7, (HL)\n");

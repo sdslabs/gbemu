@@ -16,7 +16,7 @@ APU::APU()
 	enableVINRight = false;
 	volumeLeft = 0;
 	volumeRight = 0;
-
+	mMap = nullptr;
 	channel1 = new PulseChannel(CH1);
 	channel2 = new PulseChannel(CH2);
 	channel3 = new WaveChannel();
@@ -47,6 +47,7 @@ bool APU::init()
 	channel2->setFrameSequencer(frameSequencer);
 	channel3->setFrameSequencer(frameSequencer);
 	channel4->setFrameSequencer(frameSequencer);
+
 	return true;
 }
 
@@ -170,6 +171,12 @@ Byte APU::readByte(Word address)
 
 void APU::stepAPU(int cycles)
 {
+	// Audio checker
+	Byte flag = mMap->getAudioWriteFlag();
+	Word address = 0;
+	if (flag)
+		address = mMap->getAudioWriteAddress();
+
 	sampleCounter += cycles;
 	frameSequencerCounter += cycles;
 

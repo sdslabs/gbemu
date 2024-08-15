@@ -138,12 +138,17 @@ private:
 	// Stays in the I/O Ports at 0xFF4B
 	Byte* reg_WX;
 
+	// audio write flag
+	Byte* audioWriteFlag;
+
+	// audio write address
+	Word* audioWriteAddress;
+
 public:
 	// Audio Unit
 	// I know this is not the best way to do it
 	// But I am not sure how to do it better
-	APU* audio;
-	
+
 	Byte* joyPadState;
 	// Constructor
 	MemoryMap();
@@ -270,4 +275,16 @@ public:
 
 	// sets the ROM file
 	void setRomFile(FILE* file) { romFile = file; }
+
+	// get audio write flag
+	Byte getAudioWriteFlag() { return *audioWriteFlag; }
+
+	// get audio write address
+	Word getAudioWriteAddress() { return *audioWriteAddress; }
+
+	// set audio write flag
+	void setAudioWriteFlag(Byte value) { *audioWriteFlag = value; }
+
+	// store audio write address
+	void storeAudioWriteAddress(Word address) { *audioWriteAddress = address; }
 };

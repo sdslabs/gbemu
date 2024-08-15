@@ -1170,4 +1170,7 @@ public:
 
 	// update the timers
 	void updateTimers(int cycles);
+
+	// audio write checker
+	static void audioUpdate(Word address);
 };
