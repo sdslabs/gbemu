@@ -3,6 +3,7 @@
 #include "cpu.h"
 #include "mmap.h"
 #include "graphics.h"
+#include "audio.h"
 
 // GBE stands for GameBoyEmulator
 

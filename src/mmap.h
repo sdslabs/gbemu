@@ -1,8 +1,7 @@
 #pragma once
 #include "types.h"
 #include <stdio.h>
-#include "audio.h"
-
+#include <queue>
 // The Memory Map for GBE
 // Pulled from https://gbdev.io/pandocs/Memory_Map.html
 
@@ -138,11 +137,8 @@ private:
 	// Stays in the I/O Ports at 0xFF4B
 	Byte* reg_WX;
 
-	// audio write flag
-	Byte* audioWriteFlag;
-
-	// audio write address
-	Word* audioWriteAddress;
+	// Audio write queue
+	std::queue<audioRegs> audioWriteQueue;
 
 public:
 	// Audio Unit
@@ -189,7 +185,7 @@ public:
 	Byte* getInterruptEnableRegister() { return interruptEnableRegister; }
 
 	// Writes a byte to the memory address
-	bool writeMemory(Word address, Byte value);
+	bool writeMemory(Word address, Byte value, bool audioWrite = true);
 	void debugWriteMemory(Word address, Byte value);
 
 	// Reads a byte from the memory address
@@ -276,15 +272,12 @@ public:
 	// sets the ROM file
 	void setRomFile(FILE* file) { romFile = file; }
 
-	// get audio write flag
-	Byte getAudioWriteFlag() { return *audioWriteFlag; }
+	// push to queue
+	void pushAudioWriteQueue(Word address, Byte value);
 
-	// get audio write address
-	Word getAudioWriteAddress() { return *audioWriteAddress; }
+	// is queue empty
+	bool isQueueEmpty() { return audioWriteQueue.empty(); };
 
-	// set audio write flag
-	void setAudioWriteFlag(Byte value) { *audioWriteFlag = value; }
-
-	// store audio write address
-	void storeAudioWriteAddress(Word address) { *audioWriteAddress = address; }
+	// pop queue
+	audioRegs popAudioWriteQueue();
 };

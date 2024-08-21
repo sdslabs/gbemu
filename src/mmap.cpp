@@ -104,18 +104,32 @@ MemoryMap::MemoryMap()
 	bootRomFile = nullptr;
 	romFile = nullptr;
 
-	audio = new APU();
-
 	mbcMode = 0x0;
 }
 
+// Push to audio write queue
+void MemoryMap::pushAudioWriteQueue(Word address, Byte value)
+{
+	audioRegs temp = { address, value };
+	MemoryMap::audioWriteQueue.push(temp);
+}
+
+// remove the first element from queue
+audioRegs MemoryMap::popAudioWriteQueue()
+{
+	audioRegs t = audioWriteQueue.front();
+	audioWriteQueue.pop();
+	return t;
+};
+
 // Write to memory
 // TODO: Make emulation memory secure
-bool MemoryMap::writeMemory(Word address, Byte value)
+bool MemoryMap::writeMemory(Word address, Byte value, bool audioWrite)
 {
 	if (address < 0x8000)
 	{
-		printf("Writing to ROM is not allowed! Write attempted at %04X", address);
+
+		printf("Writing to ROM is not allowed! Write attempted at %04X\n", address);
 		return false;
 	}
 	else if (address < 0xA000)
@@ -174,13 +188,14 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 		{
 			readInput(value);
 		}
-		// Write to Audio Registers
-		else if (address >= 0xFF10 && address <= 0xFF3F)
-		{	
-			audio->writeByte(address, value);
-		}
 		else
+		{
 			ioPorts[address - 0xFF00] = value;
+			if (address >= 0xFF10 && address <= 0xFF3F && audioWrite)
+			{
+				MemoryMap::pushAudioWriteQueue(address, value);
+			}
+		}
 	}
 	else if (address < 0xFFFF)
 	{
@@ -194,7 +209,7 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 	}
 	else
 	{
-		printf("Invalid address");
+		printf("Invalid address\n");
 		return false;
 	}
 
@@ -251,14 +266,8 @@ Byte MemoryMap::readMemory(Word address)
 	}
 	else if (address < 0xFF80)
 	{
-		// Read from Audio Registers
-		if (address >= 0xFF10 && address <= 0xFF3F)
-		{
-			return audio->readByte(address);
-		}
 		// Read from I/O Ports
-		else
-			return ioPorts[address - 0xFF00];
+		return ioPorts[address - 0xFF00];
 	}
 	else if (address < 0xFFFF)
 	{

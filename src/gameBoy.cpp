@@ -33,15 +33,15 @@ GBE::GBE()
 
 	// Open the Boot ROM
 	if ((bootROM = fopen("../src/dmg_boot.gb", "rb")) == NULL)
-		printf("boot rom file not opened");
+		printf("boot rom file not opened\n");
 
 	// // Open the Game ROM
 	// if ((gameROM = fopen("../tests/tetris.gb", "rb")) == NULL)
 	// 	printf("game rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/dmg_sound/rom_singles/03-trigger.gb", "rb")) == NULL)
-		printf("game rom file not opened");
+	if ((gameROM = fopen("../tests/dmg_sound/rom_singles/02-len ctr.gb", "rb")) == NULL)
+		printf("game rom file not opened\n");
 
 	// Set the Boot ROM
 	gbe_mMap->setBootRomFile(bootROM);
@@ -105,9 +105,9 @@ GBE::GBE()
 	gbe_mMap->debugWriteMemory(0x131, 0xB9);
 	gbe_mMap->debugWriteMemory(0x132, 0x33);
 	gbe_mMap->debugWriteMemory(0x133, 0x3E);
-
+	printf("Loading boot\n");
 	executeBootROM();
-
+	printf("Exited boot\n");
 	update();
 }
 

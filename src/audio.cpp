@@ -1,5 +1,4 @@
 #include "audio.h"
-#include "types.h"
 
 APU::APU()
 {
@@ -58,7 +57,7 @@ void APU::test()
 
 void APU::writeByte(Word address, Byte value)
 {
-	printf("APU Address: %X, Value: %X\n", address, value);
+	printf("APU Address: %04X, Value: %04X\n", address, value);
 	if (address == 0xFF26)
 	{
 		bool enable = (value & 0x80) >> 7;
@@ -126,6 +125,7 @@ void APU::writeByte(Word address, Byte value)
 
 Byte APU::readByte(Word address)
 {
+	printf("Address: %04X\n", address);
 	if (address >= 0xFF10 && address <= 0xFF14)
 	{
 		return channel1->readByte(address);
@@ -171,11 +171,15 @@ Byte APU::readByte(Word address)
 
 void APU::stepAPU(int cycles)
 {
-	// Audio checker
-	Byte flag = mMap->getAudioWriteFlag();
-	Word address = 0;
-	if (flag)
-		address = mMap->getAudioWriteAddress();
+	// Audio write regsisters
+	while (!mMap->isQueueEmpty())
+	{
+		printf("APU working\n");
+		audioRegs writtenRegister = mMap->popAudioWriteQueue();
+		APU::writeByte(writtenRegister.address, writtenRegister.value);
+		Byte value = APU::readByte(writtenRegister.address);
+		mMap->writeMemory(writtenRegister.address, value, false);
+	}
 
 	sampleCounter += cycles;
 	frameSequencerCounter += cycles;
@@ -212,6 +216,12 @@ void APU::clearRegisters()
 	channel2->powerOff();
 	channel3->powerOff();
 	channel4->powerOff();
+	// Could be done by simply writing 0s but for checking's sake done as such
+	for (int address = 0xFF10; address <= 0xFF3F; address++)
+	{
+		Byte reg = readByte(address);
+		mMap->writeMemory(address, reg, false);
+	}
 }
 
 // PulseChannel
