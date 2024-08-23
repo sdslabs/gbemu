@@ -212,7 +212,7 @@ bool MemoryMap::writeMemory(Word address, Byte value, bool audioWrite)
 		printf("Invalid address\n");
 		return false;
 	}
-
+	printf("MMAP Address: %04X , value: %02X\n", address, value);
 	return true;
 }
 

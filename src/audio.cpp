@@ -57,7 +57,7 @@ void APU::test()
 
 void APU::writeByte(Word address, Byte value)
 {
-	printf("APU Address: %04X, Value: %04X\n", address, value);
+	printf("APU Address: %04X, Value: %02X\n", address, value);
 	if (address == 0xFF26)
 	{
 		bool enable = (value & 0x80) >> 7;
@@ -159,7 +159,7 @@ Byte APU::readByte(Word address)
 
 	case 0xFF26:
 		val = (enabled ? 0x80 : 0) | (channel1->isEnabled() ? 0x01 : 0) | (channel2->isEnabled() ? 0x02 : 0) | (channel3->isEnabled() ? 0x04 : 0) | (channel4->isEnabled() ? 0x08 : 0) | 0x70;
-		printf("APU Read 0xFF26: %X\n", val);
+		// printf("APU Read 0xFF26: %04X\n", val);
 		return val;
 
 	default:
@@ -176,9 +176,11 @@ void APU::stepAPU(int cycles)
 	{
 		printf("APU working\n");
 		audioRegs writtenRegister = mMap->popAudioWriteQueue();
-		APU::writeByte(writtenRegister.address, writtenRegister.value);
-		Byte value = APU::readByte(writtenRegister.address);
+		writeByte(writtenRegister.address, writtenRegister.value);
+		Byte value = readByte(writtenRegister.address);
 		mMap->writeMemory(writtenRegister.address, value, false);
+		value = readByte(0xFF26);
+		mMap->writeMemory(0xFF26, value, false);
 	}
 
 	sampleCounter += cycles;
@@ -186,8 +188,8 @@ void APU::stepAPU(int cycles)
 
 	if (frameSequencerCounter >= 8192)
 	{
+		printf("FrameSquencer start\n");
 		// update envelope clocks and length timers
-
 		channel1->run();
 		channel2->run();
 		channel3->run();
@@ -200,6 +202,15 @@ void APU::stepAPU(int cycles)
 		channel2->setFrameSequencer(frameSequencer);
 		channel3->setFrameSequencer(frameSequencer);
 		channel4->setFrameSequencer(frameSequencer);
+
+		// Read and write back after updating
+		Word address[] = { 0xFF19, 0xFF1E, 0xFF23, 0xFF26 };
+		for (auto addr : address)
+		{
+			Byte reg = readByte(addr);
+			mMap->writeMemory(addr, reg, false);
+		}
+		printf("FramerSequencer ends\n");
 	}
 }
 
@@ -263,6 +274,7 @@ void PulseChannel::writeByte(Word address, Byte value)
 		// Sound length/Wave pattern duty
 		waveDuty = (value & 0xC0) >> 6;
 		lengthTimer = maxLengthTimer - (value & 0x3F);
+		printf("PC: lengthTimer\n");
 		return;
 	case 0xFF12:
 	case 0xFF17:
@@ -293,6 +305,7 @@ void PulseChannel::writeByte(Word address, Byte value)
 		}
 		if (value & 0x80)
 		{
+			printf("WC triggered\n");
 			trigger();
 		}
 		return;
@@ -448,6 +461,7 @@ void WaveChannel::writeByte(Word address, Byte value)
 		// NR31
 		// Sound length
 		lengthTimer = maxLengthTimer - value;
+		printf("WC: lengthTimer\n");
 		return;
 	case 0xFF1C:
 		// NR32
@@ -470,6 +484,7 @@ void WaveChannel::writeByte(Word address, Byte value)
 		}
 		if (value & 0x80)
 		{
+			printf("WC triggered\n");
 			trigger();
 		}
 		return;
@@ -607,6 +622,7 @@ void NoiseChannel::writeByte(Word address, Byte value)
 		// NR41
 		// Sound length
 		lengthTimer = maxLengthTimer - (value & 0x3F);
+		printf("NC: lengthtimer\n");
 		return;
 	case 0xFF21:
 		// NR42
@@ -635,6 +651,7 @@ void NoiseChannel::writeByte(Word address, Byte value)
 		}
 		if (value & 0x80)
 		{
+			printf("NC Triggered...\n");
 			trigger();
 		}
 		return;
