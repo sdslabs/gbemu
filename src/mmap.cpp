@@ -124,7 +124,7 @@ audioRegs MemoryMap::popAudioWriteQueue()
 
 // Write to memory
 // TODO: Make emulation memory secure
-bool MemoryMap::writeMemory(Word address, Byte value, bool audioWrite)
+bool MemoryMap::writeMemory(Word address, Byte value)
 {
 	if (address < 0x8000)
 	{
@@ -191,7 +191,7 @@ bool MemoryMap::writeMemory(Word address, Byte value, bool audioWrite)
 		else
 		{
 			ioPorts[address - 0xFF00] = value;
-			if (address >= 0xFF10 && address <= 0xFF3F && audioWrite)
+			if (address >= 0xFF10 && address <= 0xFF3F)
 			{
 				MemoryMap::pushAudioWriteQueue(address, value);
 			}
@@ -219,6 +219,16 @@ bool MemoryMap::writeMemory(Word address, Byte value, bool audioWrite)
 void MemoryMap::debugWriteMemory(Word address, Byte value)
 {
 	romBank0[address] = value;
+}
+
+bool MemoryMap::writeBackMemory(Word address, Byte value)
+{
+	if (address >= 0xFF10 && address <= 0xFF3F)
+	{
+		ioPorts[address - 0xFF00] = value;
+		return true;
+	}
+	return false;
 }
 
 Byte MemoryMap::readMemory(Word address)

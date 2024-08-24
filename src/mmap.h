@@ -185,8 +185,11 @@ public:
 	Byte* getInterruptEnableRegister() { return interruptEnableRegister; }
 
 	// Writes a byte to the memory address
-	bool writeMemory(Word address, Byte value, bool audioWrite = true);
+	bool writeMemory(Word address, Byte value);
 	void debugWriteMemory(Word address, Byte value);
+
+	// Write Back
+	bool writeBackMemory(Word address, Byte value);
 
 	// Reads a byte from the memory address
 	Byte readMemory(Word address);

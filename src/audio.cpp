@@ -178,9 +178,9 @@ void APU::stepAPU(int cycles)
 		audioRegs writtenRegister = mMap->popAudioWriteQueue();
 		writeByte(writtenRegister.address, writtenRegister.value);
 		Byte value = readByte(writtenRegister.address);
-		mMap->writeMemory(writtenRegister.address, value, false);
+		mMap->writeBackMemory(writtenRegister.address, value);
 		value = readByte(0xFF26);
-		mMap->writeMemory(0xFF26, value, false);
+		mMap->writeBackMemory(0xFF26, value);
 	}
 
 	sampleCounter += cycles;
@@ -208,7 +208,7 @@ void APU::stepAPU(int cycles)
 		for (auto addr : address)
 		{
 			Byte reg = readByte(addr);
-			mMap->writeMemory(addr, reg, false);
+			mMap->writeBackMemory(addr, reg);
 		}
 		printf("FramerSequencer ends\n");
 	}
@@ -231,7 +231,7 @@ void APU::clearRegisters()
 	for (int address = 0xFF10; address <= 0xFF3F; address++)
 	{
 		Byte reg = readByte(address);
-		mMap->writeMemory(address, reg, false);
+		mMap->writeBackMemory(address, reg);
 	}
 }
 

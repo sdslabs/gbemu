@@ -22,7 +22,7 @@ elif [[ $last_keyword == "gbemu" ]]; then
         echo "making new build directory"
         mkdir build
         cd build
-        cmake -DDEBUG=on ..
+        cmake  ..
         cmake --build . -j8
         ./gbemu
     else 
