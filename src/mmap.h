@@ -1,7 +1,8 @@
 #pragma once
 #include "types.h"
 #include <stdio.h>
-#include <queue>
+#include <functional>
+extern std::function<void(Word, Byte)> globalFunction;
 // The Memory Map for GBE
 // Pulled from https://gbdev.io/pandocs/Memory_Map.html
 
@@ -137,9 +138,6 @@ private:
 	// Stays in the I/O Ports at 0xFF4B
 	Byte* reg_WX;
 
-	// Audio write queue
-	std::queue<audioRegs> audioWriteQueue;
-
 public:
 	// Audio Unit
 	// I know this is not the best way to do it
@@ -274,13 +272,4 @@ public:
 
 	// sets the ROM file
 	void setRomFile(FILE* file) { romFile = file; }
-
-	// push to queue
-	void pushAudioWriteQueue(Word address, Byte value);
-
-	// is queue empty
-	bool isQueueEmpty() { return audioWriteQueue.empty(); };
-
-	// pop queue
-	audioRegs popAudioWriteQueue();
 };

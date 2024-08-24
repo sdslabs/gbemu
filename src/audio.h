@@ -2,7 +2,7 @@
 #include "types.h"
 #include "mmap.h"
 #include <stdio.h>
-#include <SDL.h>
+#include <SDL.h> // SDL Audio
 
 enum Channel
 {
@@ -172,4 +172,8 @@ public:
 	void stepAPU(int cycles);
 	void clearRegisters();
 	void setMemoryMap(MemoryMap* map) { mMap = map; }
+	// Writes back on  Memory Write
+	void onWrite(Word address, Byte value);
+	// Write update
+	void writeUpdate(Word address, Byte value, bool WriteMem = false);
 };

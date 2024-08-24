@@ -20,6 +20,7 @@ APU::APU()
 	channel2 = new PulseChannel(CH2);
 	channel3 = new WaveChannel();
 	channel4 = new NoiseChannel();
+	globalFunction = std::bind(&APU::onWrite, this, std::placeholders::_1, std::placeholders::_2);
 }
 
 bool APU::init()
@@ -171,18 +172,6 @@ Byte APU::readByte(Word address)
 
 void APU::stepAPU(int cycles)
 {
-	// Audio write regsisters
-	while (!mMap->isQueueEmpty())
-	{
-		printf("APU working\n");
-		audioRegs writtenRegister = mMap->popAudioWriteQueue();
-		writeByte(writtenRegister.address, writtenRegister.value);
-		Byte value = readByte(writtenRegister.address);
-		mMap->writeBackMemory(writtenRegister.address, value);
-		value = readByte(0xFF26);
-		mMap->writeBackMemory(0xFF26, value);
-	}
-
 	sampleCounter += cycles;
 	frameSequencerCounter += cycles;
 
@@ -207,8 +196,7 @@ void APU::stepAPU(int cycles)
 		Word address[] = { 0xFF19, 0xFF1E, 0xFF23, 0xFF26 };
 		for (auto addr : address)
 		{
-			Byte reg = readByte(addr);
-			mMap->writeBackMemory(addr, reg);
+			writeUpdate(addr, 0xFF);
 		}
 		printf("FramerSequencer ends\n");
 	}
@@ -230,9 +218,27 @@ void APU::clearRegisters()
 	// Could be done by simply writing 0s but for checking's sake done as such
 	for (int address = 0xFF10; address <= 0xFF3F; address++)
 	{
-		Byte reg = readByte(address);
-		mMap->writeBackMemory(address, reg);
+		writeUpdate(address, 0xFF);
 	}
+}
+
+// Write on Memory Write
+void APU::onWrite(Word address, Byte value)
+{
+	writeUpdate(address, value, true);
+	writeUpdate(0xFF26, 0xFF);
+}
+
+// Write Update
+void APU::writeUpdate(Word address, Byte value, bool MemWrite)
+{
+	if (MemWrite)
+	{
+		value = mMap->readMemory(address);
+		writeByte(address, value);
+	}
+	value = readByte(address);
+	mMap->writeBackMemory(address, value);
 }
 
 // PulseChannel

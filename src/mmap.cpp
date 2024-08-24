@@ -1,6 +1,8 @@
 #include "mmap.h"
 #include <cstring>
 
+std::function<void(Word, Byte)> globalFunction = nullptr;
+
 // Constructor
 MemoryMap::MemoryMap()
 {
@@ -107,20 +109,20 @@ MemoryMap::MemoryMap()
 	mbcMode = 0x0;
 }
 
-// Push to audio write queue
-void MemoryMap::pushAudioWriteQueue(Word address, Byte value)
+// MemoryMap Destructor
+MemoryMap::~MemoryMap()
 {
-	audioRegs temp = { address, value };
-	MemoryMap::audioWriteQueue.push(temp);
+	delete romBank0;
+	delete romBank1;
+	delete videoRam;
+	delete externalRam;
+	delete workRam;
+	delete oamTable;
+	delete ioPorts;
+	delete highRam;
+	delete interruptEnableRegister;
+	delete joyPadState;
 }
-
-// remove the first element from queue
-audioRegs MemoryMap::popAudioWriteQueue()
-{
-	audioRegs t = audioWriteQueue.front();
-	audioWriteQueue.pop();
-	return t;
-};
 
 // Write to memory
 // TODO: Make emulation memory secure
@@ -193,7 +195,7 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 			ioPorts[address - 0xFF00] = value;
 			if (address >= 0xFF10 && address <= 0xFF3F)
 			{
-				MemoryMap::pushAudioWriteQueue(address, value);
+				globalFunction(address, value);
 			}
 		}
 	}

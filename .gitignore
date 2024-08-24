@@ -6,6 +6,6 @@ cmake-build-debug/
 src/.vscode/
 src/dmg_boot.gb
 tests/*
-.vscode/
+.vscode/*
 run.sh
 output.txt
