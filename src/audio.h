@@ -176,4 +176,11 @@ public:
 	void onWrite(Word address, Byte value);
 	// Write update
 	void writeUpdate(Word address, Byte value, bool WriteMem = false);
+
+	void setSignalCallback()
+	{
+		if (mMap)
+			mMap->connectObserver([this](Word address, Byte value)
+			    { this->onWrite(address, value); });
+	}
 };

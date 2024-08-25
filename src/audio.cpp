@@ -20,7 +20,6 @@ APU::APU()
 	channel2 = new PulseChannel(CH2);
 	channel3 = new WaveChannel();
 	channel4 = new NoiseChannel();
-	globalFunction = std::bind(&APU::onWrite, this, std::placeholders::_1, std::placeholders::_2);
 }
 
 bool APU::init()

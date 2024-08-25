@@ -1,7 +1,7 @@
 #include "mmap.h"
 #include <cstring>
 
-std::function<void(Word, Byte)> globalFunction = nullptr;
+// std::function<void(Word, Byte)> globalFunction = nullptr;
 
 // Constructor
 MemoryMap::MemoryMap()
@@ -105,6 +105,7 @@ MemoryMap::MemoryMap()
 
 	bootRomFile = nullptr;
 	romFile = nullptr;
+	globalFunction = nullptr;
 
 	mbcMode = 0x0;
 }

@@ -2,7 +2,7 @@
 #include "types.h"
 #include <stdio.h>
 #include <functional>
-extern std::function<void(Word, Byte)> globalFunction;
+// extern std::function<void(Word, Byte)> globalFunction;
 // The Memory Map for GBE
 // Pulled from https://gbdev.io/pandocs/Memory_Map.html
 
@@ -138,6 +138,8 @@ private:
 	// Stays in the I/O Ports at 0xFF4B
 	Byte* reg_WX;
 
+	std::function<void(Word, Byte)> globalFunction;
+
 public:
 	// Audio Unit
 	// I know this is not the best way to do it
@@ -272,4 +274,7 @@ public:
 
 	// sets the ROM file
 	void setRomFile(FILE* file) { romFile = file; }
+
+	// connects the global function
+	void connectObserver(const std::function<void(Word, Byte)>& function) { globalFunction = function; }
 };
