@@ -59,8 +59,7 @@ void APU::test()
 void APU::setSignalCallback()
 {
 	if (mMap)
-		mMap->connectObserver([this](Word address, Byte value)
-		    { this->onWrite(address, value); });
+		mMap->connectObserver([this](Word address, Byte value){ this->onWrite(address, value); });
 }
 
 void APU::writeByte(Word address, Byte value)
