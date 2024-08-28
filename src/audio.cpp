@@ -55,6 +55,14 @@ void APU::test()
 	printf("APU test\n");
 }
 
+// Connecting CallBack function
+void APU::setSignalCallback()
+{
+	if (mMap)
+		mMap->connectObserver([this](Word address, Byte value)
+		    { this->onWrite(address, value); });
+}
+
 void APU::writeByte(Word address, Byte value)
 {
 	printf("APU Address: %04X, Value: %02X\n", address, value);

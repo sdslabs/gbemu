@@ -138,6 +138,7 @@ private:
 	// Stays in the I/O Ports at 0xFF4B
 	Byte* reg_WX;
 
+	// Audio Write Listener
 	std::function<void(Word, Byte)> globalFunction;
 
 public:
