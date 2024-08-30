@@ -59,8 +59,7 @@ void APU::test()
 void APU::initializeWriteHandler()
 {
 	if (mMap)
-		mMap->setAudioWriteHandler([this](Word address)
-		    { this->onMemoryWrite(address); });
+		mMap->setAudioWriteHandler([this](Word address) { this->onMemoryWrite(address); });
 }
 
 void APU::writeByte(Word address, Byte value)
