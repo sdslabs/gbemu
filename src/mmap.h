@@ -2,7 +2,7 @@
 #include "types.h"
 #include <stdio.h>
 #include <functional>
-// extern std::function<void(Word, Byte)> globalFunction;
+
 // The Memory Map for GBE
 // Pulled from https://gbdev.io/pandocs/Memory_Map.html
 
@@ -191,7 +191,7 @@ public:
 	void debugWriteMemory(Word address, Byte value);
 
 	// Write Back
-	bool writeBackMemory(Word address, Byte value);
+	bool MemoryWriteBack(Word address, Byte value);
 
 	// Reads a byte from the memory address
 	Byte readMemory(Word address);
@@ -278,5 +278,5 @@ public:
 	void setRomFile(FILE* file) { romFile = file; }
 
 	// sets audiowritehandler function
-	void setAduioWriteHandler(const std::function<void(Word)>& function) { audioWriteHandler = function; }
+	void setAudioWriteHandler(const std::function<void(Word)>& function) { audioWriteHandler = function; }
 };

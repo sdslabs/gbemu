@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <SDL.h> // SDL Audio
 
-#define AUDIO_CHANNEL_CONTROL 0xFF26
+#define AUDIO_MASTER_CONTROL_REGISTER 0xFF26
 
 enum Channel
 {
@@ -17,8 +17,8 @@ enum Channel
 // For checking whether Write is due to memory or APU itself
 enum audioWriteFlag
 {
-	AUDIO_WRITE = 0,
-	AUDIO_MEMORY_WRITE = 1
+	AudioWrite = 0,
+	AudioMemoryWrite = 1
 
 };
 
@@ -183,9 +183,9 @@ public:
 	void clearRegisters();
 	void setMemoryMap(MemoryMap* map) { mMap = map; }
 	// Writes back on  Memory Write
-	void onWrite(Word address);
+	void onMemoryWrite(Word address);
 	// Write update
-	void writeUpdate(Word address, audioWriteFlag flag);
+	void audioRegisterUpdate(Word address, audioWriteFlag flag);
 	// initializes the audioWriteHandler of MemoryMap
 	void initializeWriteHandler();
 };

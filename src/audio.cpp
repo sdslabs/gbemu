@@ -59,7 +59,8 @@ void APU::test()
 void APU::initializeWriteHandler()
 {
 	if (mMap)
-		mMap->setAduioWriteHandler([this](Word address) { this->onWrite(address); });
+		mMap->setAudioWriteHandler([this](Word address)
+		    { this->onMemoryWrite(address); });
 }
 
 void APU::writeByte(Word address, Byte value)
@@ -202,7 +203,7 @@ void APU::stepAPU(int cycles)
 		Word address[] = { 0xFF19, 0xFF1E, 0xFF23, 0xFF26 };
 		for (auto addr : address)
 		{
-			writeUpdate(addr, AUDIO_WRITE);
+			audioRegisterUpdate(addr, AudioWrite);
 		}
 		printf("FramerSequencer ends\n");
 	}
@@ -224,21 +225,21 @@ void APU::clearRegisters()
 	// Could be done by simply writing 0s but for checking's sake done as such
 	for (int address = 0xFF10; address <= 0xFF3F; address++)
 	{
-		writeUpdate(address, AUDIO_WRITE);
+		audioRegisterUpdate(address, AudioWrite);
 	}
 }
 
 // Updates APU registers on write in MemoryMap
-void APU::onWrite(Word address)
+void APU::onMemoryWrite(Word address)
 {
 	// address where write has occurred
-	writeUpdate(address, AUDIO_MEMORY_WRITE);
+	audioRegisterUpdate(address, AudioMemoryWrite);
 	// Update the audio channel controller register
-	writeUpdate(AUDIO_CHANNEL_CONTROL, AUDIO_WRITE);
+	audioRegisterUpdate(AUDIO_MASTER_CONTROL_REGISTER, AudioWrite);
 }
 
 // Write Update
-void APU::writeUpdate(Word address, audioWriteFlag flag)
+void APU::audioRegisterUpdate(Word address, audioWriteFlag flag)
 {
 	Byte value = 0xFF;
 	if (flag)
@@ -247,7 +248,7 @@ void APU::writeUpdate(Word address, audioWriteFlag flag)
 		writeByte(address, value);
 	}
 	value = readByte(address);
-	mMap->writeBackMemory(address, value);
+	mMap->MemoryWriteBack(address, value);
 }
 
 // PulseChannel

@@ -1,8 +1,6 @@
 #include "mmap.h"
 #include <cstring>
 
-// std::function<void(Word, Byte)> globalFunction = nullptr;
-
 // Constructor
 MemoryMap::MemoryMap()
 {
@@ -225,7 +223,7 @@ void MemoryMap::debugWriteMemory(Word address, Byte value)
 	romBank0[address] = value;
 }
 
-bool MemoryMap::writeBackMemory(Word address, Byte value)
+bool MemoryMap::MemoryWriteBack(Word address, Byte value)
 {
 	if (address >= 0xFF10 && address <= 0xFF3F)
 	{
