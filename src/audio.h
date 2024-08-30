@@ -4,12 +4,22 @@
 #include <stdio.h>
 #include <SDL.h> // SDL Audio
 
+#define AUDIO_CHANNEL_CONTROL 0xFF26
+
 enum Channel
 {
 	CH1 = 0,
 	CH2 = 1,
 	CH3 = 2,
 	CH4 = 3
+};
+
+// For checking whether Write is due to memory or APU itself
+enum audioWriteFlag
+{
+	AUDIO_WRITE = 0,
+	AUDIO_MEMORY_WRITE = 1
+
 };
 
 class PulseChannel
@@ -173,9 +183,9 @@ public:
 	void clearRegisters();
 	void setMemoryMap(MemoryMap* map) { mMap = map; }
 	// Writes back on  Memory Write
-	void onWrite(Word address, Byte value);
+	void onWrite(Word address);
 	// Write update
-	void writeUpdate(Word address, Byte value, bool WriteMem = false);
-
-	void setSignalCallback();
+	void writeUpdate(Word address, audioWriteFlag flag);
+	// initializes the audioWriteHandler of MemoryMap
+	void initializeWriteHandler();
 };

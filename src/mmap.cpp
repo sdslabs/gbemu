@@ -105,7 +105,7 @@ MemoryMap::MemoryMap()
 
 	bootRomFile = nullptr;
 	romFile = nullptr;
-	globalFunction = nullptr;
+	audioWriteHandler = nullptr;
 
 	mbcMode = 0x0;
 }
@@ -194,9 +194,10 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 		else
 		{
 			ioPorts[address - 0xFF00] = value;
+			// Checks for write in aduio registers and calls audioWriteHandler
 			if (address >= 0xFF10 && address <= 0xFF3F)
 			{
-				globalFunction(address, value);
+				audioWriteHandler(address);
 			}
 		}
 	}

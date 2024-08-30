@@ -139,7 +139,8 @@ private:
 	Byte* reg_WX;
 
 	// Audio Write Listener
-	std::function<void(Word, Byte)> globalFunction;
+	// updates and writes back after audio write
+	std::function<void(Word)> audioWriteHandler;
 
 public:
 	// Audio Unit
@@ -276,6 +277,6 @@ public:
 	// sets the ROM file
 	void setRomFile(FILE* file) { romFile = file; }
 
-	// connects the global function
-	void connectObserver(const std::function<void(Word, Byte)>& function) { globalFunction = function; }
+	// sets audiowritehandler function
+	void setAduioWriteHandler(const std::function<void(Word)>& function) { audioWriteHandler = function; }
 };
