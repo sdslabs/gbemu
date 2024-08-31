@@ -166,7 +166,6 @@ Byte APU::readByte(Word address)
 
 	case 0xFF26:
 		val = (enabled ? 0x80 : 0) | (channel1->isEnabled() ? 0x01 : 0) | (channel2->isEnabled() ? 0x02 : 0) | (channel3->isEnabled() ? 0x04 : 0) | (channel4->isEnabled() ? 0x08 : 0) | 0x70;
-		// printf("APU Read 0xFF26: %04X\n", val);
 		return val;
 
 	default:
@@ -241,7 +240,7 @@ void APU::onMemoryWrite(Word address)
 void APU::audioRegisterUpdate(Word address, audioWriteFlag flag)
 {
 	Byte value = 0xFF;
-	if (flag)
+	if (flag == AudioMemoryWrite)
 	{
 		value = mMap->readMemory(address);
 		writeByte(address, value);

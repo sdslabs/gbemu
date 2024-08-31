@@ -129,7 +129,6 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 {
 	if (address < 0x8000)
 	{
-
 		printf("Writing to ROM is not allowed! Write attempted at %04X\n", address);
 		return false;
 	}
@@ -214,7 +213,7 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 		printf("Invalid address\n");
 		return false;
 	}
-	printf("MMAP Address: %04X , value: %02X\n", address, value);
+
 	return true;
 }
 

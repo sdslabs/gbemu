@@ -194,6 +194,7 @@ int CPU::LD_u16_SP()
 	// Write the contents of SP into the memory address pointed to by the next 2 bytes
 	mMap->writeMemory(address, reg_SP.lo);
 	mMap->writeMemory(address + 1, reg_SP.hi);
+
 	// Increment the program counter
 	reg_PC.dat += 3;
 
@@ -1054,7 +1055,6 @@ int CPU::LD_A_u8()
 {
 	reg_AF.hi = (*mMap)[reg_PC.dat + 1];
 	reg_PC.dat += 2;
-	// printf("%02X\n", reg_AF.hi);
 	debugPrint("LD A, u8\n");
 	return 8;
 }
@@ -3970,7 +3970,6 @@ int CPU::executeNextInstruction()
 {
 	// Get the opcode
 	Byte opcode = (*mMap)[reg_PC.dat];
-	// printf("Instr %4X:%2X\n", reg_PC.dat, opcode);
 	return (this->*method_pointer[opcode])();
 }
 
@@ -4113,8 +4112,8 @@ int CPU::RLC_HLp()
 
 	// Rotate the value at memory address pointed to by HL left by 1
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] << 1) | ((*mMap)[reg_HL.dat] >> 7));
-	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
+	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 	reg_PC.dat += 1;
 	debugPrint("RLC (HL)\n");
 	return 12;
@@ -4273,7 +4272,6 @@ int CPU::RRC_HLp()
 	// Rotate the value at memory address pointed to by HL right by 1
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] >> 1) | ((*mMap)[reg_HL.dat] << 7));
 	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
-
 	reg_PC.dat += 1;
 	debugPrint("RRC (HL)\n");
 	return 12;
@@ -4440,6 +4438,7 @@ int CPU::RL_HLp()
 
 	// Rotate the value at memory address pointed to by HL left by 1
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] << 1) | ((*mMap)[reg_HL.dat] >> 7));
+
 	// swap the values of 0th bit of the value at memory address pointed to by HL and the carry flag
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] ^ GET_CARRY_FLAG);
 	GET_CARRY_FLAG ^ ((*mMap)[reg_HL.dat] & 1) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
@@ -4615,6 +4614,7 @@ int CPU::RR_HLp()
 
 	// Rotate the value at memory address pointed to by HL right by 1
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] >> 1) | ((*mMap)[reg_HL.dat] << 7));
+
 	// swap the values of 7th bit of the value at memory address pointed to by HL and the carry flag
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] ^ GET_CARRY_FLAG << 7);
 	GET_CARRY_FLAG ^ ((*mMap)[reg_HL.dat] >> 7) ? SET_CARRY_FLAG : UNSET_CARRY_FLAG;
@@ -4781,6 +4781,7 @@ int CPU::SLA_HLp()
 
 	// Shift the value at memory address pointed to by HL left by 1
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] << 1));
+
 	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
@@ -4940,6 +4941,7 @@ int CPU::SRA_HLp()
 
 	// Shift the value at memory address pointed to by HL right by 1 while leaving 7th bit unchanged
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] >> 1) | ((*mMap)[reg_HL.dat] & 0x80));
+
 	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
@@ -5085,6 +5087,7 @@ int CPU::SWAP_HLp()
 
 	// swap the upper and lower nibbles
 	mMap->writeMemory(reg_HL.dat, ((((*mMap)[reg_HL.dat] & 0x0F) << 4) | (((*mMap)[reg_HL.dat] & 0xF0) >> 4)));
+
 	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
@@ -5242,6 +5245,7 @@ int CPU::SRL_HLp()
 
 	// Shift the value at memory address pointed to by HL right by 1
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] >> 1));
+
 	(*mMap)[reg_HL.dat] & 0xFF ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
 
 	reg_PC.dat += 1;
@@ -6307,6 +6311,7 @@ int CPU::RES_0_HLp()
 {
 	// unset the 0th bit
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 0))));
+
 	reg_PC.dat += 1;
 	debugPrint("RES 0, (HL)\n");
 	return 12;
@@ -6402,6 +6407,7 @@ int CPU::RES_1_HLp()
 {
 	// unset the 1st bit
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 1))));
+
 	reg_PC.dat += 1;
 	debugPrint("RES 1, (HL)\n");
 	return 12;
@@ -6497,6 +6503,7 @@ int CPU::RES_2_HLp()
 {
 	// unset the 2nd bit
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 2))));
+
 	reg_PC.dat += 1;
 	debugPrint("RES 2, (HL)\n");
 	return 12;
@@ -6592,6 +6599,7 @@ int CPU::RES_3_HLp()
 {
 	// unset the 3rd bit
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 3))));
+
 	reg_PC.dat += 1;
 	debugPrint("RES 3, (HL)\n");
 	return 12;
@@ -6687,6 +6695,7 @@ int CPU::RES_4_HLp()
 {
 	// unset the 4th bit
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 4))));
+
 	reg_PC.dat += 1;
 	debugPrint("RES 4, (HL)\n");
 	return 12;
@@ -6782,6 +6791,7 @@ int CPU::RES_5_HLp()
 {
 	// unset the 5th bit
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 5))));
+
 	reg_PC.dat += 1;
 	debugPrint("RES 5, (HL)\n");
 	return 12;
@@ -6877,6 +6887,7 @@ int CPU::RES_6_HLp()
 {
 	// unset the 6th bit
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 6))));
+
 	reg_PC.dat += 1;
 	debugPrint("RES 6, (HL)\n");
 	return 12;
@@ -6972,6 +6983,7 @@ int CPU::RES_7_HLp()
 {
 	// unset the 7th bit
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] & (0xFF ^ (1 << 7))));
+
 	reg_PC.dat += 1;
 	debugPrint("RES 7, (HL)\n");
 	return 12;
@@ -7067,6 +7079,7 @@ int CPU::SET_0_HLp()
 {
 	// set the 0th bit
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 0));
+
 	reg_PC.dat += 1;
 	debugPrint("SET 0, (HL)\n");
 	return 12;
@@ -7162,6 +7175,7 @@ int CPU::SET_1_HLp()
 {
 	// set the 1st bit
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 1));
+
 	reg_PC.dat += 1;
 	debugPrint("SET 1, (HL)\n");
 	return 12;
@@ -7257,6 +7271,7 @@ int CPU::SET_2_HLp()
 {
 	// set the 2nd bit
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 2));
+
 	reg_PC.dat += 1;
 	debugPrint("SET 2, (HL)\n");
 	return 12;
@@ -7352,6 +7367,7 @@ int CPU::SET_3_HLp()
 {
 	// set the 3rd bit
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 3));
+
 	reg_PC.dat += 1;
 	debugPrint("SET 3, (HL)\n");
 	return 12;
@@ -7447,6 +7463,7 @@ int CPU::SET_4_HLp()
 {
 	// set the 4th bit
 	mMap->writeMemory(reg_HL.dat, (*mMap)[reg_HL.dat] | (1 << 4));
+
 	reg_PC.dat += 1;
 	debugPrint("SET 4, (HL)\n");
 	return 12;
