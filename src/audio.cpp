@@ -59,8 +59,7 @@ void APU::test()
 void APU::initializeWriteHandler()
 {
 	if (mMap)
-		mMap->setAudioWriteHandler([this](Word address)
-		    { this->onMemoryWrite(address); });
+		mMap->setAudioWriteHandler([this](Word address) { this->onMemoryWrite(address); });
 }
 
 void APU::writeByte(Word address, Byte value)
@@ -133,7 +132,6 @@ void APU::writeByte(Word address, Byte value)
 
 Byte APU::readByte(Word address)
 {
-	printf("Address: %04X\n", address);
 	if (address >= 0xFF10 && address <= 0xFF14)
 	{
 		return channel1->readByte(address);
@@ -183,7 +181,6 @@ void APU::stepAPU(int cycles)
 
 	if (frameSequencerCounter >= 8192)
 	{
-		printf("FrameSquencer start\n");
 		// update envelope clocks and length timers
 		channel1->run();
 		channel2->run();
@@ -204,7 +201,6 @@ void APU::stepAPU(int cycles)
 		{
 			audioRegisterUpdate(addr, AudioWrite);
 		}
-		printf("FramerSequencer ends\n");
 	}
 }
 
