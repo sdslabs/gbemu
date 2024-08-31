@@ -5,3 +5,7 @@ cmake-build-debug/
 .idea/
 src/.vscode/
 src/dmg_boot.gb
+tests/*
+.vscode/*
+run.sh
+output.txt

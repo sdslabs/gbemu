@@ -3,6 +3,7 @@
 #include "cpu.h"
 #include "mmap.h"
 #include "graphics.h"
+#include "audio.h"
 
 // GBE stands for GameBoyEmulator
 
@@ -27,6 +28,9 @@ private:
 
 	// Pointer to the Graphics
 	PPU* gbe_graphics;
+
+	// Pointer to the Audio
+	APU* gbe_audio;
 
 	// File pointer for Boot ROM
 	FILE* bootROM;

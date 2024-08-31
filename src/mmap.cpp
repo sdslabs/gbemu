@@ -103,10 +103,24 @@ MemoryMap::MemoryMap()
 
 	bootRomFile = nullptr;
 	romFile = nullptr;
-
-	audio = new APU();
+	audioWriteHandler = nullptr;
 
 	mbcMode = 0x0;
+}
+
+// MemoryMap Destructor
+MemoryMap::~MemoryMap()
+{
+	delete romBank0;
+	delete romBank1;
+	delete videoRam;
+	delete externalRam;
+	delete workRam;
+	delete oamTable;
+	delete ioPorts;
+	delete highRam;
+	delete interruptEnableRegister;
+	delete joyPadState;
 }
 
 // Write to memory
@@ -115,7 +129,7 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 {
 	if (address < 0x8000)
 	{
-		printf("Writing to ROM is not allowed! Write attempted at %04X", address);
+		printf("Writing to ROM is not allowed! Write attempted at %04X\n", address);
 		return false;
 	}
 	else if (address < 0xA000)
@@ -174,13 +188,15 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 		{
 			readInput(value);
 		}
-		// Write to Audio Registers
-		else if (address >= 0xFF10 && address <= 0xFF3F)
-		{	
-			audio->writeByte(address, value);
-		}
 		else
+		{
 			ioPorts[address - 0xFF00] = value;
+			// Checks for write in aduio registers and calls audioWriteHandler
+			if (address >= 0xFF10 && address <= 0xFF3F)
+			{
+				audioWriteHandler(address);
+			}
+		}
 	}
 	else if (address < 0xFFFF)
 	{
@@ -194,7 +210,7 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 	}
 	else
 	{
-		printf("Invalid address");
+		printf("Invalid address\n");
 		return false;
 	}
 
@@ -204,6 +220,16 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 void MemoryMap::debugWriteMemory(Word address, Byte value)
 {
 	romBank0[address] = value;
+}
+
+bool MemoryMap::MemoryWriteBack(Word address, Byte value)
+{
+	if (address >= 0xFF10 && address <= 0xFF3F)
+	{
+		ioPorts[address - 0xFF00] = value;
+		return true;
+	}
+	return false;
 }
 
 Byte MemoryMap::readMemory(Word address)
@@ -251,14 +277,8 @@ Byte MemoryMap::readMemory(Word address)
 	}
 	else if (address < 0xFF80)
 	{
-		// Read from Audio Registers
-		if (address >= 0xFF10 && address <= 0xFF3F)
-		{
-			return audio->readByte(address);
-		}
 		// Read from I/O Ports
-		else
-			return ioPorts[address - 0xFF00];
+		return ioPorts[address - 0xFF00];
 	}
 	else if (address < 0xFFFF)
 	{

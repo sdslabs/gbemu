@@ -1,5 +1,4 @@
 #include "audio.h"
-#include "types.h"
 
 APU::APU()
 {
@@ -16,7 +15,7 @@ APU::APU()
 	enableVINRight = false;
 	volumeLeft = 0;
 	volumeRight = 0;
-
+	mMap = nullptr;
 	channel1 = new PulseChannel(CH1);
 	channel2 = new PulseChannel(CH2);
 	channel3 = new WaveChannel();
@@ -47,6 +46,7 @@ bool APU::init()
 	channel2->setFrameSequencer(frameSequencer);
 	channel3->setFrameSequencer(frameSequencer);
 	channel4->setFrameSequencer(frameSequencer);
+
 	return true;
 }
 
@@ -55,9 +55,16 @@ void APU::test()
 	printf("APU test\n");
 }
 
+// initialize the writehandler of memorymap
+void APU::initializeWriteHandler()
+{
+	if (mMap)
+		mMap->setAudioWriteHandler([this](Word address) { this->onMemoryWrite(address); });
+}
+
 void APU::writeByte(Word address, Byte value)
 {
-	printf("APU Address: %X, Value: %X\n", address, value);
+	printf("APU Address: %04X, Value: %02X\n", address, value);
 	if (address == 0xFF26)
 	{
 		bool enable = (value & 0x80) >> 7;
@@ -158,7 +165,6 @@ Byte APU::readByte(Word address)
 
 	case 0xFF26:
 		val = (enabled ? 0x80 : 0) | (channel1->isEnabled() ? 0x01 : 0) | (channel2->isEnabled() ? 0x02 : 0) | (channel3->isEnabled() ? 0x04 : 0) | (channel4->isEnabled() ? 0x08 : 0) | 0x70;
-		printf("APU Read 0xFF26: %X\n", val);
 		return val;
 
 	default:
@@ -176,7 +182,6 @@ void APU::stepAPU(int cycles)
 	if (frameSequencerCounter >= 8192)
 	{
 		// update envelope clocks and length timers
-
 		channel1->run();
 		channel2->run();
 		channel3->run();
@@ -189,6 +194,13 @@ void APU::stepAPU(int cycles)
 		channel2->setFrameSequencer(frameSequencer);
 		channel3->setFrameSequencer(frameSequencer);
 		channel4->setFrameSequencer(frameSequencer);
+
+		// Read and write back after updating
+		Word address[] = { 0xFF19, 0xFF1E, 0xFF23, 0xFF26 };
+		for (auto addr : address)
+		{
+			audioRegisterUpdate(addr, AudioWrite);
+		}
 	}
 }
 
@@ -205,6 +217,33 @@ void APU::clearRegisters()
 	channel2->powerOff();
 	channel3->powerOff();
 	channel4->powerOff();
+	// Could be done by simply writing 0s but for checking's sake done as such
+	for (int address = 0xFF10; address <= 0xFF3F; address++)
+	{
+		audioRegisterUpdate(address, AudioWrite);
+	}
+}
+
+// Updates APU registers on write in MemoryMap
+void APU::onMemoryWrite(Word address)
+{
+	// address where write has occurred
+	audioRegisterUpdate(address, AudioMemoryWrite);
+	// Update the audio channel controller register
+	audioRegisterUpdate(AUDIO_MASTER_CONTROL_REGISTER, AudioWrite);
+}
+
+// Write Update
+void APU::audioRegisterUpdate(Word address, audioWriteFlag flag)
+{
+	Byte value = 0xFF;
+	if (flag == AudioMemoryWrite)
+	{
+		value = mMap->readMemory(address);
+		writeByte(address, value);
+	}
+	value = readByte(address);
+	mMap->MemoryWriteBack(address, value);
 }
 
 // PulseChannel

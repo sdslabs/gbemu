@@ -1,7 +1,10 @@
 #pragma once
 #include "types.h"
+#include "mmap.h"
 #include <stdio.h>
-#include <SDL.h>
+#include <SDL.h> // SDL Audio
+
+#define AUDIO_MASTER_CONTROL_REGISTER 0xFF26
 
 enum Channel
 {
@@ -11,13 +14,21 @@ enum Channel
 	CH4 = 3
 };
 
+// For checking whether Write is due to memory or APU itself
+enum audioWriteFlag
+{
+	AudioWrite = 0,
+	AudioMemoryWrite = 1
+
+};
+
 class PulseChannel
 {
 private:
 	Channel channel;
-    bool enabled;
-    bool dacEnabled;
-    int frameSequencer;
+	bool enabled;
+	bool dacEnabled;
+	int frameSequencer;
 
 	Byte sweepPeriod;
 	bool sweepNegate;
@@ -26,7 +37,7 @@ private:
 	// NRx1
 	Byte waveDuty;
 	int lengthTimer;
-    int maxLengthTimer = 64;
+	int maxLengthTimer = 64;
 
 	Byte envelopeInitialVolume;
 	bool envelopeIncrease;
@@ -41,25 +52,24 @@ public:
 	void test();
 	void writeByte(Word address, Byte value);
 	Byte readByte(Word address);
-    bool isEnabled();
-    void powerOff();
-    void run();
-    void set_NRx4(Byte value);
-    void setFrameSequencer(int frameSequencer);
-    void trigger();
+	bool isEnabled();
+	void powerOff();
+	void run();
+	void set_NRx4(Byte value);
+	void setFrameSequencer(int frameSequencer);
+	void trigger();
 };
 
 class WaveChannel
 {
 private:
-
 	Byte waveRAM[16];
 	bool dacEnabled;
 	bool enabled;
 
 	int lengthTimer;
 	int maxLengthTimer = 256;
-    int frameSequencer;
+	int frameSequencer;
 
 	Byte outputLevel;
 
@@ -73,22 +83,22 @@ public:
 	void writeByte(Word address, Byte value);
 	Byte readByte(Word address);
 	void trigger();
-    bool isEnabled();
-    void powerOff();
-    void set_NRx4(Byte value);
-    void run();
-    void setFrameSequencer(int frameSequencer);
+	bool isEnabled();
+	void powerOff();
+	void set_NRx4(Byte value);
+	void run();
+	void setFrameSequencer(int frameSequencer);
 };
 
 class NoiseChannel
 {
 private:
-    bool enabled;
-    bool dacEnabled;
+	bool enabled;
+	bool dacEnabled;
 
 	int lengthTimer;
 	int maxLengthTimer = 64;
-    int frameSequencer;
+	int frameSequencer;
 
 	Byte envelopeInitialVolume;
 	bool envelopeIncrease;
@@ -112,11 +122,11 @@ public:
 	void writeByte(Word address, Byte value);
 	Byte readByte(Word address);
 	void trigger();
-    bool isEnabled();
-    void powerOff();
-    void set_NRx4(Byte value);
-    void run();
-    void setFrameSequencer(int frameSequencer);
+	bool isEnabled();
+	void powerOff();
+	void set_NRx4(Byte value);
+	void run();
+	void setFrameSequencer(int frameSequencer);
 };
 
 class APU
@@ -160,12 +170,22 @@ private:
 	WaveChannel* channel3;
 	NoiseChannel* channel4;
 
+	// Memory Map
+	MemoryMap* mMap;
+
 public:
 	APU();
 	void test();
-    bool init();
+	bool init();
 	void writeByte(Word address, Byte value);
 	Byte readByte(Word address);
 	void stepAPU(int cycles);
 	void clearRegisters();
+	void setMemoryMap(MemoryMap* map) { mMap = map; }
+	// Writes back on  Memory Write
+	void onMemoryWrite(Word address);
+	// Write update
+	void audioRegisterUpdate(Word address, audioWriteFlag flag);
+	// initializes the audioWriteHandler of MemoryMap
+	void initializeWriteHandler();
 };

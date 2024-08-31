@@ -1,7 +1,7 @@
 #pragma once
 #include "types.h"
 #include <stdio.h>
-#include "audio.h"
+#include <functional>
 
 // The Memory Map for GBE
 // Pulled from https://gbdev.io/pandocs/Memory_Map.html
@@ -138,12 +138,11 @@ private:
 	// Stays in the I/O Ports at 0xFF4B
 	Byte* reg_WX;
 
+	// Audio Write Listener
+	// updates and writes back after audio write
+	std::function<void(Word)> audioWriteHandler;
+
 public:
-	// Audio Unit
-	// I know this is not the best way to do it
-	// But I am not sure how to do it better
-	APU* audio;
-	
 	Byte* joyPadState;
 	// Constructor
 	MemoryMap();
@@ -186,6 +185,9 @@ public:
 	// Writes a byte to the memory address
 	bool writeMemory(Word address, Byte value);
 	void debugWriteMemory(Word address, Byte value);
+
+	// Write Back
+	bool MemoryWriteBack(Word address, Byte value);
 
 	// Reads a byte from the memory address
 	Byte readMemory(Word address);
@@ -270,4 +272,7 @@ public:
 
 	// sets the ROM file
 	void setRomFile(FILE* file) { romFile = file; }
+
+	// sets audiowritehandler function
+	void setAudioWriteHandler(const std::function<void(Word)>& function) { audioWriteHandler = function; }
 };
