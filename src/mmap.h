@@ -143,10 +143,6 @@ private:
 	std::function<void(Word)> audioWriteHandler;
 
 public:
-	// Audio Unit
-	// I know this is not the best way to do it
-	// But I am not sure how to do it better
-
 	Byte* joyPadState;
 	// Constructor
 	MemoryMap();

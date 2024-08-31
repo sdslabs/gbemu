@@ -108,9 +108,7 @@ GBE::GBE()
 	gbe_mMap->debugWriteMemory(0x132, 0x33);
 	gbe_mMap->debugWriteMemory(0x133, 0x3E);
 
-	printf("Loading boot\n");
 	executeBootROM();
-	printf("Exited boot\n");
 	update();
 }
 

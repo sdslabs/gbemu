@@ -4114,6 +4114,7 @@ int CPU::RLC_HLp()
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] << 1) | ((*mMap)[reg_HL.dat] >> 7));
 
 	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	debugPrint("RLC (HL)\n");
 	return 12;
@@ -4271,7 +4272,9 @@ int CPU::RRC_HLp()
 
 	// Rotate the value at memory address pointed to by HL right by 1
 	mMap->writeMemory(reg_HL.dat, ((*mMap)[reg_HL.dat] >> 1) | ((*mMap)[reg_HL.dat] << 7));
+
 	(*mMap)[reg_HL.dat] ? UNSET_ZERO_FLAG : SET_ZERO_FLAG;
+
 	reg_PC.dat += 1;
 	debugPrint("RRC (HL)\n");
 	return 12;

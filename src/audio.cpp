@@ -59,7 +59,8 @@ void APU::test()
 void APU::initializeWriteHandler()
 {
 	if (mMap)
-		mMap->setAudioWriteHandler([this](Word address) { this->onMemoryWrite(address); });
+		mMap->setAudioWriteHandler([this](Word address)
+		    { this->onMemoryWrite(address); });
 }
 
 void APU::writeByte(Word address, Byte value)
@@ -288,7 +289,6 @@ void PulseChannel::writeByte(Word address, Byte value)
 		// Sound length/Wave pattern duty
 		waveDuty = (value & 0xC0) >> 6;
 		lengthTimer = maxLengthTimer - (value & 0x3F);
-		printf("PC: lengthTimer\n");
 		return;
 	case 0xFF12:
 	case 0xFF17:
@@ -319,7 +319,6 @@ void PulseChannel::writeByte(Word address, Byte value)
 		}
 		if (value & 0x80)
 		{
-			printf("WC triggered\n");
 			trigger();
 		}
 		return;
@@ -475,7 +474,6 @@ void WaveChannel::writeByte(Word address, Byte value)
 		// NR31
 		// Sound length
 		lengthTimer = maxLengthTimer - value;
-		printf("WC: lengthTimer\n");
 		return;
 	case 0xFF1C:
 		// NR32
@@ -498,7 +496,6 @@ void WaveChannel::writeByte(Word address, Byte value)
 		}
 		if (value & 0x80)
 		{
-			printf("WC triggered\n");
 			trigger();
 		}
 		return;
@@ -636,7 +633,6 @@ void NoiseChannel::writeByte(Word address, Byte value)
 		// NR41
 		// Sound length
 		lengthTimer = maxLengthTimer - (value & 0x3F);
-		printf("NC: lengthtimer\n");
 		return;
 	case 0xFF21:
 		// NR42
@@ -665,7 +661,6 @@ void NoiseChannel::writeByte(Word address, Byte value)
 		}
 		if (value & 0x80)
 		{
-			printf("NC Triggered...\n");
 			trigger();
 		}
 		return;

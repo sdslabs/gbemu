@@ -8,9 +8,3 @@ typedef char SByte;
 typedef unsigned short Word;
 typedef signed short SWord;
 typedef unsigned int color;
-
-typedef struct
-{
-	Word address;
-	Byte value;
-} audioRegs;
