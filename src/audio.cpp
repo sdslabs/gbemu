@@ -66,12 +66,13 @@ void APU::initializeReadWriteHandlers()
 	if (!mMap)
 	{
 		throw std::runtime_error("MemoryMap not set in APU");
+		return;
 	}
-	else
-	{
-		mMap->setAudioReadHandler([this](Word address) { return this->readByte(address); });
-		mMap->setAudioWriteHandler([this](Word address, Byte value) { this->writeByte(address, value); });
-	}
+
+	mMap->setAudioReadHandler([this](Word address)
+	    { return this->readByte(address); });
+	mMap->setAudioWriteHandler([this](Word address, Byte value)
+	    { this->writeByte(address, value); });
 }
 void APU::test()
 {
