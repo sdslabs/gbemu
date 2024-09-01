@@ -2,6 +2,8 @@
 #include "types.h"
 #include <stdio.h>
 #include <SDL.h>
+#include <stdexcept>
+#include "mmap.h"
 
 enum Channel
 {
@@ -15,9 +17,9 @@ class PulseChannel
 {
 private:
 	Channel channel;
-    bool enabled;
-    bool dacEnabled;
-    int frameSequencer;
+	bool enabled;
+	bool dacEnabled;
+	int frameSequencer;
 
 	Byte sweepPeriod;
 	bool sweepNegate;
@@ -26,7 +28,7 @@ private:
 	// NRx1
 	Byte waveDuty;
 	int lengthTimer;
-    int maxLengthTimer = 64;
+	int maxLengthTimer = 64;
 
 	Byte envelopeInitialVolume;
 	bool envelopeIncrease;
@@ -41,25 +43,24 @@ public:
 	void test();
 	void writeByte(Word address, Byte value);
 	Byte readByte(Word address);
-    bool isEnabled();
-    void powerOff();
-    void run();
-    void set_NRx4(Byte value);
-    void setFrameSequencer(int frameSequencer);
-    void trigger();
+	bool isEnabled();
+	void powerOff();
+	void run();
+	void set_NRx4(Byte value);
+	void setFrameSequencer(int frameSequencer);
+	void trigger();
 };
 
 class WaveChannel
 {
 private:
-
 	Byte waveRAM[16];
 	bool dacEnabled;
 	bool enabled;
 
 	int lengthTimer;
 	int maxLengthTimer = 256;
-    int frameSequencer;
+	int frameSequencer;
 
 	Byte outputLevel;
 
@@ -73,22 +74,22 @@ public:
 	void writeByte(Word address, Byte value);
 	Byte readByte(Word address);
 	void trigger();
-    bool isEnabled();
-    void powerOff();
-    void set_NRx4(Byte value);
-    void run();
-    void setFrameSequencer(int frameSequencer);
+	bool isEnabled();
+	void powerOff();
+	void set_NRx4(Byte value);
+	void run();
+	void setFrameSequencer(int frameSequencer);
 };
 
 class NoiseChannel
 {
 private:
-    bool enabled;
-    bool dacEnabled;
+	bool enabled;
+	bool dacEnabled;
 
 	int lengthTimer;
 	int maxLengthTimer = 64;
-    int frameSequencer;
+	int frameSequencer;
 
 	Byte envelopeInitialVolume;
 	bool envelopeIncrease;
@@ -112,11 +113,11 @@ public:
 	void writeByte(Word address, Byte value);
 	Byte readByte(Word address);
 	void trigger();
-    bool isEnabled();
-    void powerOff();
-    void set_NRx4(Byte value);
-    void run();
-    void setFrameSequencer(int frameSequencer);
+	bool isEnabled();
+	void powerOff();
+	void set_NRx4(Byte value);
+	void run();
+	void setFrameSequencer(int frameSequencer);
 };
 
 class APU
@@ -160,12 +161,17 @@ private:
 	WaveChannel* channel3;
 	NoiseChannel* channel4;
 
+	// Pointer to MemoryMap
+	MemoryMap* mMap;
+
 public:
 	APU();
+	void setMemoryMap(MemoryMap* mMap);
 	void test();
-    bool init();
+	bool init();
 	void writeByte(Word address, Byte value);
 	Byte readByte(Word address);
 	void stepAPU(int cycles);
 	void clearRegisters();
+	void initializeReadWriteHandlers();
 };

@@ -16,7 +16,7 @@ GBE::GBE()
 	gbe_graphics = new PPU();
 
 	// audio = new Audio();
-	// APU = new APU();
+	gbe_audio = new APU();
 
 	// Unify the CPU and MemoryMap
 	gbe_cpu->setMemory(gbe_mMap);
@@ -24,8 +24,11 @@ GBE::GBE()
 	// Unify the CPU and PPU
 	gbe_cpu->setPPU(gbe_graphics);
 
-	// Unify the PPU and MmeoryMap
+	// Unify the PPU and MemoryMap
 	gbe_graphics->setMemoryMap(gbe_mMap);
+
+	// Unify the APU and MemoryMap
+	gbe_audio->setMemoryMap(gbe_mMap);
 
 	gbe_graphics->init();
 
@@ -38,7 +41,7 @@ GBE::GBE()
 	// 	printf("game rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/dmg_sound/rom_singles/03-trigger.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../tests/dmg_sound/rom_singles/02-len ctr.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Set the Boot ROM
@@ -122,7 +125,7 @@ void GBE::update()
 		// update the DIV and TIMA timers
 		gbe_cpu->updateTimers(s_Cycles);
 		gbe_graphics->executePPU(s_Cycles);
-		gbe_mMap->audio->stepAPU(s_Cycles);
+		gbe_audio->stepAPU(s_Cycles);
 		s_Cycles = 0;
 		s_Cycles += gbe_cpu->performInterrupt();
 		gbe_graphics->pollEvents();

@@ -17,6 +17,8 @@ APU::APU()
 	volumeLeft = 0;
 	volumeRight = 0;
 
+	mMap = nullptr;
+
 	channel1 = new PulseChannel(CH1);
 	channel2 = new PulseChannel(CH2);
 	channel3 = new WaveChannel();
@@ -50,6 +52,26 @@ bool APU::init()
 	return true;
 }
 
+// Set MemoryMap pointer
+void APU::setMemoryMap(MemoryMap* mMap)
+{
+	this->mMap = mMap;
+	// initialize Handlers
+	initializeReadWriteHandlers();
+}
+
+// Initializes the read-write handlers of MemoryMap
+void APU::initializeReadWriteHandlers()
+{
+	if (!mMap)
+	{
+		throw std::runtime_error("MemoryMap not set in APU");
+		return;
+	}
+
+	mMap->setAudioReadHandler([this](Word address) { return this->readByte(address); });
+	mMap->setAudioWriteHandler([this](Word address, Byte value) { this->writeByte(address, value); });
+}
 void APU::test()
 {
 	printf("APU test\n");
