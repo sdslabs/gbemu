@@ -69,10 +69,15 @@ void APU::initializeReadWriteHandlers()
 		return;
 	}
 
+<<<<<<< HEAD
 	mMap->setAudioReadHandler([this](Word address)
 	    { return this->readByte(address); });
 	mMap->setAudioWriteHandler([this](Word address, Byte value)
 	    { this->writeByte(address, value); });
+=======
+	mMap->setAudioReadHandler([this](Word address) { return this->readByte(address); });
+	mMap->setAudioWriteHandler([this](Word address, Byte value) { this->writeByte(address, value); });
+>>>>>>> bab3ce9 (Early return)
 }
 void APU::test()
 {
