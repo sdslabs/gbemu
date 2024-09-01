@@ -29,8 +29,6 @@ GBE::GBE()
 
 	// Unify the APU and MemoryMap
 	gbe_audio->setMemoryMap(gbe_mMap);
-	// initialize Handlers
-	gbe_audio->initializeReadWriteHandlers();
 
 	gbe_graphics->init();
 
@@ -43,7 +41,7 @@ GBE::GBE()
 	// 	printf("game rom file not opened");
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/dmg_sound/rom_singles/03-trigger.gb", "rb")) == NULL)
+	if ((gameROM = fopen("../tests/dmg_sound/rom_singles/02-len ctr.gb", "rb")) == NULL)
 		printf("game rom file not opened");
 
 	// Set the Boot ROM

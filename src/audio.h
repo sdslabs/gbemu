@@ -2,6 +2,7 @@
 #include "types.h"
 #include <stdio.h>
 #include <SDL.h>
+#include <stdexcept>
 #include "mmap.h"
 
 enum Channel
