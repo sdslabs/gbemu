@@ -3,6 +3,7 @@
 #include "cpu.h"
 #include "mmap.h"
 #include "graphics.h"
+#include "audio.h"
 
 // GBE stands for GameBoyEmulator
 
@@ -33,6 +34,9 @@ private:
 
 	// File pointer for game ROM
 	FILE* gameROM;
+
+	// Pointer to Audio
+	APU* gbe_audio;
 
 	// Update function of the GBE
 	// Will be called every frame

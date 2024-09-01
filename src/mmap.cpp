@@ -104,9 +104,22 @@ MemoryMap::MemoryMap()
 	bootRomFile = nullptr;
 	romFile = nullptr;
 
-	audio = new APU();
-
 	mbcMode = 0x0;
+}
+
+// MemoryMap Destructor
+MemoryMap::~MemoryMap()
+{
+	delete romBank0;
+	delete romBank1;
+	delete videoRam;
+	delete externalRam;
+	delete workRam;
+	delete oamTable;
+	delete ioPorts;
+	delete highRam;
+	delete interruptEnableRegister;
+	delete joyPadState;
 }
 
 // Write to memory
@@ -176,8 +189,8 @@ bool MemoryMap::writeMemory(Word address, Byte value)
 		}
 		// Write to Audio Registers
 		else if (address >= 0xFF10 && address <= 0xFF3F)
-		{	
-			audio->writeByte(address, value);
+		{
+			audioWriteHandler(address, value);
 		}
 		else
 			ioPorts[address - 0xFF00] = value;
@@ -254,7 +267,7 @@ Byte MemoryMap::readMemory(Word address)
 		// Read from Audio Registers
 		if (address >= 0xFF10 && address <= 0xFF3F)
 		{
-			return audio->readByte(address);
+			return audioReadHandler(address);
 		}
 		// Read from I/O Ports
 		else
