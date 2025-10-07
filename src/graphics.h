@@ -1,8 +1,6 @@
 #pragma once
 #include "types.h"
 #include "mmap.h"
-#include <stdio.h>
-#include <algorithm>
 #include <vector>
 
 #ifdef __linux__
@@ -30,7 +28,7 @@ private:
 
 	// renderArray to be converted to texture
 	// stores 4 copies of texture for wrapping of screen
-	color renderArray[160 * 144];
+	Color renderArray[160 * 144];
 
 	MemoryMap* mMap;
 
@@ -75,12 +73,12 @@ private:
 	const int SCREEN_HEIGHT = 144;
 
 	// Color Mapping for background
-	color bg_colors[4] = { 0x9BBC0FFF, 0x8BAC0FFF, 0x306230FF, 0x0F380FFF };
+	Color bg_colors[4] = { 0x9BBC0FFF, 0x8BAC0FFF, 0x306230FF, 0x0F380FFF };
 
 	// Color Mapping for objects
 	// NOTE: 0 is transparent
 	// indices 1, 2, 3 are the actual colors and will be populated later
-	color obj_colors[4] = { 0x00000000, 0x00000000, 0x00000000, 0x00000000 };
+	Color obj_colors[4] = { 0x00000000, 0x00000000, 0x00000000, 0x00000000 };
 
 	// Current line being rendered
 	int currentLine;
