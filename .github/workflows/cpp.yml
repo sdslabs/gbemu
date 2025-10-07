@@ -41,4 +41,4 @@ jobs:
           mkdir build
           cd build
           cmake ..
-          cmake --build . -j 8
+          cmake --build . -j8
