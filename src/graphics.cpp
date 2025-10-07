@@ -1,5 +1,6 @@
 #include "types.h"
 #include "graphics.h"
+#include <algorithm>
 
 PPU::PPU()
 {
@@ -10,7 +11,7 @@ PPU::PPU()
 	isEnabled = false;
 	showBGWin = false;
 	showWindow = false;
-	//renderWindow = false;
+	// renderWindow = false;
 	mMap = nullptr;
 	bgTileDataAddr = 0x0000;
 	bgTileMapAddr = 0x0000;
@@ -295,7 +296,8 @@ void PPU::renderScanline(Byte line)
 		}
 
 		if (sprites.size())
-			std::sort(sprites.begin(), sprites.end(), [](Sprite& a, Sprite& b) { return (((a.x == b.x) && (a.address > b.address)) || (a.x > b.x)); });
+			std::sort(sprites.begin(), sprites.end(), [](Sprite& a, Sprite& b)
+			    { return (((a.x == b.x) && (a.address > b.address)) || (a.x > b.x)); });
 
 		for (auto it = sprites.begin(); it != sprites.end(); ++it)
 		{
