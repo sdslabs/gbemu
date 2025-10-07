@@ -1,10 +1,9 @@
-#include "types.h"
 #include "cpu.h"
 #include "gameBoy.h"
 
 int GBE::s_Cycles;
 
-GBE::GBE()
+GBE::GBE(const char* bootRomPath, const char* gameRomPath)
 {
 	// Initialize the CPU
 	gbe_cpu = new CPU();
@@ -33,16 +32,16 @@ GBE::GBE()
 	gbe_graphics->init();
 
 	// Open the Boot ROM
-	if ((bootROM = fopen("../src/dmg_boot.gb", "rb")) == NULL)
-		printf("boot rom file not opened");
-
-	// // Open the Game ROM
-	// if ((gameROM = fopen("../tests/tetris.gb", "rb")) == NULL)
-	// 	printf("game rom file not opened");
+	if ((bootROM = fopen(bootRomPath, "rb")) == NULL)
+	{
+		printf("Error: Could not open boot ROM file: %s\n", bootRomPath);
+	}
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/dmg_sound/rom_singles/02-len ctr.gb", "rb")) == NULL)
-		printf("game rom file not opened");
+	if ((gameROM = fopen(gameRomPath, "rb")) == NULL)
+	{
+		printf("Error: Could not open game ROM file: %s\n", gameRomPath);
+	}
 
 	// Set the Boot ROM
 	gbe_mMap->setBootRomFile(bootROM);

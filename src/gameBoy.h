@@ -53,8 +53,10 @@ private:
 
 public:
 	// Constructor
-	// Initializes the CPU
-	GBE();
+	// Initializes the CPU and loads ROMs from specified paths
+	// bootRomPath: Path to the boot ROM file
+	// gameRomPath: Path to the game ROM file
+	GBE(const char* bootRomPath, const char* gameRomPath);
 
 	// Returns the CPU
 	CPU* getCPU() { return gbe_cpu; };
