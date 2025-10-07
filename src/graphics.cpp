@@ -104,7 +104,11 @@ bool PPU::pollEvents()
 {
 	while (SDL_PollEvent(event))
 	{
-		if (event->key.type == SDL_KEYDOWN)
+		if (event->type == SDL_QUIT)
+		{
+			exit(0);
+		}
+		else if (event->key.type == SDL_KEYDOWN)
 		{
 			switch (event->key.keysym.sym)
 			{
