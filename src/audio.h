@@ -1,8 +1,8 @@
 #pragma once
-#include "types.h"
-#include <stdio.h>
+
 #include <SDL.h>
-#include <stdexcept>
+
+#include "types.h"
 #include "mmap.h"
 
 enum Channel
@@ -24,6 +24,10 @@ private:
 	Byte sweepPeriod;
 	bool sweepNegate;
 	Byte sweepShift;
+	bool sweepEnabled;
+	int sweepTimer;
+	int shadowFrequency;
+	bool negateHasBeenUsed;
 
 	// NRx1
 	Byte waveDuty;
@@ -33,14 +37,19 @@ private:
 	Byte envelopeInitialVolume;
 	bool envelopeIncrease;
 	Byte envelopePeriod;
+	int envelopeTimer;
+	Byte currentVolume;
 
 	int frequency;
 
 	bool soundLengthEnable;
 
+	// Frequency timer for waveform generation
+	int frequencyTimer;
+	int waveformPosition;
+
 public:
 	PulseChannel(Channel channel);
-	void test();
 	void writeByte(Word address, Byte value);
 	Byte readByte(Word address);
 	bool isEnabled();
@@ -49,6 +58,10 @@ public:
 	void set_NRx4(Byte value);
 	void setFrameSequencer(int frameSequencer);
 	void trigger();
+	int calculateSweep();
+	void performSweep();
+	void clockEnvelope();
+	void step(int cycles);
 };
 
 class WaveChannel
@@ -68,17 +81,39 @@ private:
 
 	bool soundLengthEnable;
 
+	int frequencyTimer;
+	int wavePosition;
+	Byte sampleBuffer;
+	Byte previousSample;
+	bool firstSampleWindow;
+
+	// DMG wave RAM access tracking
+	// Tracks whether the wave channel just accessed wave RAM on the last T-cycle
+	bool waveFormJustRead;
+	// Tracks how many cycles were pre-stepped during a wave RAM read
+	int preSteppedCycles;
+
+
+	int getTimerReload() const;
+	void advanceWavePosition();
+	// Advances the wave timer by an arbitrary number of cycles, tracking whether
+	// a wave RAM access lands on the final T-cycle. This exists because the
+	// emulator steps the APU in batches (once per CPU instruction), but wave RAM
+	// collision detection requires knowing the channel's state at the exact
+	// T-cycle of a CPU memory access (M3 = 8T into the instruction).
+	void stepInternal(int cycles);
+
 public:
 	WaveChannel();
-	void test();
 	void writeByte(Word address, Byte value);
 	Byte readByte(Word address);
 	void trigger();
-	bool isEnabled();
+	bool isEnabled() const;
 	void powerOff();
 	void set_NRx4(Byte value);
 	void run();
 	void setFrameSequencer(int frameSequencer);
+	void step(int cycles);
 };
 
 class NoiseChannel
@@ -94,6 +129,8 @@ private:
 	Byte envelopeInitialVolume;
 	bool envelopeIncrease;
 	Byte envelopePeriod;
+	int envelopeTimer;
+	Byte currentVolume;
 
 	// NRx3
 	Byte clockShift;
@@ -103,13 +140,12 @@ private:
 
 	Byte dividerTable[8] = { 8, 16, 32, 48, 64, 80, 96, 112 };
 
-	// NRx4
-	// bool trigger;
+	int frequencyTimer;
+
 	bool soundLengthEnable;
 
 public:
 	NoiseChannel();
-	void test();
 	void writeByte(Word address, Byte value);
 	Byte readByte(Word address);
 	void trigger();
@@ -118,6 +154,8 @@ public:
 	void set_NRx4(Byte value);
 	void run();
 	void setFrameSequencer(int frameSequencer);
+	void clockEnvelope();
+	void step(int cycles);
 };
 
 class APU
@@ -167,11 +205,11 @@ private:
 public:
 	APU();
 	void setMemoryMap(MemoryMap* mMap);
-	void test();
 	bool init();
 	void writeByte(Word address, Byte value);
 	Byte readByte(Word address);
 	void stepAPU(int cycles);
 	void clearRegisters();
 	void initializeReadWriteHandlers();
+	int getFrameSequencer() const { return frameSequencer; }
 };
