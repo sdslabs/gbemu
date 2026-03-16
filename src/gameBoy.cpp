@@ -1,10 +1,9 @@
-#include "types.h"
 #include "cpu.h"
 #include "gameBoy.h"
 
 int GBE::s_Cycles;
 
-GBE::GBE()
+GBE::GBE(const char* bootRomPath, const char* gameRomPath)
 {
 	// Initialize the CPU
 	gbe_cpu = new CPU();
@@ -15,24 +14,34 @@ GBE::GBE()
 	// Initialize the Graphics
 	gbe_graphics = new PPU();
 
+	// audio = new Audio();
+	gbe_audio = new APU();
+
 	// Unify the CPU and MemoryMap
 	gbe_cpu->setMemory(gbe_mMap);
 
 	// Unify the CPU and PPU
 	gbe_cpu->setPPU(gbe_graphics);
 
-	// Unify the PPU and MmeoryMap
+	// Unify the PPU and MemoryMap
 	gbe_graphics->setMemoryMap(gbe_mMap);
+
+	// Unify the APU and MemoryMap
+	gbe_audio->setMemoryMap(gbe_mMap);
 
 	gbe_graphics->init();
 
 	// Open the Boot ROM
-	if ((bootROM = fopen("../src/dmg_boot.gb", "rb")) == NULL)
-		printf("boot rom file not opened");
+	if ((bootROM = fopen(bootRomPath, "rb")) == NULL)
+	{
+		printf("Error: Could not open boot ROM file: %s\n", bootRomPath);
+	}
 
 	// Open the Game ROM
-	if ((gameROM = fopen("../tests/halt_bug.gb", "rb")) == NULL)
-		printf("game rom file not opened");
+	if ((gameROM = fopen(gameRomPath, "rb")) == NULL)
+	{
+		printf("Error: Could not open game ROM file: %s\n", gameRomPath);
+	}
 
 	// Set the Boot ROM
 	gbe_mMap->setBootRomFile(bootROM);
@@ -115,6 +124,7 @@ void GBE::update()
 		// update the DIV and TIMA timers
 		gbe_cpu->updateTimers(s_Cycles);
 		gbe_graphics->executePPU(s_Cycles);
+		gbe_audio->stepAPU(s_Cycles);
 		s_Cycles = 0;
 		s_Cycles += gbe_cpu->performInterrupt();
 		gbe_graphics->pollEvents();

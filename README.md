@@ -27,4 +27,18 @@ cmake -DDEBUG=on ..
 cmake --build . -j8
 ```
 
-After this run the binary gbemu in the build folder.
+# Usage
+After building, run the emulator with:
+```
+./gbemu <boot_rom_path> <game_rom_path>
+```
+
+Example:
+```
+./gbemu ../src/dmg_boot.gb ../tests/tetris.gb
+```
+
+Arguments:
+- `boot_rom_path`: Path to the DMG boot ROM file (e.g., dmg_boot.gb)
+- `game_rom_path`: Path to the Game Boy ROM file to run
+
