@@ -3,5 +3,7 @@ build/
 *.DS_Store
 cmake-build-debug/
 .idea/
-src/.vscode/
+.cache/
+tests/
+.vscode/
 src/dmg_boot.gb

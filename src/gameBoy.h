@@ -3,6 +3,7 @@
 #include "cpu.h"
 #include "mmap.h"
 #include "graphics.h"
+#include "audio.h"
 
 // GBE stands for GameBoyEmulator
 
@@ -34,6 +35,9 @@ private:
 	// File pointer for game ROM
 	FILE* gameROM;
 
+	// Pointer to Audio
+	APU* gbe_audio;
+
 	// Update function of the GBE
 	// Will be called every frame
 	// GB has 59.73 frames per second
@@ -49,8 +53,10 @@ private:
 
 public:
 	// Constructor
-	// Initializes the CPU
-	GBE();
+	// Initializes the CPU and loads ROMs from specified paths
+	// bootRomPath: Path to the boot ROM file
+	// gameRomPath: Path to the game ROM file
+	GBE(const char* bootRomPath, const char* gameRomPath);
 
 	// Returns the CPU
 	CPU* getCPU() { return gbe_cpu; };
